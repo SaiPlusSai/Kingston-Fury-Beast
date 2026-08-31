@@ -1,32 +1,65 @@
 schema: spec-driven
 
-# Project context (optional)
-# This is shown to AI when creating artifacts.
-# Add your tech stack, conventions, style guides, domain knowledge, etc.
-# Example:
-#   context: |
-#     Tech stack: TypeScript, React, Node.js
-#     We use conventional commits
-#     Domain: e-commerce platform
+context: |
+  Proyecto: HALO (Urban Shield) — Plataforma de Gestión de Emergencias e Incidentes Urbanos
+  Materia: Taller de Sistemas Inteligentes (Semestre Agosto-Diciembre 2026)
+  Equipo: Kingston Fury Beast (4 integrantes)
 
-# Per-artifact rules (optional)
-# Add custom rules for specific artifacts.
-# Example:
-#   rules:
-#     proposal:
-#       - Keep proposals under 500 words
-#       - Always include a "Non-goals" section
-#     tasks:
-#       - Break tasks into chunks of max 2 hours
+  Stack actual:
+  - Frontend Web: React 19, Vite, React Router, MapLibre GL JS, TailwindCSS, Recharts
+  - Backend: Node.js (Express) envuelto en serverless-http, AWS Lambda (monolito serverless)
+  - Base de Datos: Amazon DynamoDB (tablas: UsersTable, ReportsTable, NotificationsTable, ActivityLogsTable, SupportMessagesTable)
+  - API Gateway: AWS API Gateway V2 (HTTP API)
+  - Almacenamiento: Amazon S3 (pre-signed URLs para upload de evidencias fotográficas)
+  - Identidad: Amazon Cognito + JWT local (fallback/dev)
+  - Mensajería: Amazon SNS (alertas críticas)
+  - Geografía: Amazon Location Service (geocodificación inversa)
+  - Despliegue Frontend: S3 + CloudFront (CDN)
+  - IaC: Serverless Framework (serverless.yml)
 
-# Per-operation guidance (optional)
-# Add advisory guidance for how apply and archive work should be conducted.
-# This is separate from artifact rules above.
-# Example:
-#   operations:
-#     apply:
-#       guidance:
-#         - Keep test summaries concise
-#     archive:
-#       guidance:
-#         - Summarize the archive outcome before finishing
+  Repositorios:
+  - Frontend: https://github.com/chriscc27/frontend_urbanshield
+  - Backend: https://github.com/chriscc27/backend_urbanshield
+
+  Convenciones:
+  - Conventional commits (feat:, fix:, docs:, chore:)
+  - Pull Requests obligatorios con al menos 1 reviewer
+  - Rama principal: main (protegida)
+  - Variables de entorno vía AWS Systems Manager Parameter Store
+  - Todo código generado por IA debe ser declarado en el PR
+
+  Fase actual: Expansión v2 — Añadir Chatbot en Tiempo Real, App Móvil (React Native), Predicción de Hotspots (Prophet/ARIMA)
+
+rules:
+  proposal:
+    - Incluir sección explícita de "Fuera de Alcance" para delimitar qué NO se hará
+    - Incluir criterios de éxito medibles y verificables
+    - Referenciar los repositorios existentes y cómo se integra la propuesta
+  specs:
+    - Cada spec debe cubrir una única capacidad/funcionalidad
+    - Incluir requisitos funcionales Y no funcionales
+    - Especificar contratos de API (endpoints, payloads, respuestas)
+    - Detallar modelos de datos nuevos o modificados
+    - Incluir diagramas de flujo o secuencia cuando aplique
+    - Especificar criterios de aceptación verificables por prueba
+  design:
+    - Incluir diagramas de arquitectura ASCII
+    - Documentar decisiones técnicas con justificación (ADR style)
+    - Identificar riesgos técnicos con estrategias de mitigación
+    - Referenciar specs como fuente de requisitos
+  tasks:
+    - Cada tarea debe ser completable en máximo 4 horas
+    - Incluir criterio de verificación por tarea
+    - Agrupar por módulo funcional
+    - Ordenar por dependencias (lo que desbloquea primero, primero)
+
+operations:
+  apply:
+    guidance:
+      - Siempre verificar que el código compila/ejecuta antes de marcar como completado
+      - Actualizar docs/project_context.md después de cada implementación significativa
+      - Correr linters y tests antes de crear PR
+  archive:
+    guidance:
+      - Resumir qué se implementó vs qué se planeó
+      - Documentar lecciones aprendidas

@@ -3,7 +3,7 @@
 Este documento traduce nuestro flujo de trabajo a un tablero operativo en ClickUp, definiendo las listas (columnas), los campos obligatorios y el proceso para que la evidencia quede versionada correctamente, según las reglas del equipo.
 
 ## 1. Listas del Tablero (Tipos de Trabajo)
-El tablero de nuestro proyecto (Kingston Fury Beast) está dividido en las siguientes listas. Cada tarea se crea o se mueve donde corresponde:
+El tablero de nuestro proyecto (HALO) está dividido en las siguientes listas. Cada tarea se crea o se mueve donde corresponde:
 
 | Lista | Uso típico |
 |---|---|

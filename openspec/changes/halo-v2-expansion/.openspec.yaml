@@ -1,0 +1,9 @@
+schema: spec-driven
+name: halo-v2-expansion
+description: >
+  Expansión de la plataforma HALO (Urban Shield) con tres nuevas capacidades principales:
+  1) Chatbot interactivo en tiempo real con WebSockets para consultas, FAQ y creación conversacional de reportes,
+  2) Aplicación móvil nativa multiplataforma con React Native para ciudadanos,
+  3) Módulo de predicción de hotspots de incidentes utilizando modelos estadísticos propios (Prophet/ARIMA/SARIMA)
+  desplegados en AWS Lambda Container Images.
+created: 2026-08-31

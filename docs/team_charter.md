@@ -23,13 +23,13 @@
 ## Manejo de bloqueos
 Cualquier obstáculo que detenga el desarrollo debe documentarse respondiendo a: ¿Qué me detiene?, ¿Cuándo empezó?, ¿Qué intenté hacer para solucionarlo?, ¿Qué necesito del equipo? y ¿Qué entrega está en riesgo?
 
-**Ejemplo de reporte de bloqueo (Caso Pacman):**
+**Ejemplo de reporte de bloqueo (Caso HALO):**
 ```text
-Impedimento: Errores de instalación de Gymnasium con ALE en Windows.
+Impedimento: Errores de compatibilidad entre Prophet y la versión de Python en AWS Lambda.
 Inició: Hace 2 días.
-Consecuencia: Retrasa el Hito 1 (entrenamiento del agente base).
-Acciones previas: Intenté reinstalar conda y hacer downgrade de Python, pero el error persiste.
-Siguiente paso: Pedí ayuda por WhatsApp a Christhian para revisar si podemos empaquetar el entorno en Docker para evitar esto.
+Consecuencia: Retrasa el Hito 2 (despliegue del modelo predictivo de hotspots).
+Acciones previas: Intenté empaquetar las librerías en un layer, pero excede el límite de 250MB.
+Siguiente paso: Pedí ayuda por WhatsApp a Christhian para revisar si podemos usar Container Images (Docker) en Lambda para evitar esto.
 ```
 
 ## Reglas de integridad y uso de IA
@@ -43,5 +43,5 @@ Para considerar que una tarea pasó de "En progreso" a "Completada", verificamos
 1. Satisface las condiciones y criterios de aceptación definidos en ClickUp.
 2. Existe un enlace en la tarea apuntando directamente al Pull Request o commit en GitHub.
 3. El código fue revisado, aprobado y fusionado en GitHub sin exponer datos sensibles.
-4. Si la tarea implica entrenamiento, el modelo corre sin errores locales.
+4. Si la tarea implica modelos predictivos (Prophet) o el chatbot, estos se ejecutan sin errores locales y devuelven predicciones/respuestas válidas.
 5. Si se utilizó IA intensivamente para la tarea, se declaró su uso en la revisión.

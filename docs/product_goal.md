@@ -1,6 +1,3 @@
 # Product Goal
 
-Para entusiastas e investigadores de IA en entornos autónomos, construiremos un
-agente inteligente modular que permite dominar el juego Pacman y adaptarse a otros
-entornos retro, utilizando simuladores estandarizados y un despliegue como panel
-interactivo para observar sus métricas y decisiones en tiempo real.
+Para ciudadanos, autoridades y administradores, evolucionaremos la plataforma **HALO** (gestión de incidentes y emergencias urbanas) incorporando un **chatbot inteligente en tiempo real** para consultas, expandiendo el acceso mediante una **versión móvil** nativa, y añadiendo un módulo de **predicción de hotspots** mediante modelos estadísticos propios (Prophet/ARIMA) para optimizar la toma de decisiones y agilizar los tiempos de respuesta en la ciudad.
