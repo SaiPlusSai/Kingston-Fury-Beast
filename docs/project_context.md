@@ -1,26 +1,26 @@
-# Contexto y Estado del Proyecto HALO (Registro de Cambios)
+﻿# Contexto y Estado del Proyecto HALO (Registro de Cambios)
 
-> **⚠️ IMPORTANTE:** Este documento es el registro vivo del proyecto HALO. **Todos los desarrolladores y agentes IA** deben:
+> **️ IMPORTANTE:** Este documento es el registro vivo del proyecto HALO. **Todos los desarrolladores y agentes IA** deben:
 > 1. **Consultarlo** antes de iniciar cualquier tarea para entender el estado actual.
 > 2. **Actualizarlo** después de cada implementación significativa.
 > 3. Registrar decisiones técnicas, cambios de alcance y lecciones aprendidas.
 
 ---
 
-## 📊 Estado General
+## Estado General
 
 | Componente | Estado | Progreso |
 |---|---|---|
-| Chatbot Backend (WebSocket + Handlers) | 🔴 No iniciado | 0% |
-| Chatbot Frontend (Widget + UI) | 🔴 No iniciado | 0% |
-| Predicción (Pipeline Python + Prophet/ARIMA) | 🔴 No iniciado | 0% |
-| Predicción (Dashboard de Visualización) | 🔴 No iniciado | 0% |
-| App Móvil (React Native) | 🔴 No iniciado | 0% |
-| Testing e Integración | 🔴 No iniciado | 0% |
+| Chatbot Backend (WebSocket + Handlers) | No iniciado | 0% |
+| Chatbot Frontend (Widget + UI) | No iniciado | 0% |
+| Predicción (Pipeline Python + Prophet/ARIMA) | No iniciado | 0% |
+| Predicción (Dashboard de Visualización) | No iniciado | 0% |
+| App Móvil (React Native) | No iniciado | 0% |
+| Testing e Integración | No iniciado | 0% |
 
 ---
 
-## 📁 Repositorios del Proyecto
+## Repositorios del Proyecto
 
 | Repositorio | URL | Descripción |
 |---|---|---|
@@ -31,7 +31,7 @@
 
 ---
 
-## 📐 Documentación de Referencia
+## Documentación de Referencia
 
 | Documento | Ubicación | Descripción |
 |---|---|---|
@@ -45,7 +45,7 @@
 
 ---
 
-## 📝 Decisiones Arquitectónicas Registradas
+## Decisiones Arquitectónicas Registradas
 
 | ID | Decisión | Justificación | Fecha |
 |---|---|---|---|
@@ -58,31 +58,33 @@
 
 ---
 
-## 🛠️ Registro de Implementaciones (Changelog)
+## ️ Registro de Implementaciones (Changelog)
 
 > *Agrega entradas nuevas en la parte **superior** siguiendo el formato:*
 > `[Fecha] - [Autor/Agente] - [Resumen de lo implementado]`
 
 - **31/08/2026 — IA / Setup Team:**
-  - Actualización completa de los documentos de Project Charter, Priorización de Casos y Product Goal → enfoque 100% en la plataforma HALO.
-  - Eliminación de todos los rastros del proyecto anterior (Pacman/agente-pacman).
-  - Creación del config.yaml de OpenSpec con contexto completo del proyecto, reglas por artefacto, y guías operacionales.
-  - Creación del .openspec.yaml del change `halo-v2-expansion`.
-  - Generación de propuesta técnica expandida (`proposal.md`).
-  - Generación de diseño técnico con 6 ADRs y diagramas de arquitectura (`design.md`).
-  - Generación de 3 specs independientes y exhaustivas: chatbot, mobile-app, predictions.
-  - Generación de lista de 40+ tareas organizadas en 7 fases con dependencias (`tasks.md`).
-  - Creación del documento de arquitectura inicial (`docs/arquitectura_inicial.md`).
-  - Creación de 6 prompts pre-escritos para guiar el desarrollo fase por fase (`docs/primer_prompt.md`).
+ - Actualización completa de los documentos de Project Charter, Priorización de Casos y Product Goal → enfoque 100% en la plataforma HALO.
+ - Eliminación de todos los rastros del proyecto anterior (Pacman/agente-pacman).
+ - Creación del config.yaml de OpenSpec con contexto completo del proyecto, reglas por artefacto, y guías operacionales.
+ - Creación del .openspec.yaml del change `halo-v2-expansion`.
+ - Generación de propuesta técnica expandida (`proposal.md`).
+ - Generación de diseño técnico con 6 ADRs y diagramas de arquitectura (`design.md`).
+ - Generación de 3 specs independientes y exhaustivas: chatbot, mobile-app, predictions.
+ - Generación de lista de 40+ tareas organizadas en 7 fases con dependencias (`tasks.md`).
+ - Creación del documento de arquitectura inicial (`docs/arquitectura_inicial.md`).
+ - Creación de 6 prompts pre-escritos para guiar el desarrollo fase por fase (`docs/primer_prompt.md`).
 
 ---
 
-## 🚧 En Progreso (WIP)
+## En Progreso (WIP)
 
 *Ninguna implementación de código iniciada aún. Todo el trabajo hasta ahora ha sido de planificación y especificación.*
 
 ---
 
-## 📌 Siguiente Paso
+## Siguiente Paso
 
 Usar el **Prompt 1** de `docs/primer_prompt.md` para iniciar la **Fase 1: Chatbot Backend** (tareas T-1.1 y T-1.2: configuración de WebSocket API y tablas DynamoDB en serverless.yml).
+
+

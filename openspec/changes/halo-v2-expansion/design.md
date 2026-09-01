@@ -1,4 +1,4 @@
-# Diseño Técnico: Expansión de HALO v2
+﻿# Diseño Técnico: Expansión de HALO v2
 
 Este documento describe las decisiones de arquitectura, los patrones de implementación y los riesgos técnicos identificados para las tres funcionalidades de la expansión de HALO v2. Cada decisión sigue el formato ADR (Architecture Decision Record) para documentar el contexto, las alternativas consideradas y la justificación de la elección.
 
@@ -52,23 +52,23 @@ Este documento describe las decisiones de arquitectura, los patrones de implemen
 ```javascript
 // intent-detector.js
 const INTENT_PATTERNS = {
-  greeting: [/^(hola|buenos?\s+d[ií]as?|buenas?\s+(tardes?|noches?)|hey|saludos)/i],
-  help: [/^(ayuda|help|opciones|men[uú]|que\s+puedes?\s+hacer)/i],
-  faq: [/(?:cu[aá]l|qu[eé]|c[oó]mo|d[oó]nde|cu[aá]ndo)\s+(?:es|son|est[aá])/i, /(?:n[uú]mero|tel[eé]fono|horario|contacto|informaci[oó]n)/i],
-  status: [/(?:estado|c[oó]mo\s+va|qu[eé]\s+pas[oó]|seguimiento)\s+(?:de\s+)?(?:mi\s+)?(?:reporte|caso|denuncia)/i, /reporte\s*#?\s*\d+/i],
-  create: [/(?:quiero|necesito|deseo)\s+(?:reportar|denunciar|crear|hacer)/i, /(?:reportar|denunciar)\s+(?:un|una)/i, /(?:hay|hubo)\s+(?:un|una)\s+(?:robo|accidente|incendio|emergencia)/i],
-  unknown: [/.*/]  // Fallback
+ greeting: [/^(hola|buenos?\s+d[ií]as?|buenas?\s+(tardes?|noches?)|hey|saludos)/i],
+ help: [/^(ayuda|help|opciones|men[uú]|que\s+puedes?\s+hacer)/i],
+ faq: [/(?:cu[aá]l|qu[eé]|c[oó]mo|d[oó]nde|cu[aá]ndo)\s+(?:es|son|est[aá])/i, /(?:n[uú]mero|tel[eé]fono|horario|contacto|informaci[oó]n)/i],
+ status: [/(?:estado|c[oó]mo\s+va|qu[eé]\s+pas[oó]|seguimiento)\s+(?:de\s+)?(?:mi\s+)?(?:reporte|caso|denuncia)/i, /reporte\s*#?\s*\d+/i],
+ create: [/(?:quiero|necesito|deseo)\s+(?:reportar|denunciar|crear|hacer)/i, /(?:reportar|denunciar)\s+(?:un|una)/i, /(?:hay|hubo)\s+(?:un|una)\s+(?:robo|accidente|incendio|emergencia)/i],
+ unknown: [/.*/] // Fallback
 };
 
 function detectIntent(message) {
-  for (const [intent, patterns] of Object.entries(INTENT_PATTERNS)) {
-    for (const pattern of patterns) {
-      if (pattern.test(message.trim())) {
-        return { intent, confidence: intent === 'unknown' ? 0.1 : 0.9 };
-      }
-    }
+ for (const [intent, patterns] of Object.entries(INTENT_PATTERNS)) {
+  for (const pattern of patterns) {
+   if (pattern.test(message.trim())) {
+    return { intent, confidence: intent === 'unknown' ? 0.1 : 0.9 };
+   }
   }
-  return { intent: 'unknown', confidence: 0 };
+ }
+ return { intent: 'unknown', confidence: 0 };
 }
 ```
 
@@ -166,74 +166,74 @@ Transiciones:
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│                              CLIENTES                                       │
-│                                                                             │
-│  ┌──────────────┐      ┌──────────────┐      ┌──────────────┐              │
-│  │  React Web   │      │ React Native │      │  Admin Web   │              │
-│  │  (Ciudadano) │      │  (Ciudadano) │      │  (Autoridad) │              │
-│  └──────┬───────┘      └──────┬───────┘      └──────┬───────┘              │
-│         │                     │                      │                      │
+│               CLIENTES                    │
+│                                       │
+│ ┌──────────────┐   ┌──────────────┐   ┌──────────────┐       │
+│ │ React Web  │   │ React Native │   │ Admin Web  │       │
+│ │ (Ciudadano) │   │ (Ciudadano) │   │ (Autoridad) │       │
+│ └──────┬───────┘   └──────┬───────┘   └──────┬───────┘       │
+│     │           │           │           │
 └─────────┼─────────────────────┼──────────────────────┼──────────────────────┘
-          │ HTTPS               │ HTTPS/WSS            │ HTTPS
-          ▼                     ▼                      ▼
+     │ HTTPS        │ HTTPS/WSS      │ HTTPS
+     ▼           ▼           ▼
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│                          AWS API GATEWAY                                     │
-│                                                                             │
-│  ┌──────────────────────┐          ┌──────────────────────┐                │
-│  │   HTTP API (REST)    │          │  WebSocket API       │                │
-│  │   /api/*             │          │  $connect            │                │
-│  │                      │          │  $disconnect         │                │
-│  │                      │          │  sendMessage         │                │
-│  └──────────┬───────────┘          └──────────┬───────────┘                │
-│             │                                  │                            │
+│             AWS API GATEWAY                   │
+│                                       │
+│ ┌──────────────────────┐     ┌──────────────────────┐        │
+│ │  HTTP API (REST)  │     │ WebSocket API    │        │
+│ │  /api/*       │     │ $connect      │        │
+│ │           │     │ $disconnect     │        │
+│ │           │     │ sendMessage     │        │
+│ └──────────┬───────────┘     └──────────┬───────────┘        │
+│       │                 │              │
 └─────────────┼──────────────────────────────────┼────────────────────────────┘
-              │                                  │
-              ▼                                  ▼
-┌──────────────────────────┐      ┌──────────────────────────┐
-│  Lambda: Backend Node.js │      │  Lambda: Chat Handler    │
-│  (serverless-http/Express)│      │  (Node.js)               │
-│                          │      │  - $connect              │
-│  Endpoints:              │      │  - $disconnect           │
-│  - /api/auth/*           │      │  - handleMessage         │
-│  - /api/reports/*        │      │  - detectIntent          │
-│  - /api/admin/*          │      │  - stateMachine          │
-│  - /api/admin/faqs/*     │      │                          │
-│  - /api/admin/predictions│      │                          │
-│  - /api/users/*          │      │                          │
-└────────────┬─────────────┘      └────────────┬─────────────┘
-             │                                  │
-    ┌────────┼────────────────────────┬─────────┼───────────┐
-    │        │                        │         │           │
-    ▼        ▼                        ▼         ▼           ▼
+       │                 │
+       ▼                 ▼
+┌──────────────────────────┐   ┌──────────────────────────┐
+│ Lambda: Backend Node.js │   │ Lambda: Chat Handler  │
+│ (serverless-http/Express)│   │ (Node.js)        │
+│             │   │ - $connect       │
+│ Endpoints:       │   │ - $disconnect      │
+│ - /api/auth/*      │   │ - handleMessage     │
+│ - /api/reports/*    │   │ - detectIntent     │
+│ - /api/admin/*     │   │ - stateMachine     │
+│ - /api/admin/faqs/*   │   │             │
+│ - /api/admin/predictions│   │             │
+│ - /api/users/*     │   │             │
+└────────────┬─────────────┘   └────────────┬─────────────┘
+       │                 │
+  ┌────────┼────────────────────────┬─────────┼───────────┐
+  │    │            │     │      │
+  ▼    ▼            ▼     ▼      ▼
 ┌────────┐ ┌────────┐ ┌────────┐ ┌────────┐ ┌────────┐ ┌────────┐
-│DynamoDB│ │  S3    │ │Cognito │ │  SNS   │ │Location│ │  ECR   │
-│        │ │        │ │        │ │        │ │Service │ │        │
-│Tables: │ │Buckets:│ │User    │ │Topics: │ │Geocode │ │Images: │
-│-Users  │ │-Photos │ │Pool    │ │-Alerts │ │Reverse │ │-predict│
-│-Reports│ │-Predict│ │        │ │-Errors │ │        │ │        │
-│-Notif  │ │        │ │        │ │        │ │        │ │        │
-│-WS Conn│ │        │ │        │ │        │ │        │ │        │
-│-ChatSes│ │        │ │        │ │        │ │        │ │        │
-│-ChatFaq│ │        │ │        │ │        │ │        │ │        │
+│DynamoDB│ │ S3  │ │Cognito │ │ SNS  │ │Location│ │ ECR  │
+│    │ │    │ │    │ │    │ │Service │ │    │
+│Tables: │ │Buckets:│ │User  │ │Topics: │ │Geocode │ │Images: │
+│-Users │ │-Photos │ │Pool  │ │-Alerts │ │Reverse │ │-predict│
+│-Reports│ │-Predict│ │    │ │-Errors │ │    │ │    │
+│-Notif │ │    │ │    │ │    │ │    │ │    │
+│-WS Conn│ │    │ │    │ │    │ │    │ │    │
+│-ChatSes│ │    │ │    │ │    │ │    │ │    │
+│-ChatFaq│ │    │ │    │ │    │ │    │ │    │
 └────────┘ └───┬────┘ └────────┘ └────────┘ └────────┘ └───┬────┘
-               │                                            │
-               │           ┌────────────────────┐           │
-               │           │  Amazon EventBridge │           │
-               │           │  (Cron: 3AM diario) │           │
-               │           └─────────┬──────────┘           │
-               │                     │ Invoca                │
-               │                     ▼                       │
-               │  ┌──────────────────────────────────────┐  │
-               │  │ Lambda Container Image (Python 3.11) │  │
-               │  │                                      │◄─┘
-               │  │ - Prophet model training              │
-               │  │ - ARIMA/SARIMA training               │
-               │  │ - Metrics evaluation                  │
-               │  │ - Prediction generation               │
-               │  │                                      │
-               │  └───────────────┬──────────────────────┘
-               │                  │ Escribe resultados
-               └──────────────────┘
+        │                      │
+        │      ┌────────────────────┐      │
+        │      │ Amazon EventBridge │      │
+        │      │ (Cron: 3AM diario) │      │
+        │      └─────────┬──────────┘      │
+        │           │ Invoca        │
+        │           ▼            │
+        │ ┌──────────────────────────────────────┐ │
+        │ │ Lambda Container Image (Python 3.11) │ │
+        │ │                   │◄─┘
+        │ │ - Prophet model training       │
+        │ │ - ARIMA/SARIMA training        │
+        │ │ - Metrics evaluation         │
+        │ │ - Prediction generation        │
+        │ │                   │
+        │ └───────────────┬──────────────────────┘
+        │         │ Escribe resultados
+        └──────────────────┘
 ```
 
 ---
@@ -245,28 +245,28 @@ Transiciones:
 ```
 backend_urbanshield/
 ├── src/
-│   ├── routes/
-│   │   ├── admin/
-│   │   │   ├── faqs.js           # [NUEVO] CRUD de FAQs
-│   │   │   └── predictions.js    # [NUEVO] Consulta de predicciones desde S3
-│   │   └── users/
-│   │       └── pushToken.js      # [NUEVO] Registro de push tokens
-│   ├── websocket/                # [NUEVO] Todo el módulo de WebSocket
-│   │   ├── connect.js            # Handler de $connect
-│   │   ├── disconnect.js         # Handler de $disconnect
-│   │   ├── handleMessage.js      # Handler principal de mensajes
-│   │   ├── intentDetector.js     # Detección de intenciones (regex)
-│   │   ├── stateMachine.js       # Máquina de estados del reporte
-│   │   ├── handlers/
-│   │   │   ├── faqHandler.js     # Procesador de intent_faq
-│   │   │   ├── statusHandler.js  # Procesador de intent_status
-│   │   │   ├── createHandler.js  # Procesador de intent_create
-│   │   │   ├── greetingHandler.js# Procesador de intent_greeting
-│   │   │   └── helpHandler.js    # Procesador de intent_help
-│   │   └── utils/
-│   │       └── wsResponse.js     # Utilidad para enviar respuestas WS
-│   └── ...
-├── serverless.yml                # [MODIFICAR] Agregar WebSocket API + nuevas Lambdas + tablas
+│  ├── routes/
+│  │  ├── admin/
+│  │  │  ├── faqs.js      # [NUEVO] CRUD de FAQs
+│  │  │  └── predictions.js  # [NUEVO] Consulta de predicciones desde S3
+│  │  └── users/
+│  │    └── pushToken.js   # [NUEVO] Registro de push tokens
+│  ├── websocket/        # [NUEVO] Todo el módulo de WebSocket
+│  │  ├── connect.js      # Handler de $connect
+│  │  ├── disconnect.js     # Handler de $disconnect
+│  │  ├── handleMessage.js   # Handler principal de mensajes
+│  │  ├── intentDetector.js   # Detección de intenciones (regex)
+│  │  ├── stateMachine.js    # Máquina de estados del reporte
+│  │  ├── handlers/
+│  │  │  ├── faqHandler.js   # Procesador de intent_faq
+│  │  │  ├── statusHandler.js # Procesador de intent_status
+│  │  │  ├── createHandler.js # Procesador de intent_create
+│  │  │  ├── greetingHandler.js# Procesador de intent_greeting
+│  │  │  └── helpHandler.js  # Procesador de intent_help
+│  │  └── utils/
+│  │    └── wsResponse.js   # Utilidad para enviar respuestas WS
+│  └── ...
+├── serverless.yml        # [MODIFICAR] Agregar WebSocket API + nuevas Lambdas + tablas
 └── ...
 ```
 
@@ -274,30 +274,30 @@ backend_urbanshield/
 
 ```
 prediction-service/
-├── Dockerfile                    # Imagen para Lambda Container
-├── requirements.txt              # Dependencias Python
+├── Dockerfile          # Imagen para Lambda Container
+├── requirements.txt       # Dependencias Python
 ├── src/
-│   ├── handler.py                # Entry point de Lambda
-│   ├── pipeline/
-│   │   ├── extract.py            # Extracción de datos de DynamoDB
-│   │   ├── transform.py          # Transformación y agregación
-│   │   └── load.py               # Escritura de resultados a S3
-│   ├── models/
-│   │   ├── prophet_model.py      # Entrenamiento y predicción con Prophet
-│   │   ├── arima_model.py        # Entrenamiento y predicción con ARIMA
-│   │   └── evaluator.py          # Cálculo de métricas comparativas
-│   ├── generators/
-│   │   └── synthetic_data.py     # Generación de datos sintéticos
-│   └── config/
-│       ├── zones.json            # Configuración de zonas geográficas
-│       └── model_config.yaml     # Hiperparámetros de los modelos
+│  ├── handler.py        # Entry point de Lambda
+│  ├── pipeline/
+│  │  ├── extract.py      # Extracción de datos de DynamoDB
+│  │  ├── transform.py     # Transformación y agregación
+│  │  └── load.py        # Escritura de resultados a S3
+│  ├── models/
+│  │  ├── prophet_model.py   # Entrenamiento y predicción con Prophet
+│  │  ├── arima_model.py    # Entrenamiento y predicción con ARIMA
+│  │  └── evaluator.py     # Cálculo de métricas comparativas
+│  ├── generators/
+│  │  └── synthetic_data.py   # Generación de datos sintéticos
+│  └── config/
+│    ├── zones.json      # Configuración de zonas geográficas
+│    └── model_config.yaml   # Hiperparámetros de los modelos
 ├── tests/
-│   ├── test_pipeline.py
-│   ├── test_prophet.py
-│   └── test_arima.py
+│  ├── test_pipeline.py
+│  ├── test_prophet.py
+│  └── test_arima.py
 └── scripts/
-    ├── build_and_push.sh         # Script para build Docker + push a ECR
-    └── generate_test_data.py     # Script local para generar datos de prueba
+  ├── build_and_push.sh     # Script para build Docker + push a ECR
+  └── generate_test_data.py   # Script local para generar datos de prueba
 ```
 
 ### 3.3 Frontend (`frontend_urbanshield`) — Cambios
@@ -305,27 +305,27 @@ prediction-service/
 ```
 frontend_urbanshield/
 ├── src/
-│   ├── components/
-│   │   ├── chat/                 # [NUEVO] Componentes del chatbot
-│   │   │   ├── ChatWidget.jsx    # Widget flotante principal
-│   │   │   ├── ChatWindow.jsx    # Ventana del chat expandida
-│   │   │   ├── ChatMessage.jsx   # Burbuja de mensaje individual
-│   │   │   ├── ChatInput.jsx     # Input de texto del chat
-│   │   │   └── ChatTyping.jsx    # Indicador de "escribiendo..."
-│   │   └── predictions/          # [NUEVO] Componentes de predicciones
-│   │       ├── PredictionChart.jsx    # Gráfica de series de tiempo
-│   │       ├── SeasonalityChart.jsx   # Gráfica de componentes estacionales
-│   │       ├── HeatmapLayer.jsx       # Capa de mapa de calor
-│   │       ├── ModelComparisonTable.jsx# Tabla comparativa de modelos
-│   │       └── PredictionKPIs.jsx     # Tarjetas de KPIs
-│   ├── hooks/
-│   │   └── useWebSocket.js       # [NUEVO] Custom hook para WebSocket
-│   ├── services/
-│   │   ├── chatService.js        # [NUEVO] Lógica de comunicación del chat
-│   │   └── predictionService.js  # [NUEVO] Llamadas al API de predicciones
-│   └── pages/
-│       └── admin/
-│           └── PredictionsPage.jsx # [NUEVO] Página de predicciones
+│  ├── components/
+│  │  ├── chat/         # [NUEVO] Componentes del chatbot
+│  │  │  ├── ChatWidget.jsx  # Widget flotante principal
+│  │  │  ├── ChatWindow.jsx  # Ventana del chat expandida
+│  │  │  ├── ChatMessage.jsx  # Burbuja de mensaje individual
+│  │  │  ├── ChatInput.jsx   # Input de texto del chat
+│  │  │  └── ChatTyping.jsx  # Indicador de "escribiendo..."
+│  │  └── predictions/     # [NUEVO] Componentes de predicciones
+│  │    ├── PredictionChart.jsx  # Gráfica de series de tiempo
+│  │    ├── SeasonalityChart.jsx  # Gráfica de componentes estacionales
+│  │    ├── HeatmapLayer.jsx    # Capa de mapa de calor
+│  │    ├── ModelComparisonTable.jsx# Tabla comparativa de modelos
+│  │    └── PredictionKPIs.jsx   # Tarjetas de KPIs
+│  ├── hooks/
+│  │  └── useWebSocket.js    # [NUEVO] Custom hook para WebSocket
+│  ├── services/
+│  │  ├── chatService.js    # [NUEVO] Lógica de comunicación del chat
+│  │  └── predictionService.js # [NUEVO] Llamadas al API de predicciones
+│  └── pages/
+│    └── admin/
+│      └── PredictionsPage.jsx # [NUEVO] Página de predicciones
 └── ...
 ```
 
@@ -333,45 +333,45 @@ frontend_urbanshield/
 
 ```
 mobile_urbanshield/
-├── app.json                      # Configuración de Expo
-├── App.tsx                       # Entry point
+├── app.json           # Configuración de Expo
+├── App.tsx            # Entry point
 ├── src/
-│   ├── navigation/
-│   │   ├── AuthStack.tsx
-│   │   ├── MainTabs.tsx
-│   │   └── RootNavigator.tsx
-│   ├── screens/
-│   │   ├── auth/
-│   │   │   ├── SplashScreen.tsx
-│   │   │   ├── LoginScreen.tsx
-│   │   │   └── RegisterScreen.tsx
-│   │   ├── home/
-│   │   │   └── HomeScreen.tsx
-│   │   ├── reports/
-│   │   │   ├── MyReportsScreen.tsx
-│   │   │   ├── CreateReportScreen.tsx
-│   │   │   └── ReportDetailScreen.tsx
-│   │   ├── chat/
-│   │   │   └── ChatScreen.tsx
-│   │   └── profile/
-│   │       └── ProfileScreen.tsx
-│   ├── components/
-│   │   ├── MapView.tsx
-│   │   ├── ReportCard.tsx
-│   │   ├── ChatBubble.tsx
-│   │   └── CategoryPicker.tsx
-│   ├── services/
-│   │   ├── api.ts
-│   │   ├── auth.ts
-│   │   ├── websocket.ts
-│   │   └── storage.ts
-│   ├── store/
-│   │   ├── authStore.ts
-│   │   ├── reportsStore.ts
-│   │   └── chatStore.ts
-│   └── utils/
-│       ├── constants.ts
-│       └── helpers.ts
+│  ├── navigation/
+│  │  ├── AuthStack.tsx
+│  │  ├── MainTabs.tsx
+│  │  └── RootNavigator.tsx
+│  ├── screens/
+│  │  ├── auth/
+│  │  │  ├── SplashScreen.tsx
+│  │  │  ├── LoginScreen.tsx
+│  │  │  └── RegisterScreen.tsx
+│  │  ├── home/
+│  │  │  └── HomeScreen.tsx
+│  │  ├── reports/
+│  │  │  ├── MyReportsScreen.tsx
+│  │  │  ├── CreateReportScreen.tsx
+│  │  │  └── ReportDetailScreen.tsx
+│  │  ├── chat/
+│  │  │  └── ChatScreen.tsx
+│  │  └── profile/
+│  │    └── ProfileScreen.tsx
+│  ├── components/
+│  │  ├── MapView.tsx
+│  │  ├── ReportCard.tsx
+│  │  ├── ChatBubble.tsx
+│  │  └── CategoryPicker.tsx
+│  ├── services/
+│  │  ├── api.ts
+│  │  ├── auth.ts
+│  │  ├── websocket.ts
+│  │  └── storage.ts
+│  ├── store/
+│  │  ├── authStore.ts
+│  │  ├── reportsStore.ts
+│  │  └── chatStore.ts
+│  └── utils/
+│    ├── constants.ts
+│    └── helpers.ts
 ├── assets/
 ├── package.json
 └── tsconfig.json
@@ -400,3 +400,4 @@ mobile_urbanshield/
 3. **Sanitización de input:** Todos los mensajes del chat se sanitizan antes de procesarlos (strip HTML, limitar longitud a 500 caracteres, escapar caracteres especiales).
 4. **Pre-signed URLs:** Las fotos subidas desde la app móvil usan pre-signed URLs con expiración de 5 minutos y tamaño máximo de 5MB.
 5. **Secretos:** Todas las API keys, tokens y credenciales se almacenan en AWS Systems Manager Parameter Store (SSM), nunca en variables de entorno del código fuente.
+
