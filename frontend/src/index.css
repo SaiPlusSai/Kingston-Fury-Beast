@@ -1,0 +1,435 @@
+@import "tailwindcss";
+
+/* ─────────────────────────────────────────────────────────────
+   Halo — Light Nature Smart-City Design System
+   ───────────────────────────────────────────────────────────── */
+
+@theme {
+  /* ── Backgrounds (Light Dominant) ─────────── */
+  --color-primary-bg:    #F8F6F1;
+  --color-secondary-bg:  #EFEFE7;
+  --color-card-bg:       #FFFFFF;
+  --color-muted:         #F5F5F4;
+  --color-hover:         #F3F4F6;
+
+  /* ── Sidebar (Dark Forest Green) ──────────── */
+  --color-sidebar-bg:    #2F5D50;
+  --color-sidebar-hover: #3A7060;
+  --color-sidebar-active:#224840;
+  --color-sidebar-text:  #E8F5F0;
+  --color-sidebar-muted: #9FBAAF;
+
+  /* ── Brand Green ───────────────────────────── */
+  --color-primary:       #4C9F70;
+  --color-primary-light: #5AB882;
+  --color-primary-dark:  #3A7D57;
+
+  /* ── Accent Warm ────────────────────────────── */
+  --color-accent:        #D6A663;
+  --color-accent-light:  #E0BB85;
+  --color-accent-dark:   #B8853E;
+
+  /* ── Semantics ─────────────────────────────── */
+  --color-danger:        #E76F51;
+  --color-danger-muted:  #FEF2EF;
+  --color-warning:       #DDA15E;
+  --color-warning-muted: #FEF9EF;
+  --color-success:       #6BA368;
+  --color-success-muted: #F0F7EF;
+
+  /* ── Typography ────────────────────────────── */
+  --color-text-primary:   #1F2937;
+  --color-text-secondary: #6B7280;
+  --color-text-muted:     #9CA3AF;
+
+  /* ── Borders ────────────────────────────────── */
+  --color-border:        #D6D3D1;
+  --color-border-light:  #E7E5E4;
+  --color-border-strong: #A8A29E;
+
+  /* ── Fonts ──────────────────────────────────── */
+  --font-sans:    'Inter', 'Poppins', system-ui, sans-serif;
+  --font-display: 'Poppins', 'Inter', system-ui, sans-serif;
+}
+
+/* ─── Base ─────────────────────────────────────────────────── */
+@layer base {
+  *, *::before, *::after { box-sizing: border-box; }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* ── Dark Mode Overrides ── */
+  .dark {
+    --color-primary-bg:    #111827;
+    --color-secondary-bg:  #1F2937;
+    --color-card-bg:       #1F2937;
+    --color-muted:         #374151;
+    --color-hover:         #374151;
+
+    --color-sidebar-bg:    #0F172A;
+    --color-sidebar-hover: #1E293B;
+    --color-sidebar-active:#334155;
+    
+    --color-text-primary:   #F9FAFB;
+    --color-text-secondary: #D1D5DB;
+    --color-text-muted:     #9CA3AF;
+    
+    --color-border:        #4B5563;
+    --color-border-light:  #374151;
+    --color-border-strong: #6B7280;
+  }
+
+  body {
+    @apply bg-primary-bg text-text-primary font-sans;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    line-height: 1.6;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-display font-semibold tracking-tight;
+    line-height: 1.25;
+    color: #1F2937;
+  }
+
+  input, select, textarea {
+    color-scheme: light;
+  }
+
+  /* Ocultar el ícono de revelar contraseña nativo del navegador (Edge/Chrome) */
+  input[type="password"]::-ms-reveal,
+  input[type="password"]::-ms-clear,
+  input[type="password"]::-webkit-contacts-auto-fill-button,
+  input[type="password"]::-webkit-credentials-auto-fill-button {
+    display: none !important;
+  }
+}
+
+/* ─── Scrollbar ────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: #F8F6F1; }
+::-webkit-scrollbar-thumb { background: #D6D3D1; border-radius: 100px; }
+::-webkit-scrollbar-thumb:hover { background: #4C9F70; }
+
+/* ─── Map Placeholder (Light GIS) ─────────────────────────── */
+.map-placeholder {
+  background:
+    radial-gradient(ellipse at 30% 40%, rgba(76, 159, 112, 0.06) 0%, transparent 60%),
+    radial-gradient(ellipse at 70% 70%, rgba(214, 166, 99, 0.04) 0%, transparent 50%),
+    linear-gradient(160deg, #E8EDE9 0%, #EDF2EE 50%, #E4EBE6 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+.map-placeholder::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(to right, rgba(76,159,112,0.08) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(76,159,112,0.08) 1px, transparent 1px);
+  background-size: 44px 44px;
+  pointer-events: none;
+}
+
+.map-placeholder::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(to right, rgba(76,159,112,0.04) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(76,159,112,0.04) 1px, transparent 1px);
+  background-size: 8px 8px;
+  pointer-events: none;
+}
+
+
+/* ─── Utility Classes ──────────────────────────────────────── */
+@layer utilities {
+  /* Light/Dark card surface */
+  .surface-card {
+    background: var(--color-card-bg);
+    border: 1px solid var(--color-border-light);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+  }
+
+  /* Sidebar surface (dark forest green) */
+  .surface-sidebar {
+    background: #2F5D50;
+    border-right: 1px solid rgba(0,0,0,0.1);
+  }
+
+  /* Header surface */
+  .surface-header {
+    background: color-mix(in srgb, var(--color-card-bg) 92%, transparent);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--color-border-light);
+  }
+
+  /* Gradient text (green → accent) */
+  .text-gradient {
+    background: linear-gradient(135deg, #4C9F70, #D6A663);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Sidebar nav item — active */
+  .nav-active {
+    background: rgba(255,255,255,0.15);
+    border-left: 3px solid #FFFFFF;
+    color: #FFFFFF;
+    font-weight: 600;
+  }
+
+  /* Glow variants */
+  .glow-primary { box-shadow: 0 0 20px rgba(76, 159, 112, 0.2); }
+  .glow-accent  { box-shadow: 0 0 20px rgba(214, 166, 99, 0.2); }
+  .glow-danger  { box-shadow: 0 0 20px rgba(231, 111, 81, 0.2); }
+
+  /* Premium inset */
+  .inset-surface {
+    background: var(--color-primary-bg);
+    border: 1px solid var(--color-border-light);
+    border-radius: 12px;
+  }
+}
+
+/* ─── Keyframes ─────────────────────────────────────────────── */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes slideInLeft {
+  from { opacity: 0; transform: translateX(-12px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes pulseSubtle {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+.animate-fade-in       { animation: fadeIn 0.35s ease forwards; }
+.animate-slide-in-left { animation: slideInLeft 0.25s ease forwards; }
+.animate-pulse-subtle  { animation: pulseSubtle 2s ease-in-out infinite; }
+
+@keyframes marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+.animate-marquee {
+  animation: marquee 25s linear infinite;
+}
+
+/* ── Animated Dark Gradient ── */
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.bg-animated-gradient {
+  background: linear-gradient(-45deg, #2F5D50, #1b3d33, #3A7060, #1b3d33);
+  background-size: 400% 400%;
+  animation: gradientShift 15s ease infinite;
+}
+
+/* ── Premium Noise & Aurora Textures ── */
+.noise-overlay {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0.035;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+}
+
+@keyframes auroraFlow1 {
+  0%, 100% { transform: translateY(0) scale(1) rotate(0deg); }
+  50% { transform: translateY(-40px) scale(1.1) rotate(10deg); }
+}
+@keyframes auroraFlow2 {
+  0%, 100% { transform: translateY(0) scale(1) rotate(0deg); }
+  50% { transform: translateY(30px) scale(0.9) rotate(-10deg); }
+}
+
+.aurora-orb-1 { animation: auroraFlow1 16s ease-in-out infinite; }
+.aurora-orb-2 { animation: auroraFlow2 20s ease-in-out infinite reverse; }
+
+/* ── Premium Glass ── */
+.glass-premium {
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  box-shadow: inset 0 1px 1px rgba(255,255,255,0.9), 0 8px 32px rgba(0,0,0,0.03);
+}
+
+.dark .glass-premium {
+  background: rgba(31, 41, 55, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: inset 0 1px 1px rgba(255,255,255,0.05), 0 8px 32px rgba(0,0,0,0.2);
+}
+
+/* ─── Mesh Gradient Hero Background ───────────────────────── */
+@keyframes meshShift {
+  0% {
+    background-position: 0% 50%, 100% 50%, 50% 0%, 50% 100%;
+    opacity: 1;
+  }
+  25% {
+    background-position: 30% 70%, 70% 30%, 20% 80%, 80% 20%;
+    opacity: 0.95;
+  }
+  50% {
+    background-position: 100% 50%, 0% 50%, 50% 100%, 50% 0%;
+    opacity: 1;
+  }
+  75% {
+    background-position: 70% 30%, 30% 70%, 80% 20%, 20% 80%;
+    opacity: 0.95;
+  }
+  100% {
+    background-position: 0% 50%, 100% 50%, 50% 0%, 50% 100%;
+    opacity: 1;
+  }
+}
+
+.mesh-gradient-hero {
+  background:
+    radial-gradient(ellipse 60% 50% at 0% 50%,   rgba(76, 159, 112, 0.35) 0%, transparent 70%),
+    radial-gradient(ellipse 60% 50% at 100% 50%,  rgba(214, 166, 99, 0.30) 0%, transparent 70%),
+    radial-gradient(ellipse 50% 60% at 50% 0%,    rgba(47, 93, 80, 0.25) 0%, transparent 70%),
+    radial-gradient(ellipse 50% 60% at 50% 100%,  rgba(231, 111, 81, 0.18) 0%, transparent 70%);
+  background-size: 200% 200%, 200% 200%, 200% 200%, 200% 200%;
+  animation: meshShift 20s ease-in-out infinite;
+}
+
+/* ─── Glass Card Variants ─────────────────────────────────── */
+.glass-frosted {
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(40px);
+  -webkit-backdrop-filter: blur(40px);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  box-shadow:
+    inset 0 1px 2px rgba(255, 255, 255, 0.4),
+    0 12px 40px rgba(0, 0, 0, 0.06);
+}
+
+.glass-dark {
+  background: rgba(15, 23, 42, 0.4);
+  backdrop-filter: blur(30px);
+  -webkit-backdrop-filter: blur(30px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* ─── Animated Gradient Border ────────────────────────────── */
+@keyframes borderRotate {
+  0%   { --border-angle: 0deg; }
+  100% { --border-angle: 360deg; }
+}
+
+@property --border-angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+
+.gradient-border {
+  position: relative;
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.gradient-border::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  padding: 2px;
+  border-radius: inherit;
+  background: conic-gradient(
+    from var(--border-angle),
+    #4C9F70,
+    #D6A663,
+    #3A7D57,
+    #E0BB85,
+    #4C9F70
+  );
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  animation: borderRotate 4s linear infinite;
+}
+
+/* ─── Shimmer Effect ──────────────────────────────────────── */
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.shimmer {
+  position: relative;
+  overflow: hidden;
+}
+
+.shimmer::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.25) 50%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 3s ease-in-out infinite;
+  pointer-events: none;
+}
+
+/* ─── Float Animation ─────────────────────────────────────── */
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-20px); }
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+/* ─── Pulse Ring ──────────────────────────────────────────── */
+@keyframes pulseRing {
+  0% {
+    transform: scale(1);
+    opacity: 0.6;
+  }
+  100% {
+    transform: scale(2.4);
+    opacity: 0;
+  }
+}
+
+.pulse-ring {
+  position: relative;
+}
+
+.pulse-ring::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 2px solid currentColor;
+  animation: pulseRing 1.8s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* ─── Stagger Fade Utilities ─────────────────────────────── */
+.stagger-1 { animation-delay: 0.1s; }
+.stagger-2 { animation-delay: 0.2s; }
+.stagger-3 { animation-delay: 0.3s; }
+.stagger-4 { animation-delay: 0.4s; }
