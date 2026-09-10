@@ -50,9 +50,9 @@
 │  1. Comprensión    2. Comprensión    3. Preparación             │
 │  del Negocio       de los Datos      de los Datos               │
 │  ┌──────────┐     ┌──────────┐      ┌──────────┐               │
-│  │problem_  │     │data_eco- │      │transform │               │
-│  │statement │────▶│system.md │─────▶│.py + EDA │               │
-│  │.md       │     │01_eda.py │      │          │               │
+│  │problem_  │     │data_eco- │      │generate_ │               │
+│  │statement │────▶│system.md │─────▶│data.py   │               │
+│  │.md       │     │eda.ipynb │      │          │               │
 │  └──────────┘     └──────────┘      └────┬─────┘               │
 │                                          │                      │
 │  6. Despliegue    5. Evaluación     4. Modelado                 │
@@ -68,10 +68,10 @@
 | Fase | Artefacto(s) | Estado |
 |---|---|:---:|
 | 1. Comprensión del Negocio | [problem_statement.md](docs/problem_statement.md), [product_goal.md](docs/product_goal.md) | ✅ Completo |
-| 2. Comprensión de los Datos | [data_ecosystem.md](docs/data_ecosystem.md), `prediction-service/notebooks/01_eda.py` | ⚠️ Doc lista / Script en desarrollo |
-| 3. Preparación de los Datos | `prediction-service/transform.py` | ⏳ En desarrollo (Sprint 1) |
-| 4. Modelado | `prediction-service/prophet_model.py`, `arima_model.py` | ⏳ En desarrollo (Sprint 1) |
-| 5. Evaluación | `prediction-service/evaluator.py`, [experiment_log.md](docs/experiment_log.md), [baseline.md](docs/baseline.md) | ⚠️ Docs listos / Ejecución en progreso |
+| 2. Comprensión de los Datos | [data_ecosystem.md](docs/data_ecosystem.md), `prediction-service/notebooks/01_eda.ipynb` | ✅ Completo |
+| 3. Preparación de los Datos | `prediction-service/scripts/generate_synthetic_data.py` | ✅ Completo (Dataset Diario y Crudo) |
+| 4. Modelado | `prediction-service/notebooks/02_baseline.ipynb` (Modelos Base) | ✅ Baselines Completos (Prophet Sprint 1) |
+| 5. Evaluación | `prediction-service/evaluator.py`, [experiment_log.md](docs/experiment_log.md), [baseline.md](docs/baseline.md) | ⚠️ Docs listos / Prophet en progreso |
 | 6. Despliegue | Lambda Container Image, EventBridge cron, [Analisis-Security-by-Design.md](docs/Arquitectura%20y%20Seguridad/Seguridad/Analisis-Security-by-Design.md) | ✅ Arquitectura lista / Código en Sprint 2 |
 
 ---
@@ -247,6 +247,31 @@ npm run dev
 #### Paso 2.5: Verificación en vivo del Frontend
 Abre tu navegador e ingresa a:  
 👉 **`http://localhost:5173`**
+
+---
+
+### 🟣 3. Iniciar el Pipeline de Inteligencia Artificial (Sprint 0)
+
+El módulo de predicción de hotspots tiene un pipeline de ciencia de datos listo para evaluación.
+
+#### Paso 3.1: Entorno Virtual e Instalación
+Abre una terminal en la carpeta del servicio:
+```bash
+cd prediction-service
+pip install -r requirements.txt
+```
+
+#### Paso 3.2: Generar Datos Sintéticos
+El proyecto simula 10,000 incidentes individuales y los agrupa por día para entrenar la IA:
+```bash
+python scripts/generate_synthetic_data.py
+```
+*(Esto generará `synthetic_lapaz_v1.csv` y `synthetic_lapaz_daily.csv` en `data/raw/`)*
+
+#### Paso 3.3: Ejecutar Jupyter Notebooks (EDA y Baselines)
+Hemos preparado dos cuadernos Jupyter interactivos para visualizar los hallazgos:
+1. Abre `notebooks/01_eda.ipynb` (Análisis Exploratorio de Datos) en VS Code y ejecútalo para ver los mapas de calor y distribuciones.
+2. Abre `notebooks/02_baseline.ipynb` (Evaluación de Baselines) en VS Code y ejecútalo para ver cómo se comportan los modelos estacionales básicos frente a la realidad.
 
 ---
 
