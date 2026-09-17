@@ -1,4 +1,4 @@
-﻿# Diseño Técnico: Expansión de HALO v2
+# Diseño Técnico: Expansión de HALO v2
 
 Este documento describe las decisiones de arquitectura, los patrones de implementación y los riesgos técnicos identificados para las tres funcionalidades de la expansión de HALO v2. Cada decisión sigue el formato ADR (Architecture Decision Record) para documentar el contexto, las alternativas consideradas y la justificación de la elección.
 
@@ -162,7 +162,139 @@ Transiciones:
 
 ---
 
-## 2. Diagrama de Arquitectura General
+## 2. Diagramas de Arquitectura — Modelo C4
+
+> Diagramas formales en metodología C4 (Simon Brown). Niveles 1 y 2 en Mermaid.
+> Agregados el 16/09/2026 para cumplimiento del Elemento de Competencia EC-3.
+
+### C4 — Nivel 1: Diagrama de Contexto del Sistema
+
+```mermaid
+graph TB
+    ciudadano["👤 Ciudadano<br/>(Usuario final)"]
+    autoridad["👮 Autoridad / Agente<br/>(Seguridad pública)"]
+    admin["🔧 Administrador HALO<br/>(Operador del sistema)"]
+
+    subgraph halo["🏙️ HALO Platform (Urban Shield v2)"]
+        web["Aplicación Web<br/>(React 19 + Vite)"]
+        mobile["App Móvil<br/>(React Native + Expo)"]
+        chat["Chatbot en Tiempo Real<br/>(WebSocket)"]
+        dashboard["Dashboard de Predicciones<br/>(Admin)"]
+    end
+
+    subgraph aws["☁️ AWS Cloud (Servicios Externos)"]
+        lambda["AWS Lambda"]
+        dynamo["Amazon DynamoDB"]
+        s3["Amazon S3"]
+        cognito["Amazon Cognito"]
+    end
+
+    ciudadano -- "Reporta incidentes<br/>Consulta estado (web/móvil/chat)" --> halo
+    autoridad -- "Monitorea incidentes<br/>Ve predicciones de hotspots" --> halo
+    admin -- "Gestiona sistema<br/>Revisa métricas" --> halo
+    halo -- "Desplegado sobre" --> aws
+```
+
+---
+
+### C4 — Nivel 2: Diagrama de Contenedores
+
+```mermaid
+graph TB
+    ciudadano["👤 Ciudadano"]
+    autoridad["👮 Autoridad"]
+    admin["🔧 Administrador"]
+
+    subgraph frontend["Capa de Presentación"]
+        web["Frontend Web<br/>React 19 + Vite + MapLibre<br/>S3 + CloudFront"]
+        mobile["App Móvil<br/>React Native + Expo<br/>iOS / Android"]
+        chat_widget["Chat Widget<br/>WebSocket client<br/>Embebido en Web y Móvil"]
+    end
+
+    subgraph gateway["AWS API Gateway"]
+        http_api["HTTP API V2<br/>/api/* (REST)"]
+        ws_api["WebSocket API<br/>$connect / $disconnect<br/>sendMessage"]
+    end
+
+    subgraph compute["Capa de Cómputo — AWS Lambda"]
+        backend["Backend Node.js<br/>Express + serverless-http<br/>Monolito serverless"]
+        chat_handler["Chat Handler<br/>Node.js<br/>intentDetector + stateMachine"]
+        predict_svc["Prediction Service<br/>Python 3.11 + Docker<br/>Lambda Container Image"]
+    end
+
+    subgraph storage["Almacenamiento"]
+        dynamo["DynamoDB<br/>8 tablas<br/>(usuarios, reportes, chat, etc.)"]
+        s3_photos["S3 — Fotos<br/>Pre-signed URLs"]
+        s3_pred["S3 — Predicciones<br/>JSON estáticos (cache diario)"]
+        ecr["ECR<br/>Docker Images<br/>(Python + Prophet)"]
+    end
+
+    subgraph scheduler["Scheduling"]
+        eventbridge["EventBridge<br/>Cron: 03:00 AM diario"]
+    end
+
+    ciudadano --> web
+    ciudadano --> mobile
+    autoridad --> web
+    admin --> web
+
+    web --> http_api
+    web --> ws_api
+    mobile --> http_api
+    mobile --> ws_api
+
+    http_api --> backend
+    ws_api --> chat_handler
+
+    backend --> dynamo
+    backend --> s3_photos
+    backend --> s3_pred
+    backend --> cognito["Cognito"]
+
+    chat_handler --> dynamo
+
+    eventbridge --> predict_svc
+    predict_svc --> dynamo
+    predict_svc --> s3_pred
+    ecr --> predict_svc
+```
+
+---
+
+### C4 — Nivel 3: Componentes del Servicio de Predicción
+
+```mermaid
+graph LR
+    eventbridge["⏰ EventBridge<br/>(Cron 03:00 AM)"]
+
+    subgraph prediction_service["Prediction Service — Lambda Container (Python 3.11)"]
+        handler["handler.py<br/>Orquestador del pipeline"]
+        extract["extract.py<br/>Extrae datos de DynamoDB<br/>(GSI por createdAt)"]
+        transform["transform.py<br/>ETL: limpieza, agrupación<br/>por zona/día, split 80/20"]
+        prophet_m["prophet_model.py<br/>Entrenamiento Prophet<br/>Estacionalidades: semanal + anual"]
+        arima_m["arima_model.py<br/>auto_arima (pmdarima)<br/>Modelo comparativo"]
+        evaluator["evaluator.py<br/>MAE, RMSE, MAPE, R²<br/>vs. Baselines"]
+        baseline_c["baseline_calculator.py<br/>Naive, Media móvil 7d<br/>Media estacional, ARIMA"]
+    end
+
+    dynamo["DynamoDB<br/>ReportsTable"]
+    s3_out["S3<br/>predictions/YYYY-MM-DD/<br/>zone_{id}_forecast.json<br/>metrics_YYYY-MM-DD.json"]
+
+    eventbridge --> handler
+    handler --> extract --> dynamo
+    extract --> transform
+    transform --> prophet_m
+    transform --> arima_m
+    transform --> baseline_c
+    prophet_m --> evaluator
+    arima_m --> evaluator
+    baseline_c --> evaluator
+    evaluator --> s3_out
+```
+
+---
+
+## 3. Diagrama de Arquitectura General (ASCII — Detalle de Infraestructura)
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
