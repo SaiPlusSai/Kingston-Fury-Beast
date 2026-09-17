@@ -4,37 +4,38 @@
 **Aceptado**
 
 ## Contexto
-Los modelos de series de tiempo como Meta Prophet requieren un minimo de 90 a 365 dias de observaciones continuas para capturar adecuadamente componentes estacionales semanales, mensuales y de fin de semana. En la etapa inicial de UrbanShield o en nuevas ciudades donde se despliegue el sistema, la base de datos ReportsTable contiene un volumen insuficiente de reportes reales.
+Los modelos de series de tiempo como Meta Prophet requieren un mínimo de 90 a 365 días de observaciones continuas para capturar adecuadamente componentes estacionales (épocas de lluvias, patrones semanales y eventos festivos). En la etapa inicial del sistema, la base de datos ReportsTable no cuenta con suficiente historial de reportes ciudadanos recolectados en tiempo real.
 
 ## Problema
-Como entrenar, validar y demostrar el funcionamiento del pipeline de Inteligencia Artificial (Prophet y ARIMA) sin contar con anos de historial de incidentes reales acumulados en DynamoDB?
+¿Cómo entrenar, validar y demostrar el funcionamiento del pipeline de Inteligencia Artificial (Prophet y ARIMA) sin recurrir a datos sintéticos artificiales ni esperar meses a acumular reportes orgánicos en la plataforma?
 
 ## Decisión
-Desarrollar un Modulo de Generacion de Datos Sinteticos Parametrico y Deterministico (generate_synthetic_data.py, seed=42) capaz de sintetizar 365 dias de incidentes urbanos realistas con distribuciones temporales circadianas, estacionalidad semanal y agrupamientos espaciales gaussianos alrededor de puntos neuralgicos urbanos.
+Desarrollar un módulo de Curaduría e Ingestión de Datos (ingest_historical_data.py) encargado de procesar, limpiar y unificar datasets históricos reales de emergencias urbanas, desastres naturales (deslizamientos, riadas) y delitos reportados en La Paz y Bolivia, poblando directamente la base de datos ReportsTable.
 
 ## Justificación técnica
-1. Validez Cientifica y Reproducibilidad: Cumple rigurosamente con la metodologia CRISP-ML(Q) y la documentacion de Kingston-Fury-Beast-. Fijar una semilla pseudoaleatoria (seed=42) garantiza que los experimentos sean reproducibles por cualquier evaluador.
-2. Patrones Urbanos Verosimiles: El generador no inyecta ruido blanco uniforme; simula concentraciones de robos nocturnos en zonas comerciales, picos de accidentes viales en horarios de transito matutino/vespertino y fallas de infraestructura en dias laborales.
-3. Habilitador del Pipeline Completo: Permite probar de punta a punta el ETL, calculo de baselines estadisticos, metricas MAE/RMSE/MAPE y la renderizacion de mapas de calor sin esperar meses de recoleccion de datos en campo.
-4. Trazabilidad Etica: Los datos sinteticos quedan etiquetados y aislados, garantizando que nunca se confundan con reportes legales reales de la ciudadania.
+1. Validez Empírica y Relevancia Geográfica: La topografía y clima de La Paz (laderas, pendientes, cuencas y época de lluvias) presentan patrones espaciotemporales únicos que las fórmulas sintéticas no pueden replicar con fidelidad.
+2. Captura de Estacionalidad Real: Los datos históricos permiten a Meta Prophet y ARIMA detectar ciclos anuales verdaderos, como el incremento de deslizamientos entre noviembre y marzo o picos de incidentes urbanos en fechas festivas locales.
+3. Fundamento y Rigor Metodológico: Cumple con la metodología CRISP-ML(Q) garantizando que el entrenamiento del pipeline se sustente en evidencia empírica observada y fuentes de datos abiertos/públicos de la región.
+4. Estandarización de Esquema: Transforma variables heterogéneas externas (coordenadas GPS, fechas, tipos de incidente) a una estructura unificada compatible con la canalización del extractor (extract.py).
 
 ## Alternativas consideradas
-- Alternativa 1: Esperar a recolectar datos reales durante meses antes de implementar los modelos. Descartada por inviable en el marco temporal academico y comercial del proyecto.
-- Alternativa 2: Usar datasets genericos abiertos (ej. delitos de Chicago o Nueva York). Descartada por no ajustarse a la estructura de categorias, coordenadas geograficas ni dinamicas urbanas locales del proyecto HALO.
+- Alternativa 1: Generación de datos sintéticos matemáticos. Descartada por ignorar la geografía de La Paz y restar credibilidad científica al comportamiento real de las emergencias locales.
+- Alternativa 2: Esperar la recolección orgánica de datos en producción. Descartada por ser inviable en el marco temporal del proyecto e impedir el despliegue inmediato del módulo predictivo.
 
 ## Consecuencias positivas
-- Disponibilidad inmediata de un banco de pruebas exhaustivo para el modulo de IA.
-- Posibilidad de realizar pruebas de estres de volumen en DynamoDB y S3.
-- Base solida para benchmarking cuantitativo de Prophet vs ARIMA.
+- Alta precisión empírica en la identificación de zonas críticas (hotspots) desde el primer día.
+- Capacidad de integración con iniciativas de Datos Abiertos (Open Data) locales y nacionales.
+- Disponibilidad de un banco de pruebas verídico para la validación cuantitativa de métricas (MAE, RMSE, MAPE).
 
 ## Consecuencias negativas
-- Los modelos entrenados con datos sinteticos reflejan las suposiciones del generador y deberan ser reentrenados gradualmente a medida que ingresen reportes reales.
+- Requiere esfuerzo técnico inicial de limpieza, normalización y tratamiento de datos faltantes (Data Wrangling) previo al entrenamiento.
 
 ## Riesgos
-- Sobreajuste (overfitting) a los patrones matematicos artificiales del generador.
+- Disparidad de formatos, nomenclaturas y resolución geográfica entre los distintos datasets históricos recopilados.
 
 ## Mitigaciones
 - Incorporar ruido estocastico mediante distribuciones de Poisson y disenar el extractor de datos (extract.py) con una logica de transicion hibrida: usar datos reales prioritariamente y completar con sinteticos solo cuando los registros reales por zona sean inferiores al umbral minimo de 90 dias.
+- Construir una matriz de mapeo explícita (category_mapper.py) para traducir las taxonomías de las fuentes externas al esquema estandarizado de categorías del proyecto.
 
 ## Componentes afectados
-prediction-service/scripts/generate_synthetic_data.py, prediction-service/src/pipeline/extract.py.
+prediction-service/scripts/ingest_historical_data.py, prediction-service/scripts/category_mapper.py, prediction-service/src/pipeline/extract.py, ReportsTable.
