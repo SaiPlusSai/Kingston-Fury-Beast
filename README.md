@@ -67,8 +67,8 @@
 | 1. Comprensión del Negocio | [problem_statement.md](docs/problem_statement.md), [product_goal.md](docs/product_goal.md) | ✅ Completo |
 | 2. Comprensión de los Datos | [data_ecosystem.md](docs/data_ecosystem.md), prediction-service/notebooks/01_eda.py | ⚠️ Doc lista / Script pendiente |
 | 3. Preparación de los Datos | prediction-service/transform.py | ❌ Pendiente (Sprint 1) |
-| 4. Modelado | prediction-service/prophet_model.py, rima_model.py | ❌ Pendiente (Sprint 1) |
-| 5. Evaluación | prediction-service/evaluator.py, [experiment_log.md](docs/experiment_log.md), [aseline.md](docs/baseline.md) | ⚠️ Docs listos / Código pendiente |
+| 4. Modelado | prediction-service/prophet_model.py, Arima_model.py | ❌ Pendiente (Sprint 1) |
+| 5. Evaluación | prediction-service/evaluator.py, [experiment_log.md](docs/experiment_log.md), [Baseline.md](docs/baseline.md) | ⚠️ Docs listos / Código pendiente |
 | 6. Despliegue | Lambda Container Image, EventBridge cron | ❌ Pendiente (Sprint 2) |
 
 ---
@@ -187,7 +187,8 @@ cat output/baseline_comparison_.json
 | [problem_statement.md](docs/problem_statement.md) | Problema, stakeholders, alcance, métricas SMART | EC-1 |
 | [data_ecosystem.md](docs/data_ecosystem.md) | Inventario de datos, EDA, privacidad, pipeline | EC-2 |
 | [design.md](openspec/changes/halo-v2-expansion/design.md) | 6 ADRs + diagramas C4 + estructura del código | EC-3 |
-| [isk_register.md](docs/risk_register.md) | 10 riesgos con probabilidad, impacto y dueño | EC-3 |
+| [
+isk_register.md](docs/risk_register.md) | 10 riesgos con probabilidad, impacto y dueño | EC-3 |
 | [aseline.md](docs/baseline.md) | 4 modelos baseline + umbrales de aceptación Prophet | EC-4 |
 | [experiment_log.md](docs/experiment_log.md) | Log de experimentos con resultados y decisiones | EC-4 |
 | [	asks.md](openspec/changes/halo-v2-expansion/tasks.md) | 40+ tareas en 7 fases con criterios de verificación | EC-5 |
