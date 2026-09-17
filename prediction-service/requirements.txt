@@ -1,0 +1,25 @@
+# Dependencias del Servicio de Predicción — HALO v2
+# Instalar con: pip install -r requirements.txt
+# Python 3.11+
+
+# Series de Tiempo — Modelos principales
+# prophet==1.1.5         # Comentado temporalmente por límite de rutas largas en Windows
+# pmdarima          # Comentado temporalmente por incompatibilidad de build en Python 3.13==2.0.4          # auto_arima para ARIMA baseline
+
+# Manipulación de datos
+pandas==2.2.2
+numpy>=2.1.0
+
+# Métricas de evaluación
+# Calculadas manualmente con numpy para compatibilidad con Python 3.13==1.4.2      # MAE, RMSE, R²
+
+# Visualización (EDA)
+matplotlib==3.8.4
+seaborn==0.13.2
+
+# Utilidades
+python-dotenv==1.0.1
+
+# Modelos de Series de Tiempo (Sprint 0 — Baselines)
+statsmodels>=0.15.0       # ARIMA, SARIMA, test ADF — puro Python, sin compilacion C++
+scipy>=1.8                # Dependencia de statsmodels

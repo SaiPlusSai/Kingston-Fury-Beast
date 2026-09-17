@@ -1,0 +1,220 @@
+service: urbanshield-backend
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  stage: ${opt:stage, 'dev'}
+  region: ${opt:region, 'us-east-1'}
+  environment:
+    NODE_ENV: production
+    API_PREFIX: /api
+    USE_IN_MEMORY_STORE: "false"
+    DYNAMODB_TABLE_USERS: !Ref UsersTable
+    DYNAMODB_TABLE_REPORTS: !Ref ReportsTable
+    DYNAMODB_TABLE_NOTIFICATIONS: !Ref NotificationsTable
+    DYNAMODB_TABLE_ACTIVITY_LOGS: !Ref ActivityLogsTable
+    DYNAMODB_TABLE_SUPPORT_MESSAGES: !Ref SupportMessagesTable
+    S3_BUCKET_NAME: ${self:custom.s3BucketName}
+    S3_PROFILE_BUCKET_NAME: ${self:custom.profileBucketName}
+    USE_COGNITO: "false"
+    JWT_ACCESS_SECRET: ${env:JWT_ACCESS_SECRET}
+    JWT_REFRESH_SECRET: ${env:JWT_REFRESH_SECRET}
+    JWT_ACCESS_EXPIRES_IN: ${env:JWT_ACCESS_EXPIRES_IN, '15m'}
+    JWT_REFRESH_EXPIRES_IN: ${env:JWT_REFRESH_EXPIRES_IN, '7d'}
+    CORS_ORIGIN: ${env:CORS_ORIGIN, 'http://localhost:5173'}
+    FRONTEND_URL: ${env:FRONTEND_URL, 'http://localhost:5173'}
+    COGNITO_USER_POOL_ID: ${env:COGNITO_USER_POOL_ID, ''}
+    COGNITO_CLIENT_ID: ${env:COGNITO_CLIENT_ID, ''}
+    SNS_TOPIC_EMERGENCY_ALERTS: !Ref EmergencyAlertsTopic
+    LOCATION_MAP_NAME: ${env:LOCATION_MAP_NAME, 'UrbanShieldMap'}
+    LOCATION_PLACE_INDEX: ${env:LOCATION_PLACE_INDEX, 'UrbanShieldPlaceIndex'}
+
+  iam:
+    role:
+      statements:
+        # Permisos para DynamoDB
+        - Effect: Allow
+          Action:
+            - dynamodb:GetItem
+            - dynamodb:PutItem
+            - dynamodb:UpdateItem
+            - dynamodb:DeleteItem
+            - dynamodb:Scan
+            - dynamodb:Query
+          Resource:
+            - !GetAtt UsersTable.Arn
+            - !Sub ${UsersTable.Arn}/index/GSI_Email
+            - !GetAtt ReportsTable.Arn
+            - !GetAtt NotificationsTable.Arn
+            - !GetAtt ActivityLogsTable.Arn
+            - !GetAtt SupportMessagesTable.Arn
+            - !Sub ${SupportMessagesTable.Arn}/index/GSI_StatusCreatedAt
+            - !Sub ${SupportMessagesTable.Arn}/index/GSI_UserIdCreatedAt
+
+        # Permisos para S3 (Subida de fotos vía URL presignada)
+        - Effect: Allow
+          Action:
+            - s3:PutObject
+            - s3:GetObject
+            - s3:DeleteObject
+          Resource:
+            - !Sub arn:aws:s3:::${self:custom.s3BucketName}/*
+            - !Sub arn:aws:s3:::${self:custom.profileBucketName}/*
+
+        # Permisos para SNS (Mensajería)
+        - Effect: Allow
+          Action:
+            - sns:Publish
+          Resource:
+            - !Ref EmergencyAlertsTopic
+
+        # Permisos para Amazon Location Service
+        - Effect: Allow
+          Action:
+            - geo:SearchPlaceIndexForText
+            - geo:GetMapTile
+          Resource: "*"
+
+custom:
+  s3BucketName: urbanshield-uploads-${self:provider.stage}-${aws:accountId}
+  profileBucketName: urbanshield-profile-photos-${self:provider.stage}-${aws:accountId}
+
+functions:
+  api:
+    handler: src/lambda.handler
+    events:
+      - httpApi:
+          method: ANY
+          path: /
+      - httpApi:
+          method: ANY
+          path: /{proxy+}
+
+resources:
+  Resources:
+    # 1. Tabla de Usuarios
+    UsersTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: UrbanShield-Users-${self:provider.stage}
+        BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+          - AttributeName: userId
+            AttributeType: S
+          - AttributeName: email
+            AttributeType: S
+        KeySchema:
+          - AttributeName: userId
+            KeyType: HASH
+        GlobalSecondaryIndexes:
+          - IndexName: GSI_Email
+            KeySchema:
+              - AttributeName: email
+                KeyType: HASH
+            Projection:
+              ProjectionType: ALL
+
+    # 2. Tabla de Reportes
+    ReportsTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: UrbanShield-Reports-${self:provider.stage}
+        BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+          - AttributeName: reportId
+            AttributeType: S
+        KeySchema:
+          - AttributeName: reportId
+            KeyType: HASH
+
+    # 3. Tabla de Notificaciones
+    NotificationsTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: UrbanShield-Notifications-${self:provider.stage}
+        BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+          - AttributeName: notificationId
+            AttributeType: S
+        KeySchema:
+          - AttributeName: notificationId
+            KeyType: HASH
+
+    # 4. Tabla de Auditoría
+    ActivityLogsTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: UrbanShield-ActivityLogs-${self:provider.stage}
+        BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+          - AttributeName: activityId
+            AttributeType: S
+        KeySchema:
+          - AttributeName: activityId
+            KeyType: HASH
+
+    # 5. Tabla de soporte / inbox
+    SupportMessagesTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: UrbanShield-SupportMessages-${self:provider.stage}
+        BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+          - AttributeName: supportMessageId
+            AttributeType: S
+          - AttributeName: userId
+            AttributeType: S
+          - AttributeName: status
+            AttributeType: S
+          - AttributeName: createdAt
+            AttributeType: S
+        KeySchema:
+          - AttributeName: supportMessageId
+            KeyType: HASH
+        GlobalSecondaryIndexes:
+          - IndexName: GSI_StatusCreatedAt
+            KeySchema:
+              - AttributeName: status
+                KeyType: HASH
+              - AttributeName: createdAt
+                KeyType: RANGE
+            Projection:
+              ProjectionType: ALL
+          - IndexName: GSI_UserIdCreatedAt
+            KeySchema:
+              - AttributeName: userId
+                KeyType: HASH
+              - AttributeName: createdAt
+                KeyType: RANGE
+            Projection:
+              ProjectionType: ALL
+
+    # 6. Bucket de S3 para subida de fotos de reportes
+    S3UploadsBucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: ${self:custom.s3BucketName}
+        CorsConfiguration:
+          CorsRules:
+            - AllowedHeaders: ['*']
+              AllowedMethods: [PUT, GET, HEAD]
+              AllowedOrigins: ['*']
+              MaxAge: 3600
+
+    # 7. Bucket de S3 para fotos de perfil
+    S3ProfilePhotosBucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: ${self:custom.profileBucketName}
+        CorsConfiguration:
+          CorsRules:
+            - AllowedHeaders: ['*']
+              AllowedMethods: [PUT, GET, HEAD]
+              AllowedOrigins: ['*']
+              MaxAge: 3600
+
+    # 8. Tema de Amazon SNS para Alertas
+    EmergencyAlertsTopic:
+      Type: AWS::SNS::Topic
+      Properties:
+        TopicName: UrbanShield-EmergencyAlerts-${self:provider.stage}

@@ -50,9 +50,9 @@
 │  1. Comprensión    2. Comprensión    3. Preparación             │
 │  del Negocio       de los Datos      de los Datos               │
 │  ┌──────────┐     ┌──────────┐      ┌──────────┐               │
-│  │problem_  │     │data_eco- │      │transform │               │
-│  │statement │────▶│system.md │─────▶│.py + EDA │               │
-│  │.md       │     │01_eda.py │      │          │               │
+│  │problem_  │     │data_eco- │      │generate_ │               │
+│  │statement │────▶│system.md │─────▶│data.py   │               │
+│  │.md       │     │eda.ipynb │      │          │               │
 │  └──────────┘     └──────────┘      └────┬─────┘               │
 │                                          │                      │
 │  6. Despliegue    5. Evaluación     4. Modelado                 │
@@ -68,10 +68,10 @@
 | Fase | Artefacto(s) | Estado |
 |---|---|:---:|
 | 1. Comprensión del Negocio | [problem_statement.md](docs/problem_statement.md), [product_goal.md](docs/product_goal.md) | ✅ Completo |
-| 2. Comprensión de los Datos | [data_ecosystem.md](docs/data_ecosystem.md), `prediction-service/notebooks/01_eda.py` | ⚠️ Doc lista / Script en desarrollo |
-| 3. Preparación de los Datos | `prediction-service/transform.py` | ⏳ En desarrollo (Sprint 1) |
-| 4. Modelado | `prediction-service/prophet_model.py`, `arima_model.py` | ⏳ En desarrollo (Sprint 1) |
-| 5. Evaluación | `prediction-service/evaluator.py`, [experiment_log.md](docs/experiment_log.md), [baseline.md](docs/baseline.md) | ⚠️ Docs listos / Ejecución en progreso |
+| 2. Comprensión de los Datos | [data_ecosystem.md](docs/data_ecosystem.md), `prediction-service/notebooks/01_eda.ipynb` | ✅ Completo |
+| 3. Preparación de los Datos | `prediction-service/scripts/generate_synthetic_data.py` | ✅ Completo (Dataset Diario y Crudo) |
+| 4. Modelado | `prediction-service/notebooks/02_baseline.ipynb` (Modelos Base) | ✅ Baselines Completos (Prophet Sprint 1) |
+| 5. Evaluación | `prediction-service/evaluator.py`, [experiment_log.md](docs/experiment_log.md), [baseline.md](docs/baseline.md) | ⚠️ Docs listos / Prophet en progreso |
 | 6. Despliegue | Lambda Container Image, EventBridge cron, [Analisis-Security-by-Design.md](docs/Arquitectura%20y%20Seguridad/Seguridad/Analisis-Security-by-Design.md) | ✅ Arquitectura lista / Código en Sprint 2 |
 
 ---
@@ -146,6 +146,132 @@ De acuerdo con el estándar de excelencia exigido en la rúbrica del Elemento de
 2. **Matriz de Intervención Humana:** Cada documento cuenta con registro del responsable humano que validó y modificó el artefacto.
 3. **Cero Datos Sensibles en Prompts:** Ningún secreto, token o dato real se envía a herramientas de IA.
 4. **Apropiación Técnica:** Todos los integrantes comprenden y defienden técnicamente cada decisión sin depender de la IA frente al docente.
+
+---
+
+
+---
+
+## 🚀 Guía de Inicio Rápido y Ejecución Local (Backend y Frontend)
+
+Para reproducir y evaluar el sistema en vivo durante la defensa, sigue este tutorial paso a paso para levantar tanto el **Backend Serverless** como el **Frontend Web**.
+
+### 📋 Prerrequisitos del Entorno
+* **Node.js:** Versión 18.0.0 o superior (`node -v`)
+* **NPM:** Gestor de paquetes incluido con Node (`npm -v`)
+* **Navegador Web:** Chrome, Edge o Firefox moderno
+
+---
+
+### 🟢 1. Iniciar el Backend (`backend_urbanshield`)
+
+El backend está desarrollado en **Node.js + Express** y cuenta con un modo de desarrollo local (**in-memory store**) que permite levantarlo y probarlo al 100% sin requerir credenciales activas de AWS.
+
+#### Paso 1.1: Navegar a la carpeta del backend
+Abre una terminal y colócate en el directorio del backend:
+```bash
+# Si estás en la raíz de los repositorios:
+cd backend_urbanshield
+```
+
+#### Paso 1.2: Configurar las variables de entorno
+Copia la plantilla de variables de entorno:
+```bash
+# En Windows (PowerShell):
+Copy-Item .env.example .env
+
+# En Linux / macOS / Git Bash:
+cp .env.example .env
+```
+> 💡 **Nota de configuración:** El archivo `.env.example` ya viene preconfigurado para desarrollo local con:
+> - `PORT=3000`
+> - `API_PREFIX=/api`
+> - `USE_IN_MEMORY_STORE=true` *(habilita base de datos en memoria para pruebas sin DynamoDB remoto)*
+> - `USE_COGNITO=false` *(habilita autenticación local con JWT y Bcrypt sin Cognito)*
+> - `CORS_ORIGIN=http://localhost:5173` *(permite conexión con el frontend)*
+
+#### Paso 1.3: Instalar dependencias
+```bash
+npm install
+```
+
+#### Paso 1.4: Iniciar el servidor en modo desarrollo
+```bash
+npm run dev
+```
+*(El servidor iniciará mediante `nodemon` escuchando en el puerto 3000).*
+
+#### Paso 1.5: Verificación en vivo del Backend
+* **API Base:** `http://localhost:3000/api`
+* **Documentación Interactiva Swagger / OpenAPI:**  
+  👉 **`http://localhost:3000/api-docs`**  
+  *(Permite probar directamente endpoints de autenticación, creación y listado de incidentes).*
+
+---
+
+### 🔵 2. Iniciar el Frontend (`frontend_urbanshield`)
+
+La aplicación cliente está construida sobre **React 19 + Vite + TailwindCSS v4** y consume los endpoints del backend local.
+
+#### Paso 2.1: Navegar a la carpeta del frontend
+Abre una **segunda terminal** (mantén el backend corriendo en la primera):
+```bash
+# Si estás en la raíz de los repositorios:
+cd frontend_urbanshield
+```
+
+#### Paso 2.2: Configurar las variables de entorno
+Copia la plantilla de variables de entorno:
+```bash
+# En Windows (PowerShell):
+Copy-Item .env.example .env
+
+# En Linux / macOS / Git Bash:
+cp .env.example .env
+```
+Asegúrate de que el archivo `.env` contenga la URL que apunta al backend local:
+```env
+VITE_API_URL=http://localhost:3000/api
+```
+
+#### Paso 2.3: Instalar dependencias
+```bash
+npm install
+```
+
+#### Paso 2.4: Iniciar el servidor de desarrollo Vite
+```bash
+npm run dev
+```
+
+#### Paso 2.5: Verificación en vivo del Frontend
+Abre tu navegador e ingresa a:  
+👉 **`http://localhost:5173`**
+
+---
+
+### 🟣 3. Iniciar el Pipeline de Inteligencia Artificial (Sprint 0)
+
+El módulo de predicción de hotspots tiene un pipeline de ciencia de datos listo para evaluación.
+
+#### Paso 3.1: Entorno Virtual e Instalación
+Abre una terminal en la carpeta del servicio:
+```bash
+cd prediction-service
+pip install -r requirements.txt
+```
+
+#### Paso 3.2: Generar Datos Sintéticos
+El proyecto simula 10,000 incidentes individuales y los agrupa por día para entrenar la IA:
+```bash
+python scripts/generate_synthetic_data.py
+```
+*(Esto generará `synthetic_lapaz_v1.csv` y `synthetic_lapaz_daily.csv` en `data/raw/`)*
+
+#### Paso 3.3: Ejecutar Jupyter Notebooks (EDA y Baselines)
+Hemos preparado dos cuadernos Jupyter interactivos para visualizar los hallazgos:
+1. Abre `notebooks/01_eda.ipynb` (Análisis Exploratorio de Datos) en VS Code y ejecútalo para ver los mapas de calor y distribuciones.
+2. Abre `notebooks/02_baseline.ipynb` (Evaluación de Baselines) en VS Code y ejecútalo para ver cómo se comportan los modelos estacionales básicos frente a la realidad.
 
 ---
 

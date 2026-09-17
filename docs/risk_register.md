@@ -1,4 +1,4 @@
-﻿# Registro de Riesgos — HALO v2
+# Registro de Riesgos — HALO v2
 ## Proyecto Integrador | Taller de Sistemas Inteligentes
 
 > **Propósito:** Registro formal y activo de todos los riesgos técnicos, de datos y de IA identificados. Debe revisarse en cada Sprint Review y actualizarse con el estado real de cada riesgo.
@@ -69,7 +69,7 @@ Si tras ejecutar EXP-001 el MAPE supera el 30% (el doble del umbral):
 
 **Plan A:** Ajustar los parámetros del generador de datos sintéticos para añadir más ruido y menos estacionalidad perfecta.
 
-**Plan B:** Buscar y usar un dataset público de incidentes urbanos (ej. datos abiertos de criminalidad de ciudades latinoamericanas con licencia CC).
+**Plan B:** Buscar y usar un dataset público de incidentes urbanos para La Paz (ej. datos del ONSC - Observatorio Nacional de Seguridad Ciudadana de Bolivia, informes del GAMLP - Gobierno Autónomo Municipal de La Paz, o datos abiertos del INE Bolivia con licencia abierta).
 
 **Plan C (fallback académico):** Documentar el resultado como hallazgo válido. La hipótesis queda rechazada y se analiza por qué Prophet no mejora sobre el baseline con datos sintéticos perfectos.
 
