@@ -67,11 +67,11 @@
 
 | Fase | Artefacto(s) | Estado |
 |---|---|:---:|
-| 1. Comprensión del Negocio | [problem_statement.md](docs/problem_statement.md), [product_goal.md](docs/product_goal.md) | ✅ Completo |
+| 1. Comprensión del Negocio | [problem_statement.md](docs/problem_statement.md), [product_goal.md](docs/product_goal.md), [priorizacion_casos.md](docs/priorizacion_casos.md) | ✅ Completo |
 | 2. Comprensión de los Datos | [data_ecosystem.md](docs/data_ecosystem.md), `prediction-service/notebooks/01_eda.ipynb` | ✅ Completo |
 | 3. Preparación de los Datos | `prediction-service/scripts/generate_synthetic_data.py` | ✅ Completo (Dataset Diario y Crudo) |
-| 4. Modelado | `prediction-service/notebooks/02_baseline.ipynb` (Modelos Base) | ✅ Baselines Completos (Prophet Sprint 1) |
-| 5. Evaluación | `prediction-service/evaluator.py`, [experiment_log.md](docs/experiment_log.md), [baseline.md](docs/baseline.md) | ⚠️ Docs listos / Prophet en progreso |
+| 4. Modelado | `prediction-service/notebooks/02_baseline.ipynb` (Modelos Base) | ✅ Baselines Completos — 4 modelos ejecutados |
+| 5. Evaluación | `prediction-service/output/baseline_comparison.json`, [experiment_log.md](docs/experiment_log.md), [baseline.md](docs/baseline.md) | ✅ Baselines ejecutados con resultados reales / Prophet en Sprint 2 |
 | 6. Despliegue | Lambda Container Image, EventBridge cron, [Analisis-Security-by-Design.md](docs/Arquitectura%20y%20Seguridad/Seguridad/Analisis-Security-by-Design.md) | ✅ Arquitectura lista / Código en Sprint 2 |
 
 ---
@@ -93,10 +93,15 @@ El proyecto cuenta con modelado arquitectónico completo bajo el estándar **C4 
 │ (C4-02)         │ ↳ docs/Arquitectura y Seguridad/C4/C4-02-Contenedores.png            │
 ├─────────────────┼──────────────────────────────────────────────────────────────────────┤
 │ Nivel 3         │ Componentes: Desglose interno del Backend, Chatbot y Módulo de IA.   │
-│ [Ver Diagramas] │ ↳ C4-03-01 Backend  •  C4-03-02 Chatbot  •  C4-03-03 Predicción     │
+│ [Ver Diagramas] │ ↳ C4-03-01-Componentes-Backend.png                                  │
+│                 │ ↳ C4-03-02-Componentes-Chatbot.png                                  │
+│                 │ ↳ C4-03-03-Componentes-Prediccion-IA.png                            │
 ├─────────────────┼──────────────────────────────────────────────────────────────────────┤
 │ Nivel 4         │ Código: Diagramas de clases y estructura interna de controladores.   │
-│ [Ver Diagramas] │ ↳ Core Reportes  •  Chatbot FSM  •  Predicción IA  •  Auth/Seguridad │
+│ [Ver Diagramas] │ ↳ C4-04-01-Codigo-Core-Reportes.png                                 │
+│                 │ ↳ C4-04-02-Codigo-Chatbot.png                                       │
+│                 │ ↳ C4-04-03-Codigo-Prediccion-IA.png                                 │
+│                 │ ↳ C4-04-04-Codigo-Auth-Seguridad-Infra.png                          │
 └─────────────────┴──────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -285,6 +290,7 @@ Kingston-Fury-Beast/                  ← Repositorio central de documentación 
 ├── docs/
 │   ├── problem_statement.md          ← EC-1: Formulación del problema, stakeholders y métricas
 │   ├── product_goal.md               ← EC-1: Product Goal formal
+│   ├── priorizacion_casos.md         ← EC-1: Matriz de priorización y justificación del proyecto
 │   ├── data_ecosystem.md             ← EC-2: Inventario de datos, EDA, pipeline y privacidad
 │   ├── baseline.md                   ← EC-4: 4 modelos de referencia y umbrales Prophet
 │   ├── experiment_log.md             ← EC-4: Log de experimentos (exitosos y fallidos)
@@ -292,16 +298,39 @@ Kingston-Fury-Beast/                  ← Repositorio central de documentación 
 │   ├── declaracion_ia_evidencia_humana.md ← EC-5: Blindaje HITL de uso de IA (Fase 2)
 │   ├── team_charter.md               ← EC-5: Normas del equipo, SLAs y Definition of Done
 │   ├── clickup_estructura.md         ← EC-5: Flujo de trabajo Scrum y trazabilidad
+│   ├── project_context.md            ← Estado vivo del proyecto, changelog y tabla CRISP-ML(Q)
+│   ├── gaps_y_recomendaciones.md     ← Diagnóstico de brechas vs Elementos de Competencia
+│   ├── arquitectura_inicial.md       ← Stack completo, tablas DynamoDB y endpoints existentes
+│   ├── primer_prompt.md              ← 6 prompts pre-escritos para guiar el desarrollo con IA
 │   │
 │   └── Arquitectura y Seguridad/     ← 🏛️ ARQUITECTURA FORMAL Y SEGURIDAD
 │       ├── ADR/                      ← 10 Decisiones de Arquitectura (ADR-001 a ADR-010)
-│       ├── C4/                       ← Diagramas C4 en 4 niveles (Contexto, Contenedores, Componentes, Código)
+│       ├── C4/                       ← Diagramas C4 en 4 niveles
+│       │   ├── C4-01-Contexto.png
+│       │   ├── C4-02-Contenedores.png
+│       │   ├── C4-03-Componentes.png
+│       │   ├── C4-04-Codigo.png
+│       │   ├── Componentes/          ← C4-03-01, C4-03-02, C4-03-03 (Backend, Chatbot, IA)
+│       │   └── Codigo/               ← C4-04-01 a C4-04-04 (Core, Chatbot, IA, Auth)
 │       └── Seguridad/                ← Security by Design y Matriz de Riesgos
+│
+├── backend/                          ← Backend Node.js + Express (modo local in-memory)
+├── frontend/                         ← Frontend React 19 + Vite + TailwindCSS v4
+├── mobile/                           ← App Móvil React Native + Expo (⚠️ Por iniciar)
+│
+├── prediction-service/               ← Pipeline de Ciencia de Datos (Python)
+│   ├── scripts/generate_synthetic_data.py
+│   ├── notebooks/
+│   │   ├── 01_eda.ipynb              ← Análisis Exploratorio de Datos
+│   │   └── 02_baseline.ipynb         ← Evaluación de 4 modelos baseline ✅ Ejecutado
+│   ├── data/raw/                     ← Datasets sintéticos generados
+│   └── output/                       ← Resultados: baseline_comparison.json, gráficas
 │
 ├── openspec/                         ← Especificaciones de Cambios y Ciclo de Vida
 │   └── changes/
 │       └── halo-v2-expansion/
 │           ├── design.md             ← Diseño técnico detallado
+│           ├── proposal.md           ← Propuesta técnica expandida
 │           ├── tasks.md              ← 40+ tareas por fases
 │           └── specs/                ← Especificaciones por módulo (Chatbot, Móvil, Predicción)
 │
@@ -310,4 +339,4 @@ Kingston-Fury-Beast/                  ← Repositorio central de documentación 
 
 ---
 
-*Última actualización: 17/09/2026 | Equipo HALO (Sergio Arias, Alan Flores, Kael Lopez, Christhian Coronel)*
+*Última actualización: 17/09/2026 — Baselines ejecutados, estructura del repo actualizada | Equipo HALO (Sergio Arias, Alan Flores, Kael Lopez, Christhian Coronel)*
