@@ -149,6 +149,107 @@ De acuerdo con el estándar de excelencia exigido en la rúbrica del Elemento de
 
 ---
 
+
+---
+
+## 🚀 Guía de Inicio Rápido y Ejecución Local (Backend y Frontend)
+
+Para reproducir y evaluar el sistema en vivo durante la defensa, sigue este tutorial paso a paso para levantar tanto el **Backend Serverless** como el **Frontend Web**.
+
+### 📋 Prerrequisitos del Entorno
+* **Node.js:** Versión 18.0.0 o superior (`node -v`)
+* **NPM:** Gestor de paquetes incluido con Node (`npm -v`)
+* **Navegador Web:** Chrome, Edge o Firefox moderno
+
+---
+
+### 🟢 1. Iniciar el Backend (`backend_urbanshield`)
+
+El backend está desarrollado en **Node.js + Express** y cuenta con un modo de desarrollo local (**in-memory store**) que permite levantarlo y probarlo al 100% sin requerir credenciales activas de AWS.
+
+#### Paso 1.1: Navegar a la carpeta del backend
+Abre una terminal y colócate en el directorio del backend:
+```bash
+# Si estás en la raíz de los repositorios:
+cd backend_urbanshield
+```
+
+#### Paso 1.2: Configurar las variables de entorno
+Copia la plantilla de variables de entorno:
+```bash
+# En Windows (PowerShell):
+Copy-Item .env.example .env
+
+# En Linux / macOS / Git Bash:
+cp .env.example .env
+```
+> 💡 **Nota de configuración:** El archivo `.env.example` ya viene preconfigurado para desarrollo local con:
+> - `PORT=3000`
+> - `API_PREFIX=/api`
+> - `USE_IN_MEMORY_STORE=true` *(habilita base de datos en memoria para pruebas sin DynamoDB remoto)*
+> - `USE_COGNITO=false` *(habilita autenticación local con JWT y Bcrypt sin Cognito)*
+> - `CORS_ORIGIN=http://localhost:5173` *(permite conexión con el frontend)*
+
+#### Paso 1.3: Instalar dependencias
+```bash
+npm install
+```
+
+#### Paso 1.4: Iniciar el servidor en modo desarrollo
+```bash
+npm run dev
+```
+*(El servidor iniciará mediante `nodemon` escuchando en el puerto 3000).*
+
+#### Paso 1.5: Verificación en vivo del Backend
+* **API Base:** `http://localhost:3000/api`
+* **Documentación Interactiva Swagger / OpenAPI:**  
+  👉 **`http://localhost:3000/api-docs`**  
+  *(Permite probar directamente endpoints de autenticación, creación y listado de incidentes).*
+
+---
+
+### 🔵 2. Iniciar el Frontend (`frontend_urbanshield`)
+
+La aplicación cliente está construida sobre **React 19 + Vite + TailwindCSS v4** y consume los endpoints del backend local.
+
+#### Paso 2.1: Navegar a la carpeta del frontend
+Abre una **segunda terminal** (mantén el backend corriendo en la primera):
+```bash
+# Si estás en la raíz de los repositorios:
+cd frontend_urbanshield
+```
+
+#### Paso 2.2: Configurar las variables de entorno
+Copia la plantilla de variables de entorno:
+```bash
+# En Windows (PowerShell):
+Copy-Item .env.example .env
+
+# En Linux / macOS / Git Bash:
+cp .env.example .env
+```
+Asegúrate de que el archivo `.env` contenga la URL que apunta al backend local:
+```env
+VITE_API_URL=http://localhost:3000/api
+```
+
+#### Paso 2.3: Instalar dependencias
+```bash
+npm install
+```
+
+#### Paso 2.4: Iniciar el servidor de desarrollo Vite
+```bash
+npm run dev
+```
+
+#### Paso 2.5: Verificación en vivo del Frontend
+Abre tu navegador e ingresa a:  
+👉 **`http://localhost:5173`**
+
+---
+
 ## 📁 Estructura del Repositorio
 
 ```
