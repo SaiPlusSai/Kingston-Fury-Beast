@@ -32,16 +32,17 @@ Acciones previas: Intenté empaquetar las librerías en un layer, pero excede el
 Siguiente paso: Pedí ayuda por WhatsApp a Christhian para revisar si podemos usar Container Images (Docker) en Lambda para evitar esto.
 ```
 
-## Reglas de integridad y uso de IA
-- **Herramientas permitidas:** Fomentamos el uso de asistentes como ChatGPT, Claude o GitHub Copilot para acelerar el desarrollo, depurar modelos o pulir documentación.
-- **Privacidad:** Está totalmente prohibido compartir credenciales, URLs de bases de datos o datos sensibles en los prompts de la IA.
-- **Revisión obligatoria:** Copiar y pegar a ciegas es inaceptable. Todo bloque generado por IA debe ser analizado, comprendido y probado localmente por el autor antes de subirlo al repo.
-- **Responsabilidad:** El dueño de la tarea en ClickUp es el responsable final de que el código funcione y sea explicable, sin importar si lo escribió a mano o con asistencia de IA.
+## Reglas de integridad y uso de IA (Fase 2 — Verificación Humana Demostrable)
+- **Protocolo Oficial:** Todo el equipo se rige por el marco documentado en [`declaracion_ia_evidencia_humana.md`](declaracion_ia_evidencia_humana.md).
+- **Herramientas permitidas:** Asistentes como Antigravity (Google DeepMind), Claude o GitHub Copilot para acelerar el desarrollo, depurar modelos o estructurar documentación.
+- **Privacidad y Cero Secretos:** Terminantemente prohibido compartir credenciales, secretos IAM, URLs de bases de datos o PII en los prompts.
+- **Revisión Obligatoria y Auditoría de Alucinaciones:** Copiar y pegar a ciegas es inaceptable. Todo bloque asistido por IA debe ser analizado, contrastado contra la arquitectura (ADRs), corregido y probado localmente por el autor antes de subirlo al repo.
+- **Responsabilidad Individual y Defensa Oral:** El dueño de la tarea en ClickUp asume la autoría completa y debe estar plenamente capacitado para justificar y defender cada decisión técnica ante el docente sin asistencia externa.
 
-## Definition of Done inicial
+## Definition of Done (DoD)
 Para considerar que una tarea pasó de "En progreso" a "Completada", verificamos que:
 1. Satisface las condiciones y criterios de aceptación definidos en ClickUp.
 2. Existe un enlace en la tarea apuntando directamente al Pull Request o commit en GitHub.
 3. El código fue revisado, aprobado y fusionado en GitHub sin exponer datos sensibles.
 4. Si la tarea implica modelos predictivos (Prophet) o el chatbot, estos se ejecutan sin errores locales y devuelven predicciones/respuestas válidas.
-5. Si se utilizó IA intensivamente para la tarea, se declaró su uso en la revisión.
+5. **Declaración y Verificación Humana de IA (Fase 2):** Si se utilizó IA para la tarea, se completó el checklist obligatorio en el PR y se registró la intervención en la Matriz de Verificación Humana.
