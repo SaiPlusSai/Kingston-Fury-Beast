@@ -1,0 +1,231 @@
+{
+  "fecha": "2026-09-17T15:48:55.777458",
+  "resumen": [
+    {
+      "Modelo": "BL-3 Estacional",
+      "MAE": 0.834,
+      "RMSE": 1.036,
+      "MAPE_%": 50.857,
+      "R2": -0.001
+    },
+    {
+      "Modelo": "BL-4 ARIMA(1,1,1)",
+      "MAE": 0.843,
+      "RMSE": 1.06,
+      "MAPE_%": 50.288,
+      "R2": -0.036
+    },
+    {
+      "Modelo": "BL-2 Media Movil 7d",
+      "MAE": 0.922,
+      "RMSE": 1.176,
+      "MAPE_%": 50.098,
+      "R2": -0.247
+    },
+    {
+      "Modelo": "BL-1 Naive",
+      "MAE": 0.856,
+      "RMSE": 1.22,
+      "MAPE_%": 40.115,
+      "R2": -0.387
+    }
+  ],
+  "detalle": [
+    {
+      "model": "BL-1 Naive",
+      "zona": "Centro",
+      "MAE": 1.548,
+      "RMSE": 2.084,
+      "MAPE_%": 47.37,
+      "R2": -1.231
+    },
+    {
+      "model": "BL-2 Media Movil 7d",
+      "zona": "Centro",
+      "MAE": 1.548,
+      "RMSE": 2.084,
+      "MAPE_%": 47.37,
+      "R2": -1.231
+    },
+    {
+      "model": "BL-3 Estacional",
+      "zona": "Centro",
+      "MAE": 1.007,
+      "RMSE": 1.35,
+      "MAPE_%": 51.2,
+      "R2": 0.063
+    },
+    {
+      "model": "BL-4 ARIMA(1,1,1)",
+      "zona": "Centro",
+      "MAE": 1.067,
+      "RMSE": 1.426,
+      "MAPE_%": 50.97,
+      "R2": -0.045
+    },
+    {
+      "model": "BL-1 Naive",
+      "zona": "Cotahuma",
+      "MAE": 0.808,
+      "RMSE": 1.104,
+      "MAPE_%": 53.65,
+      "R2": -0.004
+    },
+    {
+      "model": "BL-2 Media Movil 7d",
+      "zona": "Cotahuma",
+      "MAE": 0.861,
+      "RMSE": 1.159,
+      "MAPE_%": 44.8,
+      "R2": -0.107
+    },
+    {
+      "model": "BL-3 Estacional",
+      "zona": "Cotahuma",
+      "MAE": 0.828,
+      "RMSE": 1.078,
+      "MAPE_%": 49.79,
+      "R2": 0.044
+    },
+    {
+      "model": "BL-4 ARIMA(1,1,1)",
+      "zona": "Cotahuma",
+      "MAE": 0.839,
+      "RMSE": 1.117,
+      "MAPE_%": 48.38,
+      "R2": -0.028
+    },
+    {
+      "model": "BL-1 Naive",
+      "zona": "Max Paredes",
+      "MAE": 1.014,
+      "RMSE": 1.324,
+      "MAPE_%": 54.06,
+      "R2": -0.036
+    },
+    {
+      "model": "BL-2 Media Movil 7d",
+      "zona": "Max Paredes",
+      "MAE": 1.194,
+      "RMSE": 1.341,
+      "MAPE_%": 78.51,
+      "R2": -0.062
+    },
+    {
+      "model": "BL-3 Estacional",
+      "zona": "Max Paredes",
+      "MAE": 1.112,
+      "RMSE": 1.275,
+      "MAPE_%": 72.19,
+      "R2": 0.04
+    },
+    {
+      "model": "BL-4 ARIMA(1,1,1)",
+      "zona": "Max Paredes",
+      "MAE": 1.203,
+      "RMSE": 1.349,
+      "MAPE_%": 79.85,
+      "R2": -0.075
+    },
+    {
+      "model": "BL-1 Naive",
+      "zona": "Periférica",
+      "MAE": 0.671,
+      "RMSE": 0.944,
+      "MAPE_%": 41.55,
+      "R2": -0.002
+    },
+    {
+      "model": "BL-2 Media Movil 7d",
+      "zona": "Periférica",
+      "MAE": 0.671,
+      "RMSE": 0.944,
+      "MAPE_%": 41.55,
+      "R2": -0.002
+    },
+    {
+      "model": "BL-3 Estacional",
+      "zona": "Periférica",
+      "MAE": 0.805,
+      "RMSE": 0.996,
+      "MAPE_%": 46.63,
+      "R2": -0.117
+    },
+    {
+      "model": "BL-4 ARIMA(1,1,1)",
+      "zona": "Periférica",
+      "MAE": 0.709,
+      "RMSE": 0.954,
+      "MAPE_%": 41.32,
+      "R2": -0.023
+    },
+    {
+      "model": "BL-1 Naive",
+      "zona": "San Antonio",
+      "MAE": 0.685,
+      "RMSE": 1.085,
+      "MAPE_%": 26.71,
+      "R2": -0.662
+    },
+    {
+      "model": "BL-2 Media Movil 7d",
+      "zona": "San Antonio",
+      "MAE": 0.744,
+      "RMSE": 0.859,
+      "MAPE_%": 55.48,
+      "R2": -0.042
+    },
+    {
+      "model": "BL-3 Estacional",
+      "zona": "San Antonio",
+      "MAE": 0.714,
+      "RMSE": 0.87,
+      "MAPE_%": 47.93,
+      "R2": -0.068
+    },
+    {
+      "model": "BL-4 ARIMA(1,1,1)",
+      "zona": "San Antonio",
+      "MAE": 0.731,
+      "RMSE": 0.842,
+      "MAPE_%": 49.13,
+      "R2": -0.001
+    },
+    {
+      "model": "BL-1 Naive",
+      "zona": "Sur",
+      "MAE": 0.411,
+      "RMSE": 0.776,
+      "MAPE_%": 17.35,
+      "R2": -0.389
+    },
+    {
+      "model": "BL-2 Media Movil 7d",
+      "zona": "Sur",
+      "MAE": 0.517,
+      "RMSE": 0.67,
+      "MAPE_%": 32.88,
+      "R2": -0.036
+    },
+    {
+      "model": "BL-3 Estacional",
+      "zona": "Sur",
+      "MAE": 0.536,
+      "RMSE": 0.648,
+      "MAPE_%": 37.4,
+      "R2": 0.031
+    },
+    {
+      "model": "BL-4 ARIMA(1,1,1)",
+      "zona": "Sur",
+      "MAE": 0.511,
+      "RMSE": 0.673,
+      "MAPE_%": 32.08,
+      "R2": -0.045
+    }
+  ],
+  "umbral_prophet": {
+    "RMSE_objetivo": 0.829,
+    "descripcion": "20% de mejora sobre el mejor baseline"
+  }
+}
