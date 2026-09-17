@@ -1,0 +1,25 @@
+model,zona,MAE,RMSE,MAPE_%,R2
+BL-1 Naive,Centro,1.548,2.084,47.37,-1.231
+BL-2 Media Movil 7d,Centro,1.548,2.084,47.37,-1.231
+BL-3 Estacional,Centro,1.007,1.35,51.2,0.063
+"BL-4 ARIMA(1,1,1)",Centro,1.067,1.426,50.97,-0.045
+BL-1 Naive,Cotahuma,0.808,1.104,53.65,-0.004
+BL-2 Media Movil 7d,Cotahuma,0.861,1.159,44.8,-0.107
+BL-3 Estacional,Cotahuma,0.828,1.078,49.79,0.044
+"BL-4 ARIMA(1,1,1)",Cotahuma,0.839,1.117,48.38,-0.028
+BL-1 Naive,Max Paredes,1.014,1.324,54.06,-0.036
+BL-2 Media Movil 7d,Max Paredes,1.194,1.341,78.51,-0.062
+BL-3 Estacional,Max Paredes,1.112,1.275,72.19,0.04
+"BL-4 ARIMA(1,1,1)",Max Paredes,1.203,1.349,79.85,-0.075
+BL-1 Naive,Periférica,0.671,0.944,41.55,-0.002
+BL-2 Media Movil 7d,Periférica,0.671,0.944,41.55,-0.002
+BL-3 Estacional,Periférica,0.805,0.996,46.63,-0.117
+"BL-4 ARIMA(1,1,1)",Periférica,0.709,0.954,41.32,-0.023
+BL-1 Naive,San Antonio,0.685,1.085,26.71,-0.662
+BL-2 Media Movil 7d,San Antonio,0.744,0.859,55.48,-0.042
+BL-3 Estacional,San Antonio,0.714,0.87,47.93,-0.068
+"BL-4 ARIMA(1,1,1)",San Antonio,0.731,0.842,49.13,-0.001
+BL-1 Naive,Sur,0.411,0.776,17.35,-0.389
+BL-2 Media Movil 7d,Sur,0.517,0.67,32.88,-0.036
+BL-3 Estacional,Sur,0.536,0.648,37.4,0.031
+"BL-4 ARIMA(1,1,1)",Sur,0.511,0.673,32.08,-0.045

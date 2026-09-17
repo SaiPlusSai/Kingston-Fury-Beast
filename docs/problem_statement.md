@@ -7,7 +7,7 @@
 
 ## 1. Contexto del Problema
 
-Las ciudades latinoamericanas enfrentan una brecha crítica en la gestión de emergencias e incidentes urbanos: los ciudadanos no tienen canales eficientes para reportar incidentes, las autoridades carecen de visibilidad en tiempo real del estado de los reportes, y los administradores toman decisiones reactivas en lugar de preventivas porque no existen herramientas que anticipen dónde ocurrirán los próximos incidentes.
+La ciudad de **La Paz (Bolivia)**, con sus macrodistritos urbanos (Centro, Sur, Cotahuma, Max Paredes, Periférica, San Antonio y Mallasa), enfrenta una brecha crítica en la gestión de emergencias e incidentes urbanos: los ciudadanos no tienen canales eficientes para reportar incidentes, las autoridades carecen de visibilidad en tiempo real del estado de los reportes, y los administradores toman decisiones reactivas en lugar de preventivas porque no existen herramientas que anticipen dónde ocurrirán los próximos incidentes dentro del territorio municipal paceño.
 
 La plataforma **HALO (Urban Shield)** ya resuelve la gestión básica de incidentes mediante una aplicación web (React 19) y un backend serverless en AWS (Node.js/Express en Lambda). Sin embargo, la plataforma presenta tres limitaciones funcionales y operativas que este proyecto integrador aborda:
 

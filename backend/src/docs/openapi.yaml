@@ -1,0 +1,54 @@
+openapi: 3.0.3
+info:
+  title: UrbanShield API
+  version: 1.0.0
+  description: Smart-city emergency reporting REST API
+
+paths:
+  /auth/register:
+    post:
+      tags: [Auth]
+      summary: Register a new citizen account
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password, name]
+              properties:
+                email: { type: string, format: email }
+                password: { type: string, minLength: 8 }
+                name: { type: string }
+      responses:
+        '201':
+          description: User registered
+
+  /auth/login:
+    post:
+      tags: [Auth]
+      summary: Login and receive JWT tokens
+      security: []
+      responses:
+        '200':
+          description: Login successful
+
+  /reports:
+    get:
+      tags: [Reports]
+      summary: List reports with filters and pagination
+      security:
+        - bearerAuth: []
+    post:
+      tags: [Reports]
+      summary: Create a new incident report
+      security:
+        - bearerAuth: []
+
+  /admin/dashboard:
+    get:
+      tags: [Admin]
+      summary: Admin dashboard analytics
+      security:
+        - bearerAuth: []

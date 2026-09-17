@@ -1,0 +1,1989 @@
+{
+  "D:\\KEVIN\\Proyectos\\UrbanShield\\backend_urbanshield\\serverless.yml": {
+    "versionFramework": "4.36.1",
+    "servicePath": "D:\\KEVIN\\Proyectos\\UrbanShield\\backend_urbanshield\\serverless.yml",
+    "serviceConfigFileName": "serverless.yml",
+    "service": {
+      "service": "urbanshield-backend",
+      "provider": {
+        "name": "aws",
+        "runtime": "nodejs18.x",
+        "stage": "dev",
+        "region": "us-east-1",
+        "environment": {
+          "NODE_ENV": "production",
+          "API_PREFIX": "/api",
+          "USE_IN_MEMORY_STORE": "false",
+          "DYNAMODB_TABLE_USERS": {
+            "Ref": "UsersTable"
+          },
+          "DYNAMODB_TABLE_REPORTS": {
+            "Ref": "ReportsTable"
+          },
+          "DYNAMODB_TABLE_NOTIFICATIONS": {
+            "Ref": "NotificationsTable"
+          },
+          "DYNAMODB_TABLE_ACTIVITY_LOGS": {
+            "Ref": "ActivityLogsTable"
+          },
+          "S3_BUCKET_NAME": "urbanshield-uploads-dev-130063747200",
+          "USE_COGNITO": "true",
+          "COGNITO_USER_POOL_ID": "us-east-1_yjkCu1mIv",
+          "COGNITO_CLIENT_ID": "5mscvi0k161ouut5ph5g4jnm4v",
+          "SNS_TOPIC_EMERGENCY_ALERTS": {
+            "Ref": "EmergencyAlertsTopic"
+          },
+          "LOCATION_MAP_NAME": "UrbanShieldMap",
+          "LOCATION_PLACE_INDEX": "UrbanShieldPlaceIndex"
+        },
+        "iam": {
+          "role": {
+            "statements": [
+              {
+                "Effect": "Allow",
+                "Action": [
+                  "dynamodb:GetItem",
+                  "dynamodb:PutItem",
+                  "dynamodb:UpdateItem",
+                  "dynamodb:DeleteItem",
+                  "dynamodb:Scan",
+                  "dynamodb:Query"
+                ],
+                "Resource": [
+                  {
+                    "Fn::GetAtt": [
+                      "UsersTable",
+                      "Arn"
+                    ]
+                  },
+                  {
+                    "Fn::Sub": "${UsersTable.Arn}/index/GSI_Email"
+                  },
+                  {
+                    "Fn::GetAtt": [
+                      "ReportsTable",
+                      "Arn"
+                    ]
+                  },
+                  {
+                    "Fn::GetAtt": [
+                      "NotificationsTable",
+                      "Arn"
+                    ]
+                  },
+                  {
+                    "Fn::GetAtt": [
+                      "ActivityLogsTable",
+                      "Arn"
+                    ]
+                  }
+                ]
+              },
+              {
+                "Effect": "Allow",
+                "Action": [
+                  "s3:PutObject",
+                  "s3:GetObject",
+                  "s3:DeleteObject"
+                ],
+                "Resource": [
+                  {
+                    "Fn::Sub": "arn:aws:s3:::urbanshield-uploads-dev-130063747200/*"
+                  }
+                ]
+              },
+              {
+                "Effect": "Allow",
+                "Action": [
+                  "sns:Publish"
+                ],
+                "Resource": [
+                  {
+                    "Ref": "EmergencyAlertsTopic"
+                  }
+                ]
+              },
+              {
+                "Effect": "Allow",
+                "Action": [
+                  "geo:SearchPlaceIndexForText",
+                  "geo:GetMapTile"
+                ],
+                "Resource": "*"
+              }
+            ]
+          }
+        },
+        "versionFunctions": true,
+        "compiledCloudFormationTemplate": {
+          "AWSTemplateFormatVersion": "2010-09-09",
+          "Description": "The AWS CloudFormation template for this Serverless application",
+          "Resources": {
+            "ApiLogGroup": {
+              "Type": "AWS::Logs::LogGroup",
+              "Properties": {
+                "LogGroupName": "/aws/lambda/urbanshield-backend-dev-api"
+              }
+            },
+            "IamRoleLambdaExecution": {
+              "Type": "AWS::IAM::Role",
+              "Properties": {
+                "AssumeRolePolicyDocument": {
+                  "Version": "2012-10-17",
+                  "Statement": [
+                    {
+                      "Effect": "Allow",
+                      "Principal": {
+                        "Service": [
+                          "lambda.amazonaws.com"
+                        ]
+                      },
+                      "Action": [
+                        "sts:AssumeRole"
+                      ]
+                    }
+                  ]
+                },
+                "Policies": [
+                  {
+                    "PolicyName": {
+                      "Fn::Join": [
+                        "-",
+                        [
+                          "urbanshield-backend",
+                          "dev",
+                          "lambda"
+                        ]
+                      ]
+                    },
+                    "PolicyDocument": {
+                      "Version": "2012-10-17",
+                      "Statement": [
+                        {
+                          "Effect": "Allow",
+                          "Action": [
+                            "logs:CreateLogStream",
+                            "logs:CreateLogGroup",
+                            "logs:TagResource"
+                          ],
+                          "Resource": [
+                            {
+                              "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/urbanshield-backend-dev*:*"
+                            }
+                          ]
+                        },
+                        {
+                          "Effect": "Allow",
+                          "Action": [
+                            "logs:PutLogEvents"
+                          ],
+                          "Resource": [
+                            {
+                              "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/urbanshield-backend-dev*:*:*"
+                            }
+                          ]
+                        },
+                        {
+                          "Effect": "Allow",
+                          "Action": [
+                            "dynamodb:GetItem",
+                            "dynamodb:PutItem",
+                            "dynamodb:UpdateItem",
+                            "dynamodb:DeleteItem",
+                            "dynamodb:Scan",
+                            "dynamodb:Query"
+                          ],
+                          "Resource": [
+                            {
+                              "Fn::GetAtt": [
+                                "UsersTable",
+                                "Arn"
+                              ]
+                            },
+                            {
+                              "Fn::Sub": "${UsersTable.Arn}/index/GSI_Email"
+                            },
+                            {
+                              "Fn::GetAtt": [
+                                "ReportsTable",
+                                "Arn"
+                              ]
+                            },
+                            {
+                              "Fn::GetAtt": [
+                                "NotificationsTable",
+                                "Arn"
+                              ]
+                            },
+                            {
+                              "Fn::GetAtt": [
+                                "ActivityLogsTable",
+                                "Arn"
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "Effect": "Allow",
+                          "Action": [
+                            "s3:PutObject",
+                            "s3:GetObject",
+                            "s3:DeleteObject"
+                          ],
+                          "Resource": [
+                            {
+                              "Fn::Sub": "arn:aws:s3:::urbanshield-uploads-dev-130063747200/*"
+                            }
+                          ]
+                        },
+                        {
+                          "Effect": "Allow",
+                          "Action": [
+                            "sns:Publish"
+                          ],
+                          "Resource": [
+                            {
+                              "Ref": "EmergencyAlertsTopic"
+                            }
+                          ]
+                        },
+                        {
+                          "Effect": "Allow",
+                          "Action": [
+                            "geo:SearchPlaceIndexForText",
+                            "geo:GetMapTile"
+                          ],
+                          "Resource": "*"
+                        }
+                      ]
+                    }
+                  }
+                ],
+                "Path": "/",
+                "RoleName": {
+                  "Fn::Join": [
+                    "-",
+                    [
+                      "urbanshield-backend",
+                      "dev",
+                      {
+                        "Ref": "AWS::Region"
+                      },
+                      "lambdaRole"
+                    ]
+                  ]
+                }
+              }
+            },
+            "ApiLambdaFunction": {
+              "Type": "AWS::Lambda::Function",
+              "Properties": {
+                "Code": {
+                  "S3Bucket": "serverless-framework-deployments-us-east-1-f1edc59a-2296",
+                  "S3Key": "serverless/urbanshield-backend/dev/1779135428736-2026-05-18T20:17:08.736Z/urbanshield-backend.zip"
+                },
+                "Handler": "src/lambda.handler",
+                "Runtime": "nodejs18.x",
+                "FunctionName": "urbanshield-backend-dev-api",
+                "MemorySize": 1024,
+                "Timeout": 6,
+                "Environment": {
+                  "Variables": {
+                    "NODE_ENV": "production",
+                    "API_PREFIX": "/api",
+                    "USE_IN_MEMORY_STORE": "false",
+                    "DYNAMODB_TABLE_USERS": {
+                      "Ref": "UsersTable"
+                    },
+                    "DYNAMODB_TABLE_REPORTS": {
+                      "Ref": "ReportsTable"
+                    },
+                    "DYNAMODB_TABLE_NOTIFICATIONS": {
+                      "Ref": "NotificationsTable"
+                    },
+                    "DYNAMODB_TABLE_ACTIVITY_LOGS": {
+                      "Ref": "ActivityLogsTable"
+                    },
+                    "S3_BUCKET_NAME": "urbanshield-uploads-dev-130063747200",
+                    "USE_COGNITO": "true",
+                    "COGNITO_USER_POOL_ID": "us-east-1_yjkCu1mIv",
+                    "COGNITO_CLIENT_ID": "5mscvi0k161ouut5ph5g4jnm4v",
+                    "SNS_TOPIC_EMERGENCY_ALERTS": {
+                      "Ref": "EmergencyAlertsTopic"
+                    },
+                    "LOCATION_MAP_NAME": "UrbanShieldMap",
+                    "LOCATION_PLACE_INDEX": "UrbanShieldPlaceIndex"
+                  }
+                },
+                "Role": {
+                  "Fn::GetAtt": [
+                    "IamRoleLambdaExecution",
+                    "Arn"
+                  ]
+                }
+              },
+              "DependsOn": [
+                "ApiLogGroup"
+              ]
+            },
+            "ApiLambdaVersion2KyI1l23jwkUzOnYjSnxKAT1brWUCg59nG9jDCwbhrU": {
+              "Type": "AWS::Lambda::Version",
+              "DeletionPolicy": "Retain",
+              "Properties": {
+                "FunctionName": {
+                  "Ref": "ApiLambdaFunction"
+                },
+                "CodeSha256": "Lv7Zdd5sqKGlMmR3ALwcMD9T0kU89/BQr4RrTpzaXnU="
+              }
+            },
+            "HttpApi": {
+              "Type": "AWS::ApiGatewayV2::Api",
+              "Properties": {
+                "Name": "dev-urbanshield-backend",
+                "ProtocolType": "HTTP"
+              }
+            },
+            "HttpApiStage": {
+              "Type": "AWS::ApiGatewayV2::Stage",
+              "Properties": {
+                "ApiId": {
+                  "Ref": "HttpApi"
+                },
+                "StageName": "$default",
+                "AutoDeploy": true,
+                "DefaultRouteSettings": {
+                  "DetailedMetricsEnabled": false
+                }
+              }
+            },
+            "ApiLambdaPermissionHttpApi": {
+              "Type": "AWS::Lambda::Permission",
+              "Properties": {
+                "FunctionName": {
+                  "Fn::GetAtt": [
+                    "ApiLambdaFunction",
+                    "Arn"
+                  ]
+                },
+                "Action": "lambda:InvokeFunction",
+                "Principal": "apigateway.amazonaws.com",
+                "SourceArn": {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition"
+                      },
+                      ":execute-api:",
+                      {
+                        "Ref": "AWS::Region"
+                      },
+                      ":",
+                      {
+                        "Ref": "AWS::AccountId"
+                      },
+                      ":",
+                      {
+                        "Ref": "HttpApi"
+                      },
+                      "/*"
+                    ]
+                  ]
+                }
+              }
+            },
+            "HttpApiIntegrationApi": {
+              "Type": "AWS::ApiGatewayV2::Integration",
+              "Properties": {
+                "ApiId": {
+                  "Ref": "HttpApi"
+                },
+                "IntegrationType": "AWS_PROXY",
+                "IntegrationUri": {
+                  "Fn::GetAtt": [
+                    "ApiLambdaFunction",
+                    "Arn"
+                  ]
+                },
+                "PayloadFormatVersion": "2.0",
+                "TimeoutInMillis": 30000
+              }
+            },
+            "HttpApiRouteAny": {
+              "Type": "AWS::ApiGatewayV2::Route",
+              "Properties": {
+                "ApiId": {
+                  "Ref": "HttpApi"
+                },
+                "RouteKey": "ANY /",
+                "Target": {
+                  "Fn::Join": [
+                    "/",
+                    [
+                      "integrations",
+                      {
+                        "Ref": "HttpApiIntegrationApi"
+                      }
+                    ]
+                  ]
+                }
+              },
+              "DependsOn": "HttpApiIntegrationApi"
+            },
+            "HttpApiRouteAnyProxyVar": {
+              "Type": "AWS::ApiGatewayV2::Route",
+              "Properties": {
+                "ApiId": {
+                  "Ref": "HttpApi"
+                },
+                "RouteKey": "ANY /{proxy+}",
+                "Target": {
+                  "Fn::Join": [
+                    "/",
+                    [
+                      "integrations",
+                      {
+                        "Ref": "HttpApiIntegrationApi"
+                      }
+                    ]
+                  ]
+                }
+              },
+              "DependsOn": "HttpApiIntegrationApi"
+            },
+            "UsersTable": {
+              "Type": "AWS::DynamoDB::Table",
+              "Properties": {
+                "TableName": "UrbanShield-Users-dev",
+                "BillingMode": "PAY_PER_REQUEST",
+                "AttributeDefinitions": [
+                  {
+                    "AttributeName": "userId",
+                    "AttributeType": "S"
+                  },
+                  {
+                    "AttributeName": "email",
+                    "AttributeType": "S"
+                  }
+                ],
+                "KeySchema": [
+                  {
+                    "AttributeName": "userId",
+                    "KeyType": "HASH"
+                  }
+                ],
+                "GlobalSecondaryIndexes": [
+                  {
+                    "IndexName": "GSI_Email",
+                    "KeySchema": [
+                      {
+                        "AttributeName": "email",
+                        "KeyType": "HASH"
+                      }
+                    ],
+                    "Projection": {
+                      "ProjectionType": "ALL"
+                    }
+                  }
+                ]
+              }
+            },
+            "ReportsTable": {
+              "Type": "AWS::DynamoDB::Table",
+              "Properties": {
+                "TableName": "UrbanShield-Reports-dev",
+                "BillingMode": "PAY_PER_REQUEST",
+                "AttributeDefinitions": [
+                  {
+                    "AttributeName": "reportId",
+                    "AttributeType": "S"
+                  }
+                ],
+                "KeySchema": [
+                  {
+                    "AttributeName": "reportId",
+                    "KeyType": "HASH"
+                  }
+                ]
+              }
+            },
+            "NotificationsTable": {
+              "Type": "AWS::DynamoDB::Table",
+              "Properties": {
+                "TableName": "UrbanShield-Notifications-dev",
+                "BillingMode": "PAY_PER_REQUEST",
+                "AttributeDefinitions": [
+                  {
+                    "AttributeName": "notificationId",
+                    "AttributeType": "S"
+                  }
+                ],
+                "KeySchema": [
+                  {
+                    "AttributeName": "notificationId",
+                    "KeyType": "HASH"
+                  }
+                ]
+              }
+            },
+            "ActivityLogsTable": {
+              "Type": "AWS::DynamoDB::Table",
+              "Properties": {
+                "TableName": "UrbanShield-ActivityLogs-dev",
+                "BillingMode": "PAY_PER_REQUEST",
+                "AttributeDefinitions": [
+                  {
+                    "AttributeName": "logId",
+                    "AttributeType": "S"
+                  }
+                ],
+                "KeySchema": [
+                  {
+                    "AttributeName": "logId",
+                    "KeyType": "HASH"
+                  }
+                ]
+              }
+            },
+            "S3UploadsBucket": {
+              "Type": "AWS::S3::Bucket",
+              "Properties": {
+                "BucketName": "urbanshield-uploads-dev-130063747200",
+                "CorsConfiguration": {
+                  "CorsRules": [
+                    {
+                      "AllowedHeaders": [
+                        "*"
+                      ],
+                      "AllowedMethods": [
+                        "PUT",
+                        "GET",
+                        "HEAD"
+                      ],
+                      "AllowedOrigins": [
+                        "*"
+                      ],
+                      "MaxAge": 3600
+                    }
+                  ]
+                }
+              }
+            },
+            "EmergencyAlertsTopic": {
+              "Type": "AWS::SNS::Topic",
+              "Properties": {
+                "TopicName": "UrbanShield-EmergencyAlerts-dev"
+              }
+            }
+          },
+          "Outputs": {
+            "ServerlessDeploymentBucketName": {
+              "Value": "serverless-framework-deployments-us-east-1-f1edc59a-2296",
+              "Export": {
+                "Name": "sls-urbanshield-backend-dev-ServerlessDeploymentBucketName"
+              }
+            },
+            "ApiLambdaFunctionQualifiedArn": {
+              "Description": "Current Lambda function version",
+              "Value": {
+                "Ref": "ApiLambdaVersion2KyI1l23jwkUzOnYjSnxKAT1brWUCg59nG9jDCwbhrU"
+              },
+              "Export": {
+                "Name": "sls-urbanshield-backend-dev-ApiLambdaFunctionQualifiedArn"
+              }
+            },
+            "HttpApiId": {
+              "Description": "Id of the HTTP API",
+              "Value": {
+                "Ref": "HttpApi"
+              },
+              "Export": {
+                "Name": "sls-urbanshield-backend-dev-HttpApiId"
+              }
+            },
+            "HttpApiUrl": {
+              "Description": "URL of the HTTP API",
+              "Value": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "https://",
+                    {
+                      "Ref": "HttpApi"
+                    },
+                    ".execute-api.",
+                    {
+                      "Ref": "AWS::Region"
+                    },
+                    ".",
+                    {
+                      "Ref": "AWS::URLSuffix"
+                    }
+                  ]
+                ]
+              },
+              "Export": {
+                "Name": "sls-urbanshield-backend-dev-HttpApiUrl"
+              }
+            }
+          }
+        },
+        "vpc": {}
+      },
+      "custom": {
+        "s3BucketName": "urbanshield-uploads-dev-130063747200"
+      },
+      "functions": {
+        "api": {
+          "handler": "src/lambda.handler",
+          "events": [
+            {
+              "httpApi": {
+                "method": "ANY",
+                "path": "/"
+              },
+              "resolvedMethod": "ANY",
+              "resolvedPath": "/"
+            },
+            {
+              "httpApi": {
+                "method": "ANY",
+                "path": "/{proxy+}"
+              },
+              "resolvedMethod": "ANY",
+              "resolvedPath": "/{proxy+}"
+            }
+          ],
+          "name": "urbanshield-backend-dev-api",
+          "package": {},
+          "memory": 1024,
+          "timeout": 6,
+          "runtime": "nodejs18.x",
+          "vpc": {},
+          "versionLogicalId": "ApiLambdaVersion2KyI1l23jwkUzOnYjSnxKAT1brWUCg59nG9jDCwbhrU"
+        }
+      },
+      "resources": {
+        "Resources": {
+          "UsersTable": {
+            "Type": "AWS::DynamoDB::Table",
+            "Properties": {
+              "TableName": "UrbanShield-Users-dev",
+              "BillingMode": "PAY_PER_REQUEST",
+              "AttributeDefinitions": [
+                {
+                  "AttributeName": "userId",
+                  "AttributeType": "S"
+                },
+                {
+                  "AttributeName": "email",
+                  "AttributeType": "S"
+                }
+              ],
+              "KeySchema": [
+                {
+                  "AttributeName": "userId",
+                  "KeyType": "HASH"
+                }
+              ],
+              "GlobalSecondaryIndexes": [
+                {
+                  "IndexName": "GSI_Email",
+                  "KeySchema": [
+                    {
+                      "AttributeName": "email",
+                      "KeyType": "HASH"
+                    }
+                  ],
+                  "Projection": {
+                    "ProjectionType": "ALL"
+                  }
+                }
+              ]
+            }
+          },
+          "ReportsTable": {
+            "Type": "AWS::DynamoDB::Table",
+            "Properties": {
+              "TableName": "UrbanShield-Reports-dev",
+              "BillingMode": "PAY_PER_REQUEST",
+              "AttributeDefinitions": [
+                {
+                  "AttributeName": "reportId",
+                  "AttributeType": "S"
+                }
+              ],
+              "KeySchema": [
+                {
+                  "AttributeName": "reportId",
+                  "KeyType": "HASH"
+                }
+              ]
+            }
+          },
+          "NotificationsTable": {
+            "Type": "AWS::DynamoDB::Table",
+            "Properties": {
+              "TableName": "UrbanShield-Notifications-dev",
+              "BillingMode": "PAY_PER_REQUEST",
+              "AttributeDefinitions": [
+                {
+                  "AttributeName": "notificationId",
+                  "AttributeType": "S"
+                }
+              ],
+              "KeySchema": [
+                {
+                  "AttributeName": "notificationId",
+                  "KeyType": "HASH"
+                }
+              ]
+            }
+          },
+          "ActivityLogsTable": {
+            "Type": "AWS::DynamoDB::Table",
+            "Properties": {
+              "TableName": "UrbanShield-ActivityLogs-dev",
+              "BillingMode": "PAY_PER_REQUEST",
+              "AttributeDefinitions": [
+                {
+                  "AttributeName": "logId",
+                  "AttributeType": "S"
+                }
+              ],
+              "KeySchema": [
+                {
+                  "AttributeName": "logId",
+                  "KeyType": "HASH"
+                }
+              ]
+            }
+          },
+          "S3UploadsBucket": {
+            "Type": "AWS::S3::Bucket",
+            "Properties": {
+              "BucketName": "urbanshield-uploads-dev-130063747200",
+              "CorsConfiguration": {
+                "CorsRules": [
+                  {
+                    "AllowedHeaders": [
+                      "*"
+                    ],
+                    "AllowedMethods": [
+                      "PUT",
+                      "GET",
+                      "HEAD"
+                    ],
+                    "AllowedOrigins": [
+                      "*"
+                    ],
+                    "MaxAge": 3600
+                  }
+                ]
+              }
+            }
+          },
+          "EmergencyAlertsTopic": {
+            "Type": "AWS::SNS::Topic",
+            "Properties": {
+              "TopicName": "UrbanShield-EmergencyAlerts-dev"
+            }
+          }
+        },
+        "Outputs": {}
+      }
+    },
+    "provider": {
+      "name": "aws",
+      "runtime": "nodejs18.x",
+      "stage": "dev",
+      "region": "us-east-1",
+      "environment": {
+        "NODE_ENV": "production",
+        "API_PREFIX": "/api",
+        "USE_IN_MEMORY_STORE": "false",
+        "DYNAMODB_TABLE_USERS": {
+          "Ref": "UsersTable"
+        },
+        "DYNAMODB_TABLE_REPORTS": {
+          "Ref": "ReportsTable"
+        },
+        "DYNAMODB_TABLE_NOTIFICATIONS": {
+          "Ref": "NotificationsTable"
+        },
+        "DYNAMODB_TABLE_ACTIVITY_LOGS": {
+          "Ref": "ActivityLogsTable"
+        },
+        "S3_BUCKET_NAME": "urbanshield-uploads-dev-130063747200",
+        "USE_COGNITO": "true",
+        "COGNITO_USER_POOL_ID": "us-east-1_yjkCu1mIv",
+        "COGNITO_CLIENT_ID": "5mscvi0k161ouut5ph5g4jnm4v",
+        "SNS_TOPIC_EMERGENCY_ALERTS": {
+          "Ref": "EmergencyAlertsTopic"
+        },
+        "LOCATION_MAP_NAME": "UrbanShieldMap",
+        "LOCATION_PLACE_INDEX": "UrbanShieldPlaceIndex"
+      },
+      "iam": {
+        "role": {
+          "statements": [
+            {
+              "Effect": "Allow",
+              "Action": [
+                "dynamodb:GetItem",
+                "dynamodb:PutItem",
+                "dynamodb:UpdateItem",
+                "dynamodb:DeleteItem",
+                "dynamodb:Scan",
+                "dynamodb:Query"
+              ],
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
+                    "UsersTable",
+                    "Arn"
+                  ]
+                },
+                {
+                  "Fn::Sub": "${UsersTable.Arn}/index/GSI_Email"
+                },
+                {
+                  "Fn::GetAtt": [
+                    "ReportsTable",
+                    "Arn"
+                  ]
+                },
+                {
+                  "Fn::GetAtt": [
+                    "NotificationsTable",
+                    "Arn"
+                  ]
+                },
+                {
+                  "Fn::GetAtt": [
+                    "ActivityLogsTable",
+                    "Arn"
+                  ]
+                }
+              ]
+            },
+            {
+              "Effect": "Allow",
+              "Action": [
+                "s3:PutObject",
+                "s3:GetObject",
+                "s3:DeleteObject"
+              ],
+              "Resource": [
+                {
+                  "Fn::Sub": "arn:aws:s3:::urbanshield-uploads-dev-130063747200/*"
+                }
+              ]
+            },
+            {
+              "Effect": "Allow",
+              "Action": [
+                "sns:Publish"
+              ],
+              "Resource": [
+                {
+                  "Ref": "EmergencyAlertsTopic"
+                }
+              ]
+            },
+            {
+              "Effect": "Allow",
+              "Action": [
+                "geo:SearchPlaceIndexForText",
+                "geo:GetMapTile"
+              ],
+              "Resource": "*"
+            }
+          ]
+        }
+      },
+      "versionFunctions": true,
+      "compiledCloudFormationTemplate": {
+        "AWSTemplateFormatVersion": "2010-09-09",
+        "Description": "The AWS CloudFormation template for this Serverless application",
+        "Resources": {
+          "ApiLogGroup": {
+            "Type": "AWS::Logs::LogGroup",
+            "Properties": {
+              "LogGroupName": "/aws/lambda/urbanshield-backend-dev-api"
+            }
+          },
+          "IamRoleLambdaExecution": {
+            "Type": "AWS::IAM::Role",
+            "Properties": {
+              "AssumeRolePolicyDocument": {
+                "Version": "2012-10-17",
+                "Statement": [
+                  {
+                    "Effect": "Allow",
+                    "Principal": {
+                      "Service": [
+                        "lambda.amazonaws.com"
+                      ]
+                    },
+                    "Action": [
+                      "sts:AssumeRole"
+                    ]
+                  }
+                ]
+              },
+              "Policies": [
+                {
+                  "PolicyName": {
+                    "Fn::Join": [
+                      "-",
+                      [
+                        "urbanshield-backend",
+                        "dev",
+                        "lambda"
+                      ]
+                    ]
+                  },
+                  "PolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                      {
+                        "Effect": "Allow",
+                        "Action": [
+                          "logs:CreateLogStream",
+                          "logs:CreateLogGroup",
+                          "logs:TagResource"
+                        ],
+                        "Resource": [
+                          {
+                            "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/urbanshield-backend-dev*:*"
+                          }
+                        ]
+                      },
+                      {
+                        "Effect": "Allow",
+                        "Action": [
+                          "logs:PutLogEvents"
+                        ],
+                        "Resource": [
+                          {
+                            "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/urbanshield-backend-dev*:*:*"
+                          }
+                        ]
+                      },
+                      {
+                        "Effect": "Allow",
+                        "Action": [
+                          "dynamodb:GetItem",
+                          "dynamodb:PutItem",
+                          "dynamodb:UpdateItem",
+                          "dynamodb:DeleteItem",
+                          "dynamodb:Scan",
+                          "dynamodb:Query"
+                        ],
+                        "Resource": [
+                          {
+                            "Fn::GetAtt": [
+                              "UsersTable",
+                              "Arn"
+                            ]
+                          },
+                          {
+                            "Fn::Sub": "${UsersTable.Arn}/index/GSI_Email"
+                          },
+                          {
+                            "Fn::GetAtt": [
+                              "ReportsTable",
+                              "Arn"
+                            ]
+                          },
+                          {
+                            "Fn::GetAtt": [
+                              "NotificationsTable",
+                              "Arn"
+                            ]
+                          },
+                          {
+                            "Fn::GetAtt": [
+                              "ActivityLogsTable",
+                              "Arn"
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "Effect": "Allow",
+                        "Action": [
+                          "s3:PutObject",
+                          "s3:GetObject",
+                          "s3:DeleteObject"
+                        ],
+                        "Resource": [
+                          {
+                            "Fn::Sub": "arn:aws:s3:::urbanshield-uploads-dev-130063747200/*"
+                          }
+                        ]
+                      },
+                      {
+                        "Effect": "Allow",
+                        "Action": [
+                          "sns:Publish"
+                        ],
+                        "Resource": [
+                          {
+                            "Ref": "EmergencyAlertsTopic"
+                          }
+                        ]
+                      },
+                      {
+                        "Effect": "Allow",
+                        "Action": [
+                          "geo:SearchPlaceIndexForText",
+                          "geo:GetMapTile"
+                        ],
+                        "Resource": "*"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "Path": "/",
+              "RoleName": {
+                "Fn::Join": [
+                  "-",
+                  [
+                    "urbanshield-backend",
+                    "dev",
+                    {
+                      "Ref": "AWS::Region"
+                    },
+                    "lambdaRole"
+                  ]
+                ]
+              }
+            }
+          },
+          "ApiLambdaFunction": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+              "Code": {
+                "S3Bucket": "serverless-framework-deployments-us-east-1-f1edc59a-2296",
+                "S3Key": "serverless/urbanshield-backend/dev/1779135428736-2026-05-18T20:17:08.736Z/urbanshield-backend.zip"
+              },
+              "Handler": "src/lambda.handler",
+              "Runtime": "nodejs18.x",
+              "FunctionName": "urbanshield-backend-dev-api",
+              "MemorySize": 1024,
+              "Timeout": 6,
+              "Environment": {
+                "Variables": {
+                  "NODE_ENV": "production",
+                  "API_PREFIX": "/api",
+                  "USE_IN_MEMORY_STORE": "false",
+                  "DYNAMODB_TABLE_USERS": {
+                    "Ref": "UsersTable"
+                  },
+                  "DYNAMODB_TABLE_REPORTS": {
+                    "Ref": "ReportsTable"
+                  },
+                  "DYNAMODB_TABLE_NOTIFICATIONS": {
+                    "Ref": "NotificationsTable"
+                  },
+                  "DYNAMODB_TABLE_ACTIVITY_LOGS": {
+                    "Ref": "ActivityLogsTable"
+                  },
+                  "S3_BUCKET_NAME": "urbanshield-uploads-dev-130063747200",
+                  "USE_COGNITO": "true",
+                  "COGNITO_USER_POOL_ID": "us-east-1_yjkCu1mIv",
+                  "COGNITO_CLIENT_ID": "5mscvi0k161ouut5ph5g4jnm4v",
+                  "SNS_TOPIC_EMERGENCY_ALERTS": {
+                    "Ref": "EmergencyAlertsTopic"
+                  },
+                  "LOCATION_MAP_NAME": "UrbanShieldMap",
+                  "LOCATION_PLACE_INDEX": "UrbanShieldPlaceIndex"
+                }
+              },
+              "Role": {
+                "Fn::GetAtt": [
+                  "IamRoleLambdaExecution",
+                  "Arn"
+                ]
+              }
+            },
+            "DependsOn": [
+              "ApiLogGroup"
+            ]
+          },
+          "ApiLambdaVersion2KyI1l23jwkUzOnYjSnxKAT1brWUCg59nG9jDCwbhrU": {
+            "Type": "AWS::Lambda::Version",
+            "DeletionPolicy": "Retain",
+            "Properties": {
+              "FunctionName": {
+                "Ref": "ApiLambdaFunction"
+              },
+              "CodeSha256": "Lv7Zdd5sqKGlMmR3ALwcMD9T0kU89/BQr4RrTpzaXnU="
+            }
+          },
+          "HttpApi": {
+            "Type": "AWS::ApiGatewayV2::Api",
+            "Properties": {
+              "Name": "dev-urbanshield-backend",
+              "ProtocolType": "HTTP"
+            }
+          },
+          "HttpApiStage": {
+            "Type": "AWS::ApiGatewayV2::Stage",
+            "Properties": {
+              "ApiId": {
+                "Ref": "HttpApi"
+              },
+              "StageName": "$default",
+              "AutoDeploy": true,
+              "DefaultRouteSettings": {
+                "DetailedMetricsEnabled": false
+              }
+            }
+          },
+          "ApiLambdaPermissionHttpApi": {
+            "Type": "AWS::Lambda::Permission",
+            "Properties": {
+              "FunctionName": {
+                "Fn::GetAtt": [
+                  "ApiLambdaFunction",
+                  "Arn"
+                ]
+              },
+              "Action": "lambda:InvokeFunction",
+              "Principal": "apigateway.amazonaws.com",
+              "SourceArn": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      "Ref": "AWS::Partition"
+                    },
+                    ":execute-api:",
+                    {
+                      "Ref": "AWS::Region"
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId"
+                    },
+                    ":",
+                    {
+                      "Ref": "HttpApi"
+                    },
+                    "/*"
+                  ]
+                ]
+              }
+            }
+          },
+          "HttpApiIntegrationApi": {
+            "Type": "AWS::ApiGatewayV2::Integration",
+            "Properties": {
+              "ApiId": {
+                "Ref": "HttpApi"
+              },
+              "IntegrationType": "AWS_PROXY",
+              "IntegrationUri": {
+                "Fn::GetAtt": [
+                  "ApiLambdaFunction",
+                  "Arn"
+                ]
+              },
+              "PayloadFormatVersion": "2.0",
+              "TimeoutInMillis": 30000
+            }
+          },
+          "HttpApiRouteAny": {
+            "Type": "AWS::ApiGatewayV2::Route",
+            "Properties": {
+              "ApiId": {
+                "Ref": "HttpApi"
+              },
+              "RouteKey": "ANY /",
+              "Target": {
+                "Fn::Join": [
+                  "/",
+                  [
+                    "integrations",
+                    {
+                      "Ref": "HttpApiIntegrationApi"
+                    }
+                  ]
+                ]
+              }
+            },
+            "DependsOn": "HttpApiIntegrationApi"
+          },
+          "HttpApiRouteAnyProxyVar": {
+            "Type": "AWS::ApiGatewayV2::Route",
+            "Properties": {
+              "ApiId": {
+                "Ref": "HttpApi"
+              },
+              "RouteKey": "ANY /{proxy+}",
+              "Target": {
+                "Fn::Join": [
+                  "/",
+                  [
+                    "integrations",
+                    {
+                      "Ref": "HttpApiIntegrationApi"
+                    }
+                  ]
+                ]
+              }
+            },
+            "DependsOn": "HttpApiIntegrationApi"
+          },
+          "UsersTable": {
+            "Type": "AWS::DynamoDB::Table",
+            "Properties": {
+              "TableName": "UrbanShield-Users-dev",
+              "BillingMode": "PAY_PER_REQUEST",
+              "AttributeDefinitions": [
+                {
+                  "AttributeName": "userId",
+                  "AttributeType": "S"
+                },
+                {
+                  "AttributeName": "email",
+                  "AttributeType": "S"
+                }
+              ],
+              "KeySchema": [
+                {
+                  "AttributeName": "userId",
+                  "KeyType": "HASH"
+                }
+              ],
+              "GlobalSecondaryIndexes": [
+                {
+                  "IndexName": "GSI_Email",
+                  "KeySchema": [
+                    {
+                      "AttributeName": "email",
+                      "KeyType": "HASH"
+                    }
+                  ],
+                  "Projection": {
+                    "ProjectionType": "ALL"
+                  }
+                }
+              ]
+            }
+          },
+          "ReportsTable": {
+            "Type": "AWS::DynamoDB::Table",
+            "Properties": {
+              "TableName": "UrbanShield-Reports-dev",
+              "BillingMode": "PAY_PER_REQUEST",
+              "AttributeDefinitions": [
+                {
+                  "AttributeName": "reportId",
+                  "AttributeType": "S"
+                }
+              ],
+              "KeySchema": [
+                {
+                  "AttributeName": "reportId",
+                  "KeyType": "HASH"
+                }
+              ]
+            }
+          },
+          "NotificationsTable": {
+            "Type": "AWS::DynamoDB::Table",
+            "Properties": {
+              "TableName": "UrbanShield-Notifications-dev",
+              "BillingMode": "PAY_PER_REQUEST",
+              "AttributeDefinitions": [
+                {
+                  "AttributeName": "notificationId",
+                  "AttributeType": "S"
+                }
+              ],
+              "KeySchema": [
+                {
+                  "AttributeName": "notificationId",
+                  "KeyType": "HASH"
+                }
+              ]
+            }
+          },
+          "ActivityLogsTable": {
+            "Type": "AWS::DynamoDB::Table",
+            "Properties": {
+              "TableName": "UrbanShield-ActivityLogs-dev",
+              "BillingMode": "PAY_PER_REQUEST",
+              "AttributeDefinitions": [
+                {
+                  "AttributeName": "logId",
+                  "AttributeType": "S"
+                }
+              ],
+              "KeySchema": [
+                {
+                  "AttributeName": "logId",
+                  "KeyType": "HASH"
+                }
+              ]
+            }
+          },
+          "S3UploadsBucket": {
+            "Type": "AWS::S3::Bucket",
+            "Properties": {
+              "BucketName": "urbanshield-uploads-dev-130063747200",
+              "CorsConfiguration": {
+                "CorsRules": [
+                  {
+                    "AllowedHeaders": [
+                      "*"
+                    ],
+                    "AllowedMethods": [
+                      "PUT",
+                      "GET",
+                      "HEAD"
+                    ],
+                    "AllowedOrigins": [
+                      "*"
+                    ],
+                    "MaxAge": 3600
+                  }
+                ]
+              }
+            }
+          },
+          "EmergencyAlertsTopic": {
+            "Type": "AWS::SNS::Topic",
+            "Properties": {
+              "TopicName": "UrbanShield-EmergencyAlerts-dev"
+            }
+          }
+        },
+        "Outputs": {
+          "ServerlessDeploymentBucketName": {
+            "Value": "serverless-framework-deployments-us-east-1-f1edc59a-2296",
+            "Export": {
+              "Name": "sls-urbanshield-backend-dev-ServerlessDeploymentBucketName"
+            }
+          },
+          "ApiLambdaFunctionQualifiedArn": {
+            "Description": "Current Lambda function version",
+            "Value": {
+              "Ref": "ApiLambdaVersion2KyI1l23jwkUzOnYjSnxKAT1brWUCg59nG9jDCwbhrU"
+            },
+            "Export": {
+              "Name": "sls-urbanshield-backend-dev-ApiLambdaFunctionQualifiedArn"
+            }
+          },
+          "HttpApiId": {
+            "Description": "Id of the HTTP API",
+            "Value": {
+              "Ref": "HttpApi"
+            },
+            "Export": {
+              "Name": "sls-urbanshield-backend-dev-HttpApiId"
+            }
+          },
+          "HttpApiUrl": {
+            "Description": "URL of the HTTP API",
+            "Value": {
+              "Fn::Join": [
+                "",
+                [
+                  "https://",
+                  {
+                    "Ref": "HttpApi"
+                  },
+                  ".execute-api.",
+                  {
+                    "Ref": "AWS::Region"
+                  },
+                  ".",
+                  {
+                    "Ref": "AWS::URLSuffix"
+                  }
+                ]
+              ]
+            },
+            "Export": {
+              "Name": "sls-urbanshield-backend-dev-HttpApiUrl"
+            }
+          }
+        }
+      },
+      "vpc": {}
+    },
+    "dashboard": {
+      "isEnabledForService": false,
+      "requiredAuthentication": false,
+      "orgFeaturesInUse": null,
+      "orgObservabilityIntegrations": null,
+      "serviceAppId": null,
+      "serviceProvider": null,
+      "instanceParameters": null
+    },
+    "serviceRawFile": "service: urbanshield-backend\n\nprovider:\n  name: aws\n  runtime: nodejs18.x\n  stage: ${opt:stage, 'dev'}\n  region: ${opt:region, 'us-east-1'}\n  environment:\n    NODE_ENV: production\n    API_PREFIX: /api\n    USE_IN_MEMORY_STORE: \"false\"\n    DYNAMODB_TABLE_USERS: !Ref UsersTable\n    DYNAMODB_TABLE_REPORTS: !Ref ReportsTable\n    DYNAMODB_TABLE_NOTIFICATIONS: !Ref NotificationsTable\n    DYNAMODB_TABLE_ACTIVITY_LOGS: !Ref ActivityLogsTable\n    S3_BUCKET_NAME: ${self:custom.s3BucketName}\n    USE_COGNITO: \"true\"\n    COGNITO_USER_POOL_ID: ${env:COGNITO_USER_POOL_ID}\n    COGNITO_CLIENT_ID: ${env:COGNITO_CLIENT_ID}\n    SNS_TOPIC_EMERGENCY_ALERTS: !Ref EmergencyAlertsTopic\n    LOCATION_MAP_NAME: ${env:LOCATION_MAP_NAME, 'UrbanShieldMap'}\n    LOCATION_PLACE_INDEX: ${env:LOCATION_PLACE_INDEX, 'UrbanShieldPlaceIndex'}\n\n  iam:\n    role:\n      statements:\n        # Permisos para DynamoDB\n        - Effect: Allow\n          Action:\n            - dynamodb:GetItem\n            - dynamodb:PutItem\n            - dynamodb:UpdateItem\n            - dynamodb:DeleteItem\n            - dynamodb:Scan\n            - dynamodb:Query\n          Resource:\n            - !GetAtt UsersTable.Arn\n            - !Sub ${UsersTable.Arn}/index/GSI_Email\n            - !GetAtt ReportsTable.Arn\n            - !GetAtt NotificationsTable.Arn\n            - !GetAtt ActivityLogsTable.Arn\n\n        # Permisos para S3 (Subida de fotos vía URL presignada)\n        - Effect: Allow\n          Action:\n            - s3:PutObject\n            - s3:GetObject\n            - s3:DeleteObject\n          Resource:\n            - !Sub arn:aws:s3:::${self:custom.s3BucketName}/*\n\n        # Permisos para SNS (Mensajería)\n        - Effect: Allow\n          Action:\n            - sns:Publish\n          Resource:\n            - !Ref EmergencyAlertsTopic\n\n        # Permisos para Amazon Location Service\n        - Effect: Allow\n          Action:\n            - geo:SearchPlaceIndexForText\n            - geo:GetMapTile\n          Resource: \"*\"\n\ncustom:\n  s3BucketName: urbanshield-uploads-${self:provider.stage}-${aws:accountId}\n\nfunctions:\n  api:\n    handler: src/lambda.handler\n    events:\n      - httpApi:\n          method: ANY\n          path: /\n      - httpApi:\n          method: ANY\n          path: /{proxy+}\n\nresources:\n  Resources:\n    # 1. Tabla de Usuarios\n    UsersTable:\n      Type: AWS::DynamoDB::Table\n      Properties:\n        TableName: UrbanShield-Users-${self:provider.stage}\n        BillingMode: PAY_PER_REQUEST\n        AttributeDefinitions:\n          - AttributeName: userId\n            AttributeType: S\n          - AttributeName: email\n            AttributeType: S\n        KeySchema:\n          - AttributeName: userId\n            KeyType: HASH\n        GlobalSecondaryIndexes:\n          - IndexName: GSI_Email\n            KeySchema:\n              - AttributeName: email\n                KeyType: HASH\n            Projection:\n              ProjectionType: ALL\n\n    # 2. Tabla de Reportes\n    ReportsTable:\n      Type: AWS::DynamoDB::Table\n      Properties:\n        TableName: UrbanShield-Reports-${self:provider.stage}\n        BillingMode: PAY_PER_REQUEST\n        AttributeDefinitions:\n          - AttributeName: reportId\n            AttributeType: S\n        KeySchema:\n          - AttributeName: reportId\n            KeyType: HASH\n\n    # 3. Tabla de Notificaciones\n    NotificationsTable:\n      Type: AWS::DynamoDB::Table\n      Properties:\n        TableName: UrbanShield-Notifications-${self:provider.stage}\n        BillingMode: PAY_PER_REQUEST\n        AttributeDefinitions:\n          - AttributeName: notificationId\n            AttributeType: S\n        KeySchema:\n          - AttributeName: notificationId\n            KeyType: HASH\n\n    # 4. Tabla de Auditoría\n    ActivityLogsTable:\n      Type: AWS::DynamoDB::Table\n      Properties:\n        TableName: UrbanShield-ActivityLogs-${self:provider.stage}\n        BillingMode: PAY_PER_REQUEST\n        AttributeDefinitions:\n          - AttributeName: logId\n            AttributeType: S\n        KeySchema:\n          - AttributeName: logId\n            KeyType: HASH\n\n    # 5. Bucket de S3 para subida de fotos\n    S3UploadsBucket:\n      Type: AWS::S3::Bucket\n      Properties:\n        BucketName: ${self:custom.s3BucketName}\n        CorsConfiguration:\n          CorsRules:\n            - AllowedHeaders: ['*']\n              AllowedMethods: [PUT, GET, HEAD]\n              AllowedOrigins: ['*']\n              MaxAge: 3600\n\n    # 6. Tema de Amazon SNS para Alertas\n    EmergencyAlertsTopic:\n      Type: AWS::SNS::Topic\n      Properties:\n        TopicName: UrbanShield-EmergencyAlerts-${self:provider.stage}\n",
+    "command": [
+      "deploy"
+    ],
+    "options": {
+      "stage": "dev"
+    },
+    "orgId": "c49208cc-2bc2-416c-8e69-16f005e8f730",
+    "orgName": "ucbbb",
+    "userId": "17pNGHkXkxGFtdzy6T",
+    "userName": "ucbbb",
+    "serviceProviderAwsAccountId": "130063747200",
+    "serviceProviderAwsCfStackName": "urbanshield-backend-dev",
+    "serviceProviderAwsCfStackId": "arn:aws:cloudformation:us-east-1:130063747200:stack/urbanshield-backend-dev/925ee100-52f6-11f1-9dd9-0e190deb23a3",
+    "serviceProviderAwsCfStackCreated": "2026-05-18T20:17:19.758Z",
+    "serviceProviderAwsCfStackUpdated": null,
+    "serviceProviderAwsCfStackStatus": "CREATE_COMPLETE",
+    "serviceProviderAwsCfStackOutputs": [
+      {
+        "OutputKey": "ApiLambdaFunctionQualifiedArn",
+        "OutputValue": "arn:aws:lambda:us-east-1:130063747200:function:urbanshield-backend-dev-api:1",
+        "Description": "Current Lambda function version",
+        "ExportName": "sls-urbanshield-backend-dev-ApiLambdaFunctionQualifiedArn"
+      },
+      {
+        "OutputKey": "HttpApiId",
+        "OutputValue": "vr8t662kuc",
+        "Description": "Id of the HTTP API",
+        "ExportName": "sls-urbanshield-backend-dev-HttpApiId"
+      },
+      {
+        "OutputKey": "ServerlessDeploymentBucketName",
+        "OutputValue": "serverless-framework-deployments-us-east-1-f1edc59a-2296",
+        "ExportName": "sls-urbanshield-backend-dev-ServerlessDeploymentBucketName"
+      },
+      {
+        "OutputKey": "HttpApiUrl",
+        "OutputValue": "https://vr8t662kuc.execute-api.us-east-1.amazonaws.com",
+        "Description": "URL of the HTTP API",
+        "ExportName": "sls-urbanshield-backend-dev-HttpApiUrl"
+      }
+    ],
+    "compiledCloudFormationTemplate": {
+      "AWSTemplateFormatVersion": "2010-09-09",
+      "Description": "The AWS CloudFormation template for this Serverless application",
+      "Resources": {
+        "ApiLogGroup": {
+          "Type": "AWS::Logs::LogGroup",
+          "Properties": {
+            "LogGroupName": "/aws/lambda/urbanshield-backend-dev-api"
+          }
+        },
+        "IamRoleLambdaExecution": {
+          "Type": "AWS::IAM::Role",
+          "Properties": {
+            "AssumeRolePolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Principal": {
+                    "Service": [
+                      "lambda.amazonaws.com"
+                    ]
+                  },
+                  "Action": [
+                    "sts:AssumeRole"
+                  ]
+                }
+              ]
+            },
+            "Policies": [
+              {
+                "PolicyName": {
+                  "Fn::Join": [
+                    "-",
+                    [
+                      "urbanshield-backend",
+                      "dev",
+                      "lambda"
+                    ]
+                  ]
+                },
+                "PolicyDocument": {
+                  "Version": "2012-10-17",
+                  "Statement": [
+                    {
+                      "Effect": "Allow",
+                      "Action": [
+                        "logs:CreateLogStream",
+                        "logs:CreateLogGroup",
+                        "logs:TagResource"
+                      ],
+                      "Resource": [
+                        {
+                          "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/urbanshield-backend-dev*:*"
+                        }
+                      ]
+                    },
+                    {
+                      "Effect": "Allow",
+                      "Action": [
+                        "logs:PutLogEvents"
+                      ],
+                      "Resource": [
+                        {
+                          "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/urbanshield-backend-dev*:*:*"
+                        }
+                      ]
+                    },
+                    {
+                      "Effect": "Allow",
+                      "Action": [
+                        "dynamodb:GetItem",
+                        "dynamodb:PutItem",
+                        "dynamodb:UpdateItem",
+                        "dynamodb:DeleteItem",
+                        "dynamodb:Scan",
+                        "dynamodb:Query"
+                      ],
+                      "Resource": [
+                        {
+                          "Fn::GetAtt": [
+                            "UsersTable",
+                            "Arn"
+                          ]
+                        },
+                        {
+                          "Fn::Sub": "${UsersTable.Arn}/index/GSI_Email"
+                        },
+                        {
+                          "Fn::GetAtt": [
+                            "ReportsTable",
+                            "Arn"
+                          ]
+                        },
+                        {
+                          "Fn::GetAtt": [
+                            "NotificationsTable",
+                            "Arn"
+                          ]
+                        },
+                        {
+                          "Fn::GetAtt": [
+                            "ActivityLogsTable",
+                            "Arn"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "Effect": "Allow",
+                      "Action": [
+                        "s3:PutObject",
+                        "s3:GetObject",
+                        "s3:DeleteObject"
+                      ],
+                      "Resource": [
+                        {
+                          "Fn::Sub": "arn:aws:s3:::urbanshield-uploads-dev-130063747200/*"
+                        }
+                      ]
+                    },
+                    {
+                      "Effect": "Allow",
+                      "Action": [
+                        "sns:Publish"
+                      ],
+                      "Resource": [
+                        {
+                          "Ref": "EmergencyAlertsTopic"
+                        }
+                      ]
+                    },
+                    {
+                      "Effect": "Allow",
+                      "Action": [
+                        "geo:SearchPlaceIndexForText",
+                        "geo:GetMapTile"
+                      ],
+                      "Resource": "*"
+                    }
+                  ]
+                }
+              }
+            ],
+            "Path": "/",
+            "RoleName": {
+              "Fn::Join": [
+                "-",
+                [
+                  "urbanshield-backend",
+                  "dev",
+                  {
+                    "Ref": "AWS::Region"
+                  },
+                  "lambdaRole"
+                ]
+              ]
+            }
+          }
+        },
+        "ApiLambdaFunction": {
+          "Type": "AWS::Lambda::Function",
+          "Properties": {
+            "Code": {
+              "S3Bucket": "serverless-framework-deployments-us-east-1-f1edc59a-2296",
+              "S3Key": "serverless/urbanshield-backend/dev/1779135428736-2026-05-18T20:17:08.736Z/urbanshield-backend.zip"
+            },
+            "Handler": "src/lambda.handler",
+            "Runtime": "nodejs18.x",
+            "FunctionName": "urbanshield-backend-dev-api",
+            "MemorySize": 1024,
+            "Timeout": 6,
+            "Environment": {
+              "Variables": {
+                "NODE_ENV": "production",
+                "API_PREFIX": "/api",
+                "USE_IN_MEMORY_STORE": "false",
+                "DYNAMODB_TABLE_USERS": {
+                  "Ref": "UsersTable"
+                },
+                "DYNAMODB_TABLE_REPORTS": {
+                  "Ref": "ReportsTable"
+                },
+                "DYNAMODB_TABLE_NOTIFICATIONS": {
+                  "Ref": "NotificationsTable"
+                },
+                "DYNAMODB_TABLE_ACTIVITY_LOGS": {
+                  "Ref": "ActivityLogsTable"
+                },
+                "S3_BUCKET_NAME": "urbanshield-uploads-dev-130063747200",
+                "USE_COGNITO": "true",
+                "COGNITO_USER_POOL_ID": "us-east-1_yjkCu1mIv",
+                "COGNITO_CLIENT_ID": "5mscvi0k161ouut5ph5g4jnm4v",
+                "SNS_TOPIC_EMERGENCY_ALERTS": {
+                  "Ref": "EmergencyAlertsTopic"
+                },
+                "LOCATION_MAP_NAME": "UrbanShieldMap",
+                "LOCATION_PLACE_INDEX": "UrbanShieldPlaceIndex"
+              }
+            },
+            "Role": {
+              "Fn::GetAtt": [
+                "IamRoleLambdaExecution",
+                "Arn"
+              ]
+            }
+          },
+          "DependsOn": [
+            "ApiLogGroup"
+          ]
+        },
+        "ApiLambdaVersion2KyI1l23jwkUzOnYjSnxKAT1brWUCg59nG9jDCwbhrU": {
+          "Type": "AWS::Lambda::Version",
+          "DeletionPolicy": "Retain",
+          "Properties": {
+            "FunctionName": {
+              "Ref": "ApiLambdaFunction"
+            },
+            "CodeSha256": "Lv7Zdd5sqKGlMmR3ALwcMD9T0kU89/BQr4RrTpzaXnU="
+          }
+        },
+        "HttpApi": {
+          "Type": "AWS::ApiGatewayV2::Api",
+          "Properties": {
+            "Name": "dev-urbanshield-backend",
+            "ProtocolType": "HTTP"
+          }
+        },
+        "HttpApiStage": {
+          "Type": "AWS::ApiGatewayV2::Stage",
+          "Properties": {
+            "ApiId": {
+              "Ref": "HttpApi"
+            },
+            "StageName": "$default",
+            "AutoDeploy": true,
+            "DefaultRouteSettings": {
+              "DetailedMetricsEnabled": false
+            }
+          }
+        },
+        "ApiLambdaPermissionHttpApi": {
+          "Type": "AWS::Lambda::Permission",
+          "Properties": {
+            "FunctionName": {
+              "Fn::GetAtt": [
+                "ApiLambdaFunction",
+                "Arn"
+              ]
+            },
+            "Action": "lambda:InvokeFunction",
+            "Principal": "apigateway.amazonaws.com",
+            "SourceArn": {
+              "Fn::Join": [
+                "",
+                [
+                  "arn:",
+                  {
+                    "Ref": "AWS::Partition"
+                  },
+                  ":execute-api:",
+                  {
+                    "Ref": "AWS::Region"
+                  },
+                  ":",
+                  {
+                    "Ref": "AWS::AccountId"
+                  },
+                  ":",
+                  {
+                    "Ref": "HttpApi"
+                  },
+                  "/*"
+                ]
+              ]
+            }
+          }
+        },
+        "HttpApiIntegrationApi": {
+          "Type": "AWS::ApiGatewayV2::Integration",
+          "Properties": {
+            "ApiId": {
+              "Ref": "HttpApi"
+            },
+            "IntegrationType": "AWS_PROXY",
+            "IntegrationUri": {
+              "Fn::GetAtt": [
+                "ApiLambdaFunction",
+                "Arn"
+              ]
+            },
+            "PayloadFormatVersion": "2.0",
+            "TimeoutInMillis": 30000
+          }
+        },
+        "HttpApiRouteAny": {
+          "Type": "AWS::ApiGatewayV2::Route",
+          "Properties": {
+            "ApiId": {
+              "Ref": "HttpApi"
+            },
+            "RouteKey": "ANY /",
+            "Target": {
+              "Fn::Join": [
+                "/",
+                [
+                  "integrations",
+                  {
+                    "Ref": "HttpApiIntegrationApi"
+                  }
+                ]
+              ]
+            }
+          },
+          "DependsOn": "HttpApiIntegrationApi"
+        },
+        "HttpApiRouteAnyProxyVar": {
+          "Type": "AWS::ApiGatewayV2::Route",
+          "Properties": {
+            "ApiId": {
+              "Ref": "HttpApi"
+            },
+            "RouteKey": "ANY /{proxy+}",
+            "Target": {
+              "Fn::Join": [
+                "/",
+                [
+                  "integrations",
+                  {
+                    "Ref": "HttpApiIntegrationApi"
+                  }
+                ]
+              ]
+            }
+          },
+          "DependsOn": "HttpApiIntegrationApi"
+        },
+        "UsersTable": {
+          "Type": "AWS::DynamoDB::Table",
+          "Properties": {
+            "TableName": "UrbanShield-Users-dev",
+            "BillingMode": "PAY_PER_REQUEST",
+            "AttributeDefinitions": [
+              {
+                "AttributeName": "userId",
+                "AttributeType": "S"
+              },
+              {
+                "AttributeName": "email",
+                "AttributeType": "S"
+              }
+            ],
+            "KeySchema": [
+              {
+                "AttributeName": "userId",
+                "KeyType": "HASH"
+              }
+            ],
+            "GlobalSecondaryIndexes": [
+              {
+                "IndexName": "GSI_Email",
+                "KeySchema": [
+                  {
+                    "AttributeName": "email",
+                    "KeyType": "HASH"
+                  }
+                ],
+                "Projection": {
+                  "ProjectionType": "ALL"
+                }
+              }
+            ]
+          }
+        },
+        "ReportsTable": {
+          "Type": "AWS::DynamoDB::Table",
+          "Properties": {
+            "TableName": "UrbanShield-Reports-dev",
+            "BillingMode": "PAY_PER_REQUEST",
+            "AttributeDefinitions": [
+              {
+                "AttributeName": "reportId",
+                "AttributeType": "S"
+              }
+            ],
+            "KeySchema": [
+              {
+                "AttributeName": "reportId",
+                "KeyType": "HASH"
+              }
+            ]
+          }
+        },
+        "NotificationsTable": {
+          "Type": "AWS::DynamoDB::Table",
+          "Properties": {
+            "TableName": "UrbanShield-Notifications-dev",
+            "BillingMode": "PAY_PER_REQUEST",
+            "AttributeDefinitions": [
+              {
+                "AttributeName": "notificationId",
+                "AttributeType": "S"
+              }
+            ],
+            "KeySchema": [
+              {
+                "AttributeName": "notificationId",
+                "KeyType": "HASH"
+              }
+            ]
+          }
+        },
+        "ActivityLogsTable": {
+          "Type": "AWS::DynamoDB::Table",
+          "Properties": {
+            "TableName": "UrbanShield-ActivityLogs-dev",
+            "BillingMode": "PAY_PER_REQUEST",
+            "AttributeDefinitions": [
+              {
+                "AttributeName": "logId",
+                "AttributeType": "S"
+              }
+            ],
+            "KeySchema": [
+              {
+                "AttributeName": "logId",
+                "KeyType": "HASH"
+              }
+            ]
+          }
+        },
+        "S3UploadsBucket": {
+          "Type": "AWS::S3::Bucket",
+          "Properties": {
+            "BucketName": "urbanshield-uploads-dev-130063747200",
+            "CorsConfiguration": {
+              "CorsRules": [
+                {
+                  "AllowedHeaders": [
+                    "*"
+                  ],
+                  "AllowedMethods": [
+                    "PUT",
+                    "GET",
+                    "HEAD"
+                  ],
+                  "AllowedOrigins": [
+                    "*"
+                  ],
+                  "MaxAge": 3600
+                }
+              ]
+            }
+          }
+        },
+        "EmergencyAlertsTopic": {
+          "Type": "AWS::SNS::Topic",
+          "Properties": {
+            "TopicName": "UrbanShield-EmergencyAlerts-dev"
+          }
+        }
+      },
+      "Outputs": {
+        "ServerlessDeploymentBucketName": {
+          "Value": "serverless-framework-deployments-us-east-1-f1edc59a-2296",
+          "Export": {
+            "Name": "sls-urbanshield-backend-dev-ServerlessDeploymentBucketName"
+          }
+        },
+        "ApiLambdaFunctionQualifiedArn": {
+          "Description": "Current Lambda function version",
+          "Value": {
+            "Ref": "ApiLambdaVersion2KyI1l23jwkUzOnYjSnxKAT1brWUCg59nG9jDCwbhrU"
+          },
+          "Export": {
+            "Name": "sls-urbanshield-backend-dev-ApiLambdaFunctionQualifiedArn"
+          }
+        },
+        "HttpApiId": {
+          "Description": "Id of the HTTP API",
+          "Value": {
+            "Ref": "HttpApi"
+          },
+          "Export": {
+            "Name": "sls-urbanshield-backend-dev-HttpApiId"
+          }
+        },
+        "HttpApiUrl": {
+          "Description": "URL of the HTTP API",
+          "Value": {
+            "Fn::Join": [
+              "",
+              [
+                "https://",
+                {
+                  "Ref": "HttpApi"
+                },
+                ".execute-api.",
+                {
+                  "Ref": "AWS::Region"
+                },
+                ".",
+                {
+                  "Ref": "AWS::URLSuffix"
+                }
+              ]
+            ]
+          },
+          "Export": {
+            "Name": "sls-urbanshield-backend-dev-HttpApiUrl"
+          }
+        }
+      }
+    }
+  }
+}
