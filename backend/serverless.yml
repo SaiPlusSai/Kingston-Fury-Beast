@@ -251,13 +251,13 @@ resources:
     EmergencyAlertsTopic:
       Type: AWS::SNS::Topic
       Properties:
-        TopicName: UrbanShield-EmergencyAlerts-
+        TopicName: UrbanShield-EmergencyAlerts-${self:provider.stage}
 
     # 9. Tabla de Conexiones WebSocket
     WebSocketConnectionsTable:
       Type: AWS::DynamoDB::Table
       Properties:
-        TableName: UrbanShield-WebSocketConnections-
+        TableName: UrbanShield-WebSocketConnections-${self:provider.stage}
         BillingMode: PAY_PER_REQUEST
         AttributeDefinitions:
           - AttributeName: connectionId
@@ -282,7 +282,7 @@ resources:
     ChatSessionsTable:
       Type: AWS::DynamoDB::Table
       Properties:
-        TableName: UrbanShield-ChatSessions-
+        TableName: UrbanShield-ChatSessions-${self:provider.stage}
         BillingMode: PAY_PER_REQUEST
         AttributeDefinitions:
           - AttributeName: sessionId
@@ -307,7 +307,7 @@ resources:
     ChatFaqsTable:
       Type: AWS::DynamoDB::Table
       Properties:
-        TableName: UrbanShield-ChatFaqs-
+        TableName: UrbanShield-ChatFaqs-${self:provider.stage}
         BillingMode: PAY_PER_REQUEST
         AttributeDefinitions:
           - AttributeName: faqId
@@ -323,4 +323,4 @@ resources:
               - AttributeName: category
                 KeyType: HASH
             Projection:
-              ProjectionType: ALL${self:provider.stage}
+              ProjectionType: ALL
