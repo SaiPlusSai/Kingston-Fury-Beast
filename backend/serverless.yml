@@ -64,7 +64,7 @@ provider:
           Action:
             - execute-api:ManageConnections
           Resource:
-            - !Sub 'arn:aws:execute-api:${self:provider.region}:*:**/@connections/*'
+            - !Sub 'arn:aws:execute-api:${self:provider.region}:*:*/*/@connections/*'
 
         # Permisos para S3 (Subida de fotos vía URL presignada)
         - Effect: Allow
