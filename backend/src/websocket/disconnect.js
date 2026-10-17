@@ -3,6 +3,23 @@ const { getDynamoDbDocClient } = require('../aws/clients');
 const { env } = require('../config/env');
 
 /**
+ * Removes connection item from DynamoDB idempotently.
+ * @param {string} connectionId
+ * @returns {Promise<boolean>}
+ */
+async function removeConnection(connectionId) {
+  if (!connectionId) return false;
+  const docClient = getDynamoDbDocClient();
+  await docClient.send(
+    new DeleteCommand({
+      TableName: env.dynamodb.websocketConnectionsTable,
+      Key: { connectionId },
+    })
+  );
+  return true;
+}
+
+/**
  * WebSocket $disconnect Lambda handler
  * Cleans up connection item from WebSocketConnectionsTable in DynamoDB.
  */
@@ -19,24 +36,15 @@ exports.handler = async (event) => {
   }
 
   try {
-    const docClient = getDynamoDbDocClient();
-    await docClient.send(
-      new DeleteCommand({
-        TableName: env.dynamodb.websocketConnectionsTable,
-        Key: {
-          connectionId,
-        },
-      })
-    );
-
-    console.log(`Connection removed: connectionId=${connectionId}`);
+    await removeConnection(connectionId);
+    console.log(`Connection removed successfully: connectionId=${connectionId}`);
     return {
       statusCode: 200,
-      body: JSON.stringify({ message: 'Disconnected' }),
+      body: JSON.stringify({ message: 'Disconnected', connectionId }),
     };
   } catch (error) {
     console.error(`Error deleting connection ${connectionId}:`, error.message);
-    // Even on error, return 200 so API Gateway disconnect flow does not stall
+    // Even on warning, return 200 so API Gateway disconnect sequence completes
     return {
       statusCode: 200,
       body: JSON.stringify({ message: 'Disconnect handled with warnings', error: error.message }),
@@ -44,3 +52,4 @@ exports.handler = async (event) => {
   }
 };
 
+exports.removeConnection = removeConnection;
