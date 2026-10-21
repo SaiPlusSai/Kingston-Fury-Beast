@@ -49,7 +49,7 @@ async function postToClient(event, payload) {
 }
 
 /**
- * WebSocket sendMessage Lambda Handler
+ * WebSocket sendMessage / $default Lambda Handler
  */
 exports.handler = async (event) => {
   console.log('WebSocket handleMessage event:', JSON.stringify(event));
@@ -64,6 +64,25 @@ exports.handler = async (event) => {
   }
 
   const userMessage = body.message || body.text || '';
+
+  // 0. Keepalive / Heartbeat Interceptor (RISK-03: Mitigacion de Timeout de WebSocket)
+  const isPing =
+    body.action === 'ping' ||
+    body.type === 'ping' ||
+    (typeof userMessage === 'string' && userMessage.trim().toLowerCase() === 'ping');
+
+  if (isPing) {
+    const pongPayload = {
+      type: 'pong',
+      timestamp: Date.now(),
+      connectionId,
+    };
+    await postToClient(event, pongPayload);
+    return {
+      statusCode: 200,
+      body: JSON.stringify({ message: 'Pong sent', type: 'pong' }),
+    };
+  }
 
   // 1. Recover userId from DynamoDB WebSocketConnectionsTable
   let userId = 'anonymous';
@@ -129,3 +148,4 @@ exports.handler = async (event) => {
   };
 };
 
+exports.postToClient = postToClient;
