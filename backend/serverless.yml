@@ -14,6 +14,10 @@ provider:
     DYNAMODB_TABLE_NOTIFICATIONS: !Ref NotificationsTable
     DYNAMODB_TABLE_ACTIVITY_LOGS: !Ref ActivityLogsTable
     DYNAMODB_TABLE_SUPPORT_MESSAGES: !Ref SupportMessagesTable
+    DYNAMODB_TABLE_WEBSOCKET_CONNECTIONS: !Ref WebSocketConnectionsTable
+    DYNAMODB_TABLE_CHAT_SESSIONS: !Ref ChatSessionsTable
+    DYNAMODB_TABLE_CHAT_FAQS: !Ref ChatFaqsTable
+    WEBSOCKET_API_ENDPOINT: !Sub https://.execute-api..amazonaws.com/
     S3_BUCKET_NAME: ${self:custom.s3BucketName}
     S3_PROFILE_BUCKET_NAME: ${self:custom.profileBucketName}
     USE_COGNITO: "false"
@@ -50,6 +54,17 @@ provider:
             - !GetAtt SupportMessagesTable.Arn
             - !Sub ${SupportMessagesTable.Arn}/index/GSI_StatusCreatedAt
             - !Sub ${SupportMessagesTable.Arn}/index/GSI_UserIdCreatedAt
+            - !GetAtt WebSocketConnectionsTable.Arn
+            - !Sub '${WebSocketConnectionsTable.Arn}/index/*'
+            - !GetAtt ChatSessionsTable.Arn
+            - !Sub '${ChatSessionsTable.Arn}/index/*'
+            - !GetAtt ChatFaqsTable.Arn
+            - !Sub '${ChatFaqsTable.Arn}/index/*'
+        - Effect: Allow
+          Action:
+            - execute-api:ManageConnections
+          Resource:
+            - !Sub 'arn:aws:execute-api:${self:provider.region}:*:**/@connections/*'
 
         # Permisos para S3 (Subida de fotos vía URL presignada)
         - Effect: Allow
@@ -89,6 +104,24 @@ functions:
       - httpApi:
           method: ANY
           path: /{proxy+}
+
+  chatConnect:
+    handler: src/websocket/connect.handler
+    events:
+      - websocket:
+          route: 
+
+  chatDisconnect:
+    handler: src/websocket/disconnect.handler
+    events:
+      - websocket:
+          route: 
+
+  chatHandleMessage:
+    handler: src/websocket/handleMessage.handler
+    events:
+      - websocket:
+          route: sendMessage
 
 resources:
   Resources:
@@ -217,4 +250,76 @@ resources:
     EmergencyAlertsTopic:
       Type: AWS::SNS::Topic
       Properties:
-        TopicName: UrbanShield-EmergencyAlerts-${self:provider.stage}
+        TopicName: UrbanShield-EmergencyAlerts-
+
+    # 9. Tabla de Conexiones WebSocket
+    WebSocketConnectionsTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: UrbanShield-WebSocketConnections-
+        BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+          - AttributeName: connectionId
+            AttributeType: S
+          - AttributeName: userId
+            AttributeType: S
+        KeySchema:
+          - AttributeName: connectionId
+            KeyType: HASH
+        GlobalSecondaryIndexes:
+          - IndexName: GSI_UserId
+            KeySchema:
+              - AttributeName: userId
+                KeyType: HASH
+            Projection:
+              ProjectionType: ALL
+        TimeToLiveSpecification:
+          AttributeName: ttl
+          Enabled: true
+
+    # 10. Tabla de Sesiones de Chat (Maquina de estados)
+    ChatSessionsTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: UrbanShield-ChatSessions-
+        BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+          - AttributeName: sessionId
+            AttributeType: S
+          - AttributeName: userId
+            AttributeType: S
+        KeySchema:
+          - AttributeName: sessionId
+            KeyType: HASH
+        GlobalSecondaryIndexes:
+          - IndexName: GSI_UserId
+            KeySchema:
+              - AttributeName: userId
+                KeyType: HASH
+            Projection:
+              ProjectionType: ALL
+        TimeToLiveSpecification:
+          AttributeName: ttl
+          Enabled: true
+
+    # 11. Tabla de FAQs del Chatbot
+    ChatFaqsTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: UrbanShield-ChatFaqs-
+        BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+          - AttributeName: faqId
+            AttributeType: S
+          - AttributeName: category
+            AttributeType: S
+        KeySchema:
+          - AttributeName: faqId
+            KeyType: HASH
+        GlobalSecondaryIndexes:
+          - IndexName: GSI_Category
+            KeySchema:
+              - AttributeName: category
+                KeyType: HASH
+            Projection:
+              ProjectionType: ALL${self:provider.stage}

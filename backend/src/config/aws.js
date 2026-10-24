@@ -6,6 +6,9 @@ const tableNames = {
   notifications: env.dynamodb.notificationsTable,
   activityLogs: env.dynamodb.activityLogsTable,
   supportMessages: env.dynamodb.supportMessagesTable,
+  websocketConnections: env.dynamodb.websocketConnectionsTable,
+  chatSessions: env.dynamodb.chatSessionsTable,
+  chatFaqs: env.dynamodb.chatFaqsTable,
 };
 
 const tableSchemas = {

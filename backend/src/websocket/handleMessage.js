@@ -1,0 +1,131 @@
+const { GetCommand } = require('@aws-sdk/lib-dynamodb');
+const {
+  ApiGatewayManagementApiClient,
+  PostToConnectionCommand,
+} = require('@aws-sdk/client-apigatewaymanagementapi');
+const { getDynamoDbDocClient } = require('../aws/clients');
+const { env } = require('../config/env');
+const { detectIntent } = require('./intentDetector');
+const { getSession } = require('./stateMachine');
+
+// Handlers
+const greetingHandler = require('./handlers/greetingHandler');
+const helpHandler = require('./handlers/helpHandler');
+const faqHandler = require('./handlers/faqHandler');
+const statusHandler = require('./handlers/statusHandler');
+const createHandler = require('./handlers/createHandler');
+
+/**
+ * Sends a message back to the connected WebSocket client
+ */
+async function postToClient(event, payload) {
+  const connectionId = event?.requestContext?.connectionId;
+  const domainName = event?.requestContext?.domainName;
+  const stage = event?.requestContext?.stage;
+
+  if (!connectionId) return;
+
+  const endpoint = env.websocket.endpoint || `https://${domainName}/${stage}`;
+  const apigwClient = new ApiGatewayManagementApiClient({
+    endpoint,
+    region: env.aws.region,
+  });
+
+  try {
+    const data = typeof payload === 'string' ? payload : JSON.stringify(payload);
+    await apigwClient.send(
+      new PostToConnectionCommand({
+        ConnectionId: connectionId,
+        Data: Buffer.from(data),
+      })
+    );
+  } catch (error) {
+    if (error.name === 'GoneException' || error.statusCode === 410) {
+      console.warn(`Stale connection ${connectionId}, client disconnected.`);
+    } else {
+      console.error(`Failed to post message to client ${connectionId}:`, error.message);
+    }
+  }
+}
+
+/**
+ * WebSocket sendMessage Lambda Handler
+ */
+exports.handler = async (event) => {
+  console.log('WebSocket handleMessage event:', JSON.stringify(event));
+
+  const connectionId = event?.requestContext?.connectionId;
+
+  let body = {};
+  try {
+    body = typeof event.body === 'string' ? JSON.parse(event.body) : (event.body || {});
+  } catch (err) {
+    body = { message: event.body };
+  }
+
+  const userMessage = body.message || body.text || '';
+
+  // 1. Recover userId from DynamoDB WebSocketConnectionsTable
+  let userId = 'anonymous';
+  try {
+    const docClient = getDynamoDbDocClient();
+    const connRecord = await docClient.send(
+      new GetCommand({
+        TableName: env.dynamodb.websocketConnectionsTable,
+        Key: { connectionId },
+      })
+    );
+    if (connRecord.Item && connRecord.Item.userId) {
+      userId = connRecord.Item.userId;
+    }
+  } catch (err) {
+    console.warn(`Could not resolve userId for connection ${connectionId}:`, err.message);
+  }
+
+  // 2. Check if user is currently inside an active multi-step session (stateMachine)
+  const activeSession = await getSession(userId);
+  let responsePayload = null;
+
+  if (activeSession && activeSession.state && activeSession.state !== 'IDLE') {
+    // User is in the middle of creating a report
+    responsePayload = await createHandler({ userId, message: userMessage });
+  } else {
+    // 3. Classify message intent with intentDetector
+    const { intent } = detectIntent(userMessage);
+
+    switch (intent) {
+      case 'greeting':
+        responsePayload = await greetingHandler({ userId, message: userMessage });
+        break;
+      case 'help':
+        responsePayload = await helpHandler({ userId, message: userMessage });
+        break;
+      case 'status':
+        responsePayload = await statusHandler({ userId, message: userMessage });
+        break;
+      case 'create':
+        responsePayload = await createHandler({ userId, message: userMessage });
+        break;
+      case 'faq':
+        responsePayload = await faqHandler({ userId, message: userMessage });
+        break;
+      default:
+        responsePayload = {
+          type: 'message',
+          intent: 'unknown',
+          text: `🤔 No logré entender del todo tu mensaje. Puedes escribir:\n- *"reportar"* para iniciar un reporte\n- *"ayuda"* para ver opciones\n- *"estado"* para consultar un reporte previo.`,
+          suggestedActions: ['Reportar incidente', 'Ayuda', 'Preguntas frecuentes'],
+        };
+        break;
+    }
+  }
+
+  // 4. Send response back to the client via API Gateway Management API
+  await postToClient(event, responsePayload);
+
+  return {
+    statusCode: 200,
+    body: JSON.stringify({ message: 'Processed successfully', intent: responsePayload?.intent }),
+  };
+};
+

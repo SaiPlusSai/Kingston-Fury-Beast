@@ -36,6 +36,12 @@ const env = {
     notificationsTable: process.env.DYNAMODB_TABLE_NOTIFICATIONS || 'UrbanShield-Notifications',
     activityLogsTable: process.env.DYNAMODB_TABLE_ACTIVITY_LOGS || 'UrbanShield-ActivityLogs',
     supportMessagesTable: process.env.DYNAMODB_TABLE_SUPPORT_MESSAGES || 'UrbanShield-SupportMessages',
+    websocketConnectionsTable: process.env.DYNAMODB_TABLE_WEBSOCKET_CONNECTIONS || 'UrbanShield-WebSocketConnections',
+    chatSessionsTable: process.env.DYNAMODB_TABLE_CHAT_SESSIONS || 'UrbanShield-ChatSessions',
+    chatFaqsTable: process.env.DYNAMODB_TABLE_CHAT_FAQS || 'UrbanShield-ChatFaqs',
+  },
+  websocket: {
+    endpoint: process.env.WEBSOCKET_API_ENDPOINT,
   },
   s3: {
     bucketName: process.env.S3_BUCKET_NAME || 'urbanshield-uploads',
