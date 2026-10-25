@@ -1,0 +1,105 @@
+{
+  "boundingBox": {
+    "north": -16.4200,
+    "south": -16.6200,
+    "east": -68.0300,
+    "west": -68.2200,
+    "lat_min": -16.6200,
+    "lat_max": -16.4200,
+    "lon_min": -68.2200,
+    "lon_max": -68.0300
+  },
+  "zones": [
+    {
+      "zoneId": "centro",
+      "zoneName": "Centro",
+      "centerLatitude": -16.5000,
+      "centerLongitude": -68.1193,
+      "radiusKm": 2.5,
+      "bounds": {
+        "north": -16.4850,
+        "south": -16.5150,
+        "east": -68.1050,
+        "west": -68.1350
+      }
+    },
+    {
+      "zoneId": "max_paredes",
+      "zoneName": "Max Paredes",
+      "centerLatitude": -16.4950,
+      "centerLongitude": -68.1400,
+      "radiusKm": 3.0,
+      "bounds": {
+        "north": -16.4750,
+        "south": -16.5150,
+        "east": -68.1250,
+        "west": -68.1650
+      }
+    },
+    {
+      "zoneId": "periferica",
+      "zoneName": "Periférica",
+      "centerLatitude": -16.4700,
+      "centerLongitude": -68.1100,
+      "radiusKm": 4.0,
+      "bounds": {
+        "north": -16.4400,
+        "south": -16.4950,
+        "east": -68.0850,
+        "west": -68.1350
+      }
+    },
+    {
+      "zoneId": "cotahuma",
+      "zoneName": "Cotahuma",
+      "centerLatitude": -16.5100,
+      "centerLongitude": -68.1400,
+      "radiusKm": 3.5,
+      "bounds": {
+        "north": -16.4850,
+        "south": -16.5350,
+        "east": -68.1200,
+        "west": -68.1650
+      }
+    },
+    {
+      "zoneId": "san_antonio",
+      "zoneName": "San Antonio",
+      "centerLatitude": -16.5300,
+      "centerLongitude": -68.1000,
+      "radiusKm": 4.0,
+      "bounds": {
+        "north": -16.5050,
+        "south": -16.5550,
+        "east": -68.0750,
+        "west": -68.1250
+      }
+    },
+    {
+      "zoneId": "sur",
+      "zoneName": "Sur",
+      "centerLatitude": -16.5500,
+      "centerLongitude": -68.0800,
+      "radiusKm": 4.5,
+      "bounds": {
+        "north": -16.5200,
+        "south": -16.5800,
+        "east": -68.0500,
+        "west": -68.1100
+      }
+    },
+    {
+      "zoneId": "mallasa",
+      "zoneName": "Mallasa",
+      "centerLatitude": -16.5800,
+      "centerLongitude": -68.0500,
+      "radiusKm": 5.5,
+      "bounds": {
+        "north": -16.5450,
+        "south": -16.6200,
+        "east": -68.0300,
+        "west": -68.0900
+      }
+    }
+  ]
+}
