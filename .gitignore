@@ -58,3 +58,14 @@ Thumbs.db
 .vscode/
 *.swp
 *.swo
+
+# 6. Scripts y utilidades locales de auditoria y gestion ClickUp
+clickup_tasks_dump.json
+clickup_sync.py
+detailed_pending.py
+filter_alan_tasks.py
+check_dates.py
+check_sprints.py
+inspect_cf.py
+summarize_clickup.py
+generate_pdf.py

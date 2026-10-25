@@ -17,7 +17,7 @@ provider:
     DYNAMODB_TABLE_WEBSOCKET_CONNECTIONS: !Ref WebSocketConnectionsTable
     DYNAMODB_TABLE_CHAT_SESSIONS: !Ref ChatSessionsTable
     DYNAMODB_TABLE_CHAT_FAQS: !Ref ChatFaqsTable
-    WEBSOCKET_API_ENDPOINT: !Sub https://.execute-api..amazonaws.com/
+    WEBSOCKET_API_ENDPOINT: !Sub 'https://${WebsocketsApi}.execute-api.${AWS::Region}.amazonaws.com/${sls:stage}'
     S3_BUCKET_NAME: ${self:custom.s3BucketName}
     S3_PROFILE_BUCKET_NAME: ${self:custom.profileBucketName}
     USE_COGNITO: "false"
@@ -64,7 +64,7 @@ provider:
           Action:
             - execute-api:ManageConnections
           Resource:
-            - !Sub 'arn:aws:execute-api:${self:provider.region}:*:**/@connections/*'
+            - !Sub 'arn:aws:execute-api:${self:provider.region}:*:*/*/@connections/*'
 
         # Permisos para S3 (Subida de fotos vía URL presignada)
         - Effect: Allow
@@ -109,20 +109,21 @@ functions:
     handler: src/websocket/connect.handler
     events:
       - websocket:
-          route: 
+          route: '$connect'
 
   chatDisconnect:
     handler: src/websocket/disconnect.handler
     events:
       - websocket:
-          route: 
+          route: '$disconnect'
 
   chatHandleMessage:
     handler: src/websocket/handleMessage.handler
     events:
       - websocket:
+          route: '$default'
+      - websocket:
           route: sendMessage
-
 resources:
   Resources:
     # 1. Tabla de Usuarios
@@ -250,13 +251,13 @@ resources:
     EmergencyAlertsTopic:
       Type: AWS::SNS::Topic
       Properties:
-        TopicName: UrbanShield-EmergencyAlerts-
+        TopicName: UrbanShield-EmergencyAlerts-${self:provider.stage}
 
     # 9. Tabla de Conexiones WebSocket
     WebSocketConnectionsTable:
       Type: AWS::DynamoDB::Table
       Properties:
-        TableName: UrbanShield-WebSocketConnections-
+        TableName: UrbanShield-WebSocketConnections-${self:provider.stage}
         BillingMode: PAY_PER_REQUEST
         AttributeDefinitions:
           - AttributeName: connectionId
@@ -281,7 +282,7 @@ resources:
     ChatSessionsTable:
       Type: AWS::DynamoDB::Table
       Properties:
-        TableName: UrbanShield-ChatSessions-
+        TableName: UrbanShield-ChatSessions-${self:provider.stage}
         BillingMode: PAY_PER_REQUEST
         AttributeDefinitions:
           - AttributeName: sessionId
@@ -306,7 +307,7 @@ resources:
     ChatFaqsTable:
       Type: AWS::DynamoDB::Table
       Properties:
-        TableName: UrbanShield-ChatFaqs-
+        TableName: UrbanShield-ChatFaqs-${self:provider.stage}
         BillingMode: PAY_PER_REQUEST
         AttributeDefinitions:
           - AttributeName: faqId
@@ -322,4 +323,4 @@ resources:
               - AttributeName: category
                 KeyType: HASH
             Projection:
-              ProjectionType: ALL${self:provider.stage}
+              ProjectionType: ALL
