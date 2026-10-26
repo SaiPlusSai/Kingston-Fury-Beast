@@ -11,8 +11,8 @@ Todas las tareas están ordenadas por dependencias (lo que desbloquea primero va
 - [ ] **T-0.1:** Clonar los repositorios `frontend_urbanshield` y `backend_urbanshield` en el entorno de desarrollo local. Verificar que el frontend compila con `npm run dev` y que el backend se despliega con `serverless deploy` o corre localmente con `serverless offline`.
  - **Verificación:** `npm run dev` abre la app web en localhost sin errores; `serverless offline` responde a `GET /api/health` con 200.
 
-- [ ] **T-0.2:** Crear el repositorio `mobile_urbanshield` en GitHub con la configuración inicial de Expo: `npx create-expo-app mobile_urbanshield --template blank-typescript`. Configurar ESLint, Prettier, y .gitignore. Hacer el primer commit y push.
- - **Verificación:** `npx expo start` abre la app en un emulador o dispositivo físico mostrando la pantalla por defecto de Expo.
+- [x] **T-0.2:** Configurar el subproyecto `mobile/` dentro del monorepo con Expo SDK 51 Bare Workflow, TypeScript, ESLint, Prettier y .gitignore (gestionado bajo `mobile/openspec/changes/mobile-foundation/`).
+ - **Verificación:** `npx tsc --noEmit` y `npm run lint` con 0 errores; `npx expo export --platform android` genera bundle Hermes de 1.49 MB (542 módulos); `mobile/android/` generado vía `expo prebuild`.
 
 - [ ] **T-0.3:** Crear el directorio `prediction-service/` dentro del repositorio del backend (o como repositorio separado) con el `Dockerfile`, `requirements.txt` base, y un `handler.py` placeholder que simplemente devuelva `{"status": "ok"}`. Verificar que la imagen Docker se construye localmente con `docker build -t halo-prediction .` sin errores.
  - **Verificación:** `docker build` completa sin errores; `docker run -p 9000:8080 halo-prediction` responde a una invocación de prueba con `{"status": "ok"}`.

@@ -1,0 +1,47 @@
+schema: spec-driven
+
+context: |
+  Subproyecto: HALO Mobile (Urban Shield) — Aplicación Móvil Ciudadana
+  Monorepo: Kingston Fury Beast
+  Ubicación: mobile/
+
+  Stack Móvil:
+  - Framework: React Native 0.74.5 con Expo SDK 51 (~51.0.38)
+  - Lenguaje: TypeScript 5.3+ (tipado estricto)
+  - Workflow: Expo Bare Workflow (Continuous Native Generation vía expo prebuild)
+  - Calidad: ESLint (eslint-config-expo), Prettier
+  - Empaquetador: Metro Bundler (puerto 8081)
+  - Consumo API: Backend Serverless de HALO (HTTP API + WebSocket API) según contratos de la raíz
+
+  Convenciones y Restricciones:
+  - Commits convencionales (feat:, fix:, docs:, chore:, test:)
+  - Código y componentes modularizados dentro de mobile/src/
+  - No duplicar lógica de backend ni llamar directamente a AWS DynamoDB; todo pasa por API Gateway
+  - Configuración nativa declarativa en app.json mediante plugins de Expo
+  - En Sprint 1: Solo infraestructura base, calidad y andamiaje Bare; sin dependencias funcionales prematuras
+
+rules:
+  proposal:
+    - Delimitar claramente el alcance del sprint móvil
+    - Especificar qué componentes nativos o librerías se incorporan
+    - Citar la trazabilidad con los contratos de API del OpenSpec raíz
+  specs:
+    - Seguir el formato OpenSpec delta: Purpose, ADDED Requirements, ### Requirement: ..., #### Scenario: ...
+    - Incluir escenarios con sintaxis WHEN/THEN explícita
+    - Describir flujos de usuario móvil, estados de pantalla y manejo de errores
+  design:
+    - Incluir arquitectura de navegación y gestión de estado
+    - Documentar plugins de Expo y permisos nativos en app.json
+  tasks:
+    - Dividir en tareas verificables menores a 4 horas
+    - Cada tarea debe incluir comando de verificación (ej. tsc, lint, expo export)
+
+operations:
+  apply:
+    guidance:
+      - Validar tipado TypeScript con npx tsc --noEmit antes de dar por terminada una tarea
+      - Validar linter con npm run lint
+      - Probar el bundle de Metro antes de cerrar tareas de infraestructura
+  archive:
+    guidance:
+      - Sincronizar las especificaciones aprobadas en mobile/openspec/specs/

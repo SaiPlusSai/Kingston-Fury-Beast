@@ -1,22 +1,25 @@
-﻿# Spec: Chatbot Interactivo en Tiempo Real
+## Purpose
 
-## 1. Resumen de la Capacidad
+Proporcionar un asistente conversacional interactivo en tiempo real mediante WebSockets y APIs REST para atención ciudadana, consulta de preguntas frecuentes y creación guiada de reportes de incidentes en la plataforma HALO.
 
-Este documento especifica todos los requisitos funcionales y no funcionales para el módulo de Chatbot Interactivo en Tiempo Real de la plataforma HALO. El chatbot será un componente transversal disponible tanto en la aplicación web (React 19) como en la futura aplicación móvil (React Native), conectado al backend mediante WebSockets a través de AWS API Gateway.
+## ADDED Requirements
 
-El chatbot actúa como un asistente virtual ciudadano capaz de:
-- Responder preguntas frecuentes (FAQ) de forma inmediata.
-- Consultar el estado de reportes de incidentes en tiempo real.
-- Guiar al usuario paso a paso para crear un nuevo reporte de incidente de manera conversacional.
-- Enviar notificaciones proactivas cuando el estado de un reporte cambie.
+### Requirement: CHAT-SEC - Purpose
 
----
+El sistema SHALL verificar y aplicar las condiciones de Purpose.
 
-## 2. Requisitos Funcionales
+Proporcionar un asistente conversacional interactivo en tiempo real mediante WebSockets y APIs REST para atención ciudadana, consulta de preguntas frecuentes y creación guiada de reportes de incidentes en la plataforma HALO.
 
-### 2.1 Gestión de Conexiones WebSocket
+#### Scenario: Validación de requerimiento
+- **WHEN** se evalúa la sección Purpose
+- **THEN** el sistema cumple con las directrices establecidas
 
-#### RF-CHAT-001: Establecimiento de Conexión
+### Requirement: CHAT-SEC - ADDED Requirements
+
+El sistema SHALL verificar y aplicar las condiciones de ADDED Requirements.
+
+##### Requirement: RF-CHAT-001 - Establecimiento de Conexión
+
 - **Descripción:** El sistema debe permitir que un usuario autenticado establezca una conexión WebSocket persistente con el servidor.
 - **Precondiciones:** El usuario debe tener un token JWT válido emitido por Amazon Cognito.
 - **Flujo:**
@@ -27,14 +30,24 @@ El chatbot actúa como un asistente virtual ciudadano capaz de:
  5. Si el token es inválido o ha expirado, se responde con status code 401 y se rechaza la conexión.
 - **Criterio de Aceptación:** Un usuario con token válido puede establecer conexión WebSocket; un usuario sin token o con token inválido es rechazado con error 401.
 
-#### RF-CHAT-002: Desconexión
+###### Scenario: Validación funcional de RF-CHAT-001
+- **WHEN** un usuario o servicio invoca la capacidad RF-CHAT-001
+- **THEN** Un usuario con token válido puede establecer conexión WebSocket; un usuario sin token o con token inválido es rechazado con error 401.
+
+##### Requirement: RF-CHAT-002 - Desconexión
+
 - **Descripción:** Cuando un usuario cierra la conexión WebSocket (cierre de pestaña, pérdida de red, logout), el sistema debe limpiar su registro de la tabla de conexiones activas.
 - **Flujo:**
  1. API Gateway dispara la función Lambda `$disconnect` con el `connectionId`.
  2. La Lambda elimina el registro correspondiente de `WebSocketConnectionsTable`.
 - **Criterio de Aceptación:** Tras la desconexión, el registro ya no existe en DynamoDB; no se producen registros huérfanos.
 
-#### RF-CHAT-003: Reconexión Automática del Cliente
+###### Scenario: Validación funcional de RF-CHAT-002
+- **WHEN** un usuario o servicio invoca la capacidad RF-CHAT-002
+- **THEN** Tras la desconexión, el registro ya no existe en DynamoDB; no se producen registros huérfanos.
+
+##### Requirement: RF-CHAT-003 - Reconexión Automática del Cliente
+
 - **Descripción:** Si la conexión WebSocket se interrumpe inesperadamente (pérdida de red, timeout de API Gateway tras 10 minutos de inactividad), el cliente debe intentar reconectarse automáticamente.
 - **Flujo:**
  1. El cliente detecta el evento `onclose` o `onerror` del WebSocket.
@@ -43,9 +56,14 @@ El chatbot actúa como un asistente virtual ciudadano capaz de:
  4. Tras 5 intentos fallidos consecutivos, muestra un mensaje al usuario: "No se pudo conectar al servicio de chat. Verifica tu conexión a internet."
 - **Criterio de Aceptación:** El chat se reconecta automáticamente tras una desconexión transitoria; el usuario no pierde el historial de la conversación actual.
 
-### 2.2 Procesamiento de Mensajes
+##### 2.2 Procesamiento de Mensajes
 
-#### RF-CHAT-004: Envío de Mensajes del Usuario
+###### Scenario: Validación funcional de RF-CHAT-003
+- **WHEN** un usuario o servicio invoca la capacidad RF-CHAT-003
+- **THEN** El chat se reconecta automáticamente tras una desconexión transitoria; el usuario no pierde el historial de la conversación actual.
+
+##### Requirement: RF-CHAT-004 - Envío de Mensajes del Usuario
+
 - **Descripción:** El usuario puede enviar mensajes de texto a través de la interfaz de chat.
 - **Payload de Entrada (Cliente → Servidor):**
  ```json
@@ -83,7 +101,12 @@ El chatbot actúa como un asistente virtual ciudadano capaz de:
  ```
 - **Criterio de Aceptación:** El mensaje llega al servidor, se procesa y la respuesta se entrega al cliente en menos de 2 segundos.
 
-#### RF-CHAT-005: Detección de Intenciones (NLP)
+###### Scenario: Validación funcional de RF-CHAT-004
+- **WHEN** un usuario o servicio invoca la capacidad RF-CHAT-004
+- **THEN** El mensaje llega al servidor, se procesa y la respuesta se entrega al cliente en menos de 2 segundos.
+
+##### Requirement: RF-CHAT-005 - Detección de Intenciones (NLP)
+
 - **Descripción:** El sistema debe clasificar cada mensaje del usuario en una de las siguientes intenciones predefinidas.
 - **Intenciones soportadas:**
 
@@ -101,9 +124,14 @@ El chatbot actúa como un asistente virtual ciudadano capaz de:
  - **Fase 2 (Mejora):** Integración opcional con AWS Lex o servicio de NLP externo para detección semántica.
 - **Criterio de Aceptación:** El sistema clasifica correctamente al menos el 85% de los mensajes de prueba en la intención correcta; los mensajes no reconocidos caen en `intent_unknown` con un mensaje de ayuda claro.
 
-### 2.3 Intención FAQ
+##### 2.3 Intención FAQ
 
-#### RF-CHAT-006: Base de Datos de FAQs
+###### Scenario: Validación funcional de RF-CHAT-005
+- **WHEN** un usuario o servicio invoca la capacidad RF-CHAT-005
+- **THEN** El sistema clasifica correctamente al menos el 85% de los mensajes de prueba en la intención correcta; los mensajes no reconocidos caen en `intent_unknown` con un mensaje de ayuda claro.
+
+##### Requirement: RF-CHAT-006 - Base de Datos de FAQs
+
 - **Descripción:** El sistema debe mantener una colección de preguntas frecuentes con sus respuestas, consultable por el bot.
 - **Modelo de Datos (DynamoDB):**
  - **Tabla:** `ChatFaqsTable`
@@ -125,7 +153,12 @@ El chatbot actúa como un asistente virtual ciudadano capaz de:
 - **Búsqueda:** Se compararán las palabras clave del mensaje del usuario contra el campo `keywords` de cada FAQ activa. Se devolverá la FAQ con mayor coincidencia de keywords.
 - **Criterio de Aceptación:** El bot devuelve la FAQ correcta cuando el usuario pregunta con cualquiera de las palabras clave asociadas; devuelve un mensaje de "no encontrado" si ninguna FAQ coincide.
 
-#### RF-CHAT-007: Administración de FAQs
+###### Scenario: Validación funcional de RF-CHAT-006
+- **WHEN** un usuario o servicio invoca la capacidad RF-CHAT-006
+- **THEN** El bot devuelve la FAQ correcta cuando el usuario pregunta con cualquiera de las palabras clave asociadas; devuelve un mensaje de "no encontrado" si ninguna FAQ coincide.
+
+##### Requirement: RF-CHAT-007 - Administración de FAQs
+
 - **Descripción:** Los administradores deben poder gestionar (crear, editar, eliminar, activar/desactivar) las FAQs desde el panel de administración web.
 - **Endpoints API REST (backend existente):**
  - `POST /api/admin/faqs` — Crear nueva FAQ
@@ -134,9 +167,14 @@ El chatbot actúa como un asistente virtual ciudadano capaz de:
  - `DELETE /api/admin/faqs/:faqId` — Eliminar FAQ
 - **Criterio de Aceptación:** Un administrador puede crear una FAQ desde el panel web y el bot la utiliza inmediatamente en las respuestas sin necesidad de reiniciar el sistema.
 
-### 2.4 Intención Consulta de Estado
+##### 2.4 Intención Consulta de Estado
 
-#### RF-CHAT-008: Consulta de Estado de Reporte por ID
+###### Scenario: Validación funcional de RF-CHAT-007
+- **WHEN** un usuario o servicio invoca la capacidad RF-CHAT-007
+- **THEN** Un administrador puede crear una FAQ desde el panel web y el bot la utiliza inmediatamente en las respuestas sin necesidad de reiniciar el sistema.
+
+##### Requirement: RF-CHAT-008 - Consulta de Estado de Reporte por ID
+
 - **Descripción:** El bot debe ser capaz de extraer un ID de reporte del mensaje del usuario y consultar su estado actual en la base de datos.
 - **Flujo:**
  1. El usuario envía un mensaje como "Estado del reporte 2847" o "¿Cómo va mi reporte #2847?".
@@ -160,7 +198,12 @@ El chatbot actúa como un asistente virtual ciudadano capaz de:
    ```
 - **Criterio de Aceptación:** El bot devuelve el estado correcto del reporte incluyendo las últimas 3 actividades; si el reporte no existe o no pertenece al usuario, muestra un mensaje de error apropiado.
 
-#### RF-CHAT-009: Consulta de Estado sin ID (por Contexto)
+###### Scenario: Validación funcional de RF-CHAT-008
+- **WHEN** un usuario o servicio invoca la capacidad RF-CHAT-008
+- **THEN** El bot devuelve el estado correcto del reporte incluyendo las últimas 3 actividades; si el reporte no existe o no pertenece al usuario, muestra un mensaje de error apropiado.
+
+##### Requirement: RF-CHAT-009 - Consulta de Estado sin ID (por Contexto)
+
 - **Descripción:** Si el usuario dice "¿cómo va mi reporte?" sin proporcionar ID, el sistema debe consultar los reportes recientes del usuario.
 - **Flujo:**
  1. Consultar `ReportsTable` filtrando por `userId` del usuario autenticado, ordenados por fecha de creación descendente, límite 5.
@@ -176,9 +219,14 @@ El chatbot actúa como un asistente virtual ciudadano capaz de:
    ```
 - **Criterio de Aceptación:** El bot lista correctamente los reportes del usuario y permite seleccionar uno para ver el detalle completo.
 
-### 2.5 Intención Crear Reporte
+##### 2.5 Intención Crear Reporte
 
-#### RF-CHAT-010: Flujo Conversacional de Creación de Reporte
+###### Scenario: Validación funcional de RF-CHAT-009
+- **WHEN** un usuario o servicio invoca la capacidad RF-CHAT-009
+- **THEN** El bot lista correctamente los reportes del usuario y permite seleccionar uno para ver el detalle completo.
+
+##### Requirement: RF-CHAT-010 - Flujo Conversacional de Creación de Reporte
+
 - **Descripción:** El bot debe guiar al usuario a través de un flujo de pasos para crear un nuevo reporte, utilizando una máquina de estados que persista en la sesión del usuario.
 - **Estados de la Máquina:**
 
@@ -288,9 +336,14 @@ El chatbot actúa como un asistente virtual ciudadano capaz de:
  ```
 - **Criterio de Aceptación:** El usuario puede completar el flujo completo de creación de reporte conversacionalmente; el reporte creado aparece correctamente en la tabla `ReportsTable` y en el panel de administración; el usuario puede cancelar en cualquier momento.
 
-### 2.6 Notificaciones Proactivas
+##### 2.6 Notificaciones Proactivas
 
-#### RF-CHAT-011: Notificación de Cambio de Estado de Reporte
+###### Scenario: Validación funcional de RF-CHAT-010
+- **WHEN** un usuario o servicio invoca la capacidad RF-CHAT-010
+- **THEN** El usuario puede completar el flujo completo de creación de reporte conversacionalmente; el reporte creado aparece correctamente en la tabla `ReportsTable` y en el panel de administración; el usuario puede cancelar en cualquier momento.
+
+##### Requirement: RF-CHAT-011 - Notificación de Cambio de Estado de Reporte
+
 - **Descripción:** Cuando un administrador cambie el estado de un reporte, el sistema verificará si el ciudadano dueño del reporte tiene una conexión WebSocket activa y le enviará una notificación inmediata.
 - **Flujo:**
  1. El administrador actualiza el estado de un reporte en el panel web (ej: "Pendiente" → "En Investigación").
@@ -314,24 +367,28 @@ El chatbot actúa como un asistente virtual ciudadano capaz de:
 
 ---
 
-## 3. Requisitos No Funcionales
+###### Scenario: Validación funcional de RF-CHAT-011
+- **WHEN** un usuario o servicio invoca la capacidad RF-CHAT-011
+- **THEN** El ciudadano con chat abierto recibe la notificación en menos de 3 segundos tras la actualización del administrador.
 
-### 3.1 Rendimiento
+##### Requirement: CHAT-RNF - Requisitos No Funcionales
+
+####### 3.1 Rendimiento
 - **RNF-CHAT-001:** El tiempo de respuesta del bot (desde que el usuario envía el mensaje hasta que recibe la respuesta) debe ser menor a 2 segundos en el percentil 95 (p95).
 - **RNF-CHAT-002:** El sistema debe soportar al menos 100 conexiones WebSocket concurrentes sin degradación perceptible de rendimiento.
 - **RNF-CHAT-003:** La función Lambda `handleMessage` debe completar su ejecución en menos de 5 segundos para evitar timeouts.
 
-### 3.2 Disponibilidad
+####### 3.2 Disponibilidad
 - **RNF-CHAT-004:** El servicio de chat debe estar disponible el 99.5% del tiempo durante horarios de operación (6:00 AM - 12:00 AM hora local).
 - **RNF-CHAT-005:** Si el servicio de chat no está disponible, la UI debe mostrar un mensaje amigable y ofrecer alternativas (números de teléfono de emergencia, formulario web clásico).
 
-### 3.3 Seguridad
+####### 3.3 Seguridad
 - **RNF-CHAT-006:** Todas las conexiones WebSocket deben estar autenticadas mediante token JWT de Cognito. No se permitirán conexiones anónimas.
 - **RNF-CHAT-007:** Los mensajes del chat no deben almacenarse permanentemente (solo durante la sesión activa + TTL de 30 minutos). No se persisten conversaciones históricas del bot.
 - **RNF-CHAT-008:** El bot no debe revelar información de reportes que no pertenezcan al usuario solicitante.
 - **RNF-CHAT-009:** Se debe implementar rate limiting: máximo 30 mensajes por minuto por usuario para evitar abuso.
 
-### 3.4 Experiencia de Usuario
+####### 3.4 Experiencia de Usuario
 - **RNF-CHAT-010:** La interfaz del chat debe mostrar indicadores de "escribiendo..." mientras el bot procesa la respuesta.
 - **RNF-CHAT-011:** Los mensajes del bot deben incluir emojis relevantes para mejorar la legibilidad y el tono amigable.
 - **RNF-CHAT-012:** El chat debe ser responsivo y funcionar correctamente en resoluciones de 320px a 4K.
@@ -339,9 +396,13 @@ El chatbot actúa como un asistente virtual ciudadano capaz de:
 
 ---
 
-## 4. Contratos de API
+###### Scenario: Verificación de atributos de calidad
+- **WHEN** el módulo opera en condiciones normales y de alta concurrencia
+- **THEN** se satisfacen los umbrales de latencia, disponibilidad, seguridad y UX definidos
 
-### 4.1 WebSocket API
+##### Requirement: CHAT-API - Contratos de API e Integración
+
+######### 4.1 WebSocket API
 
 **URL de Conexión:**
 ```
@@ -356,9 +417,9 @@ wss://{api-id}.execute-api.{region}.amazonaws.com/{stage}?token={jwt_token}
 | `$disconnect` | `chatDisconnect` | Limpia registro de conexión |
 | `sendMessage` | `chatHandleMessage` | Procesa mensaje del usuario |
 
-### 4.2 API REST (Nuevos Endpoints)
+######### 4.2 API REST (Nuevos Endpoints)
 
-#### POST /api/admin/faqs
+########## POST /api/admin/faqs
 **Request Body:**
 ```json
 {
@@ -384,7 +445,7 @@ wss://{api-id}.execute-api.{region}.amazonaws.com/{stage}?token={jwt_token}
 }
 ```
 
-#### GET /api/admin/faqs
+########## GET /api/admin/faqs
 **Query Parameters:** `?category=contactos&isActive=true`
 **Response (200):**
 ```json
@@ -406,9 +467,13 @@ wss://{api-id}.execute-api.{region}.amazonaws.com/{stage}?token={jwt_token}
 
 ---
 
-## 5. Modelos de Datos Nuevos
+###### Scenario: Validación de contratos de interfaz
+- **WHEN** los clientes consumen los endpoints y contratos definidos
+- **THEN** el sistema procesa los payloads y responde con los códigos y esquemas JSON especificados
 
-### 5.1 WebSocketConnectionsTable
+##### Requirement: CHAT-Modelos-de-Datos-Nue - Modelos de Datos Nuevos
+
+######### 5.1 WebSocketConnectionsTable
 | Atributo | Tipo | Key | Descripción |
 |---|---|---|---|
 | `connectionId` | String | PK | ID de la conexión de API Gateway |
@@ -416,7 +481,7 @@ wss://{api-id}.execute-api.{region}.amazonaws.com/{stage}?token={jwt_token}
 | `connectedAt` | String (ISO 8601) | — | Timestamp de conexión |
 | `ttl` | Number | — | TTL para auto-limpieza (2 horas) |
 
-### 5.2 ChatSessionsTable
+######### 5.2 ChatSessionsTable
 | Atributo | Tipo | Key | Descripción |
 |---|---|---|---|
 | `sessionId` | String | PK | UUID de la sesión de chat |
@@ -428,7 +493,7 @@ wss://{api-id}.execute-api.{region}.amazonaws.com/{stage}?token={jwt_token}
 | `updatedAt` | String | — | Timestamp de última interacción |
 | `ttl` | Number | — | TTL de 30 minutos (auto-limpieza) |
 
-### 5.3 ChatFaqsTable
+######### 5.3 ChatFaqsTable
 | Atributo | Tipo | Key | Descripción |
 |---|---|---|---|
 | `faqId` | String | PK | UUID de la FAQ |
@@ -456,7 +521,12 @@ wss://{api-id}.execute-api.{region}.amazonaws.com/{stage}?token={jwt_token}
 
 ---
 
-## 6. Diagrama de Secuencia
+###### Scenario: Conformidad estructural
+- **WHEN** el sistema gestiona las entidades y estructuras de Modelos de Datos Nuevos
+- **THEN** se garantiza la persistencia, integridad y tipos de datos requeridos
+
+##### Requirement: CHAT-DIAG - Diagrama de Secuencia
+
 
 ```
 Ciudadano (Web/App)     API Gateway WS     Lambda handleMessage     DynamoDB
@@ -481,4 +551,10 @@ Ciudadano (Web/App)     API Gateway WS     Lambda handleMessage     DynamoDB
     │             │             │            │
 ```
 
+###### Scenario: Conformidad arquitectónica
+- **WHEN** se ejecutan los flujos descritos en el diagrama
+- **THEN** la interacción entre los componentes sigue la secuencia especificada
 
+#### Scenario: Validación de requerimiento
+- **WHEN** se evalúa la sección ADDED Requirements
+- **THEN** el sistema cumple con las directrices establecidas

@@ -10,7 +10,7 @@
 
 UrbanShield (HALO v2) opera en un dominio de alta sensibilidad social: la gestión de emergencias ciudadanas, alertas públicas y pronóstico de incidentes delictivos y viales. Una falla en la confidencialidad puede comprometer la identidad y seguridad física de denunciantes; una falla en la integridad puede desviar unidades de auxilio mediante reportes ficticios o envenenamiento de modelos de IA; y una falla en la disponibilidad puede costar vidas en situaciones de catástrofe.
 
-Por ello, la arquitectura de UrbanShield implementa el principio de **Security by Design** y **Defensa en Profundidad (Defense in Depth)**, alineado con:
+Por ello, la arquitectura de UrbanShield (HALO) implementa el principio de **Security by Design** y **Defensa en Profundidad (Defense in Depth)**, alineado con:
 - **OWASP Top 10 API Security Risks (2023)**
 - **OWASP Top 10 for Large Language Model & Machine Learning Applications (2025)**
 - **AWS Well-Architected Framework — Security Pillar**

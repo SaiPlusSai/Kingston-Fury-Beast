@@ -1,24 +1,25 @@
-﻿# Spec: Predicción de Hotspots con Modelos Estadísticos (Prophet / ARIMA)
+## Purpose
 
-## 1. Resumen de la Capacidad
+Proporcionar capacidades de modelado predictivo de incidentes urbanos utilizando Prophet y baselines estadísticos (ARIMA/SARIMA) desplegados en AWS Lambda Container Images para la anticipación de hotspots de seguridad.
 
-Este documento especifica todos los requisitos funcionales y no funcionales para el módulo de Predicción de Hotspots de Incidentes Urbanos de la plataforma HALO. Este módulo constituye el componente principal de Inteligencia Artificial del proyecto, satisfaciendo los requerimientos académicos de la materia de Taller de Sistemas Inteligentes.
+## ADDED Requirements
 
-El objetivo es implementar modelos estadísticos de series de tiempo propios — sin depender de soluciones pre-empaquetadas como Amazon Forecast — que sean capaces de analizar el historial de incidentes reportados en la plataforma HALO, identificar patrones temporales y geográficos, y generar predicciones sobre cuándo y dónde es más probable que ocurran futuros incidentes.
+### Requirement: PRED-SEC - Purpose
 
-Los modelos seleccionados son:
-- **Prophet (Meta):** Como modelo principal, por su capacidad de manejar estacionalidades múltiples, datos faltantes y cambios de tendencia, con una API de Python extremadamente simple y resultados interpretables.
-- **ARIMA / SARIMA:** Como modelo de comparación y validación cruzada, para demostrar versatilidad y permitir análisis de las diferencias en precisión entre ambos enfoques.
+El sistema SHALL verificar y aplicar las condiciones de Purpose.
 
-Las predicciones se visualizarán en el Dashboard de Administración mediante gráficas interactivas de "Predicción vs Realidad" y un mapa de calor predictivo, permitiendo a las autoridades tomar decisiones proactivas sobre asignación de recursos.
+Proporcionar capacidades de modelado predictivo de incidentes urbanos utilizando Prophet y baselines estadísticos (ARIMA/SARIMA) desplegados en AWS Lambda Container Images para la anticipación de hotspots de seguridad.
 
----
+#### Scenario: Validación de requerimiento
+- **WHEN** se evalúa la sección Purpose
+- **THEN** el sistema cumple con las directrices establecidas
 
-## 2. Requisitos Funcionales
+### Requirement: PRED-SEC - ADDED Requirements
 
-### 2.1 Pipeline de Datos
+El sistema SHALL verificar y aplicar las condiciones de ADDED Requirements.
 
-#### RF-PRED-001: Extracción de Datos Históricos de Incidentes
+##### Requirement: RF-PRED-001 - Extracción de Datos Históricos de Incidentes
+
 - **Descripción:** El sistema debe ser capaz de extraer todos los registros históricos de incidentes desde la tabla `ReportsTable` de DynamoDB y transformarlos en un formato adecuado para el entrenamiento de modelos de series de tiempo.
 - **Fuente de Datos:**
  - **Tabla:** `ReportsTable` (DynamoDB)
@@ -47,7 +48,12 @@ Las predicciones se visualizarán en el Dashboard de Administración mediante gr
  6. **Almacenamiento intermedio:** Guardar el DataFrame procesado como CSV en S3 (`s3://halo-predictions/data/processed/{zone_id}/{date}.csv`) para evitar re-procesar en cada entrenamiento.
 - **Criterio de Aceptación:** El pipeline extrae correctamente todos los registros válidos de `ReportsTable`, los agrupa por zona y tiempo, y genera DataFrames válidos para Prophet y ARIMA.
 
-#### RF-PRED-002: Generación de Datos Sintéticos (Dataset de Entrenamiento)
+###### Scenario: Validación funcional de RF-PRED-001
+- **WHEN** un usuario o servicio invoca la capacidad RF-PRED-001
+- **THEN** El pipeline extrae correctamente todos los registros válidos de `ReportsTable`, los agrupa por zona y tiempo, y genera DataFrames válidos para Prophet y ARIMA.
+
+##### Requirement: RF-PRED-002 - Generación de Datos Sintéticos (Dataset de Entrenamiento)
+
 - **Descripción:** Si la cantidad de datos históricos reales en `ReportsTable` es insuficiente para entrenar un modelo confiable (menos de 90 días de datos con al menos 3 incidentes diarios promedio), el sistema debe generar datos sintéticos realistas que complementen o sustituyan los datos reales.
 - **Características de los datos sintéticos:**
  1. **Distribución temporal realista:**
@@ -86,9 +92,14 @@ Las predicciones se visualizarán en el Dashboard de Administración mediante gr
  ```
 - **Criterio de Aceptación:** Los datos sintéticos generados presentan patrones estacionales claros (diarios, semanales, mensuales) que Prophet puede detectar y modelar; las gráficas de los datos sintéticos se ven realistas y no uniformes.
 
-### 2.2 Entrenamiento de Modelos
+##### 2.2 Entrenamiento de Modelos
 
-#### RF-PRED-003: Entrenamiento con Prophet (Modelo Principal)
+###### Scenario: Validación funcional de RF-PRED-002
+- **WHEN** un usuario o servicio invoca la capacidad RF-PRED-002
+- **THEN** Los datos sintéticos generados presentan patrones estacionales claros (diarios, semanales, mensuales) que Prophet puede detectar y modelar; las gráficas de los datos sintéticos se ven realistas y no uniformes.
+
+##### Requirement: RF-PRED-003 - Entrenamiento con Prophet (Modelo Principal)
+
 - **Descripción:** Implementar el entrenamiento de un modelo Prophet para cada zona geográfica, capaz de predecir la frecuencia de incidentes futuros.
 - **Configuración del modelo:**
  ```python
@@ -164,7 +175,12 @@ Las predicciones se visualizarán en el Dashboard de Administración mediante gr
  | `yearly` | float | Componente estacional anual |
 - **Criterio de Aceptación:** El modelo se entrena sin errores para al menos 3 zonas diferentes; genera predicciones a 30 días con intervalos de confianza; los componentes estacionales son interpretables y razonables.
 
-#### RF-PRED-004: Entrenamiento con ARIMA/SARIMA (Modelo Comparativo)
+###### Scenario: Validación funcional de RF-PRED-003
+- **WHEN** un usuario o servicio invoca la capacidad RF-PRED-003
+- **THEN** El modelo se entrena sin errores para al menos 3 zonas diferentes; genera predicciones a 30 días con intervalos de confianza; los componentes estacionales son interpretables y razonables.
+
+##### Requirement: RF-PRED-004 - Entrenamiento con ARIMA/SARIMA (Modelo Comparativo)
+
 - **Descripción:** Implementar un modelo ARIMA o SARIMA como alternativa y punto de comparación contra Prophet, permitiendo evaluar cuál modelo se ajusta mejor a los datos de incidentes de HALO.
 - **Implementación:**
  ```python
@@ -233,7 +249,12 @@ Las predicciones se visualizarán en el Dashboard de Administración mediante gr
  ```
 - **Criterio de Aceptación:** El modelo SARIMA se entrena sin errores con parámetros seleccionados automáticamente; genera predicciones comparables a Prophet; se documentan los valores de AIC/BIC para cada zona.
 
-#### RF-PRED-005: Evaluación y Comparación de Modelos
+###### Scenario: Validación funcional de RF-PRED-004
+- **WHEN** un usuario o servicio invoca la capacidad RF-PRED-004
+- **THEN** El modelo SARIMA se entrena sin errores con parámetros seleccionados automáticamente; genera predicciones comparables a Prophet; se documentan los valores de AIC/BIC para cada zona.
+
+##### Requirement: RF-PRED-005 - Evaluación y Comparación de Modelos
+
 - **Descripción:** El sistema debe evaluar la precisión de ambos modelos (Prophet y ARIMA) utilizando métricas estándar de series de tiempo, y presentar una comparación visual.
 - **Metodología de Evaluación:**
  1. **Train-Test Split:** Usar los últimos 20% de los datos como conjunto de prueba (holdout set).
@@ -264,9 +285,14 @@ Las predicciones se visualizarán en el Dashboard de Administración mediante gr
    ```
 - **Criterio de Aceptación:** Ambos modelos se evalúan con las mismas métricas en el mismo conjunto de prueba; se genera una tabla comparativa para cada zona; se selecciona automáticamente el modelo con menor RMSE como "ganador" para esa zona.
 
-### 2.3 Despliegue del Modelo
+##### 2.3 Despliegue del Modelo
 
-#### RF-PRED-006: Empaquetado en Docker para AWS Lambda Container Image
+###### Scenario: Validación funcional de RF-PRED-005
+- **WHEN** un usuario o servicio invoca la capacidad RF-PRED-005
+- **THEN** Ambos modelos se evalúan con las mismas métricas en el mismo conjunto de prueba; se genera una tabla comparativa para cada zona; se selecciona automáticamente el modelo con menor RMSE como "ganador" para esa zona.
+
+##### Requirement: RF-PRED-006 - Empaquetado en Docker para AWS Lambda Container Image
+
 - **Descripción:** Los modelos de predicción y el pipeline de entrenamiento deben empaquetarse en una imagen Docker compatible con AWS Lambda Container Images, ya que las librerías científicas de Python (Prophet, pandas, numpy, pystan) exceden el límite de 250MB de un Lambda Layer estándar.
 - **Dockerfile:**
  ```dockerfile
@@ -303,7 +329,12 @@ Las predicciones se visualizarán en el Dashboard de Administración mediante gr
  - Tag: `latest` + tag con fecha (ej: `2026-09-01`)
 - **Criterio de Aceptación:** La imagen Docker se construye exitosamente, se sube a ECR, y la función Lambda se invoca correctamente devolviendo predicciones en formato JSON.
 
-#### RF-PRED-007: Ejecución Programada del Entrenamiento (Batch Job)
+###### Scenario: Validación funcional de RF-PRED-006
+- **WHEN** un usuario o servicio invoca la capacidad RF-PRED-006
+- **THEN** La imagen Docker se construye exitosamente, se sube a ECR, y la función Lambda se invoca correctamente devolviendo predicciones en formato JSON.
+
+##### Requirement: RF-PRED-007 - Ejecución Programada del Entrenamiento (Batch Job)
+
 - **Descripción:** El entrenamiento y generación de predicciones no se ejecuta en tiempo real (sería demasiado lento por el cold start del contenedor), sino como un job batch programado.
 - **Scheduler:** Amazon EventBridge con regla cron.
 - **Frecuencia:** Una vez al día a las 03:00 AM (hora local), cuando el tráfico es mínimo.
@@ -340,11 +371,16 @@ Las predicciones se visualizarán en el Dashboard de Administración mediante gr
 - **Memoria de Lambda:** 3008 MB (para operaciones de pandas/numpy en memoria).
 - **Criterio de Aceptación:** El job se ejecuta diariamente sin intervención manual; los resultados se almacenan correctamente en S3; si el job falla, se envía una alerta por SNS.
 
-#### RF-PRED-008: Endpoint de Consulta de Predicciones
+###### Scenario: Validación funcional de RF-PRED-007
+- **WHEN** un usuario o servicio invoca la capacidad RF-PRED-007
+- **THEN** El job se ejecuta diariamente sin intervención manual; los resultados se almacenan correctamente en S3; si el job falla, se envía una alerta por SNS.
+
+##### Requirement: RF-PRED-008 - Endpoint de Consulta de Predicciones
+
 - **Descripción:** El backend principal (Node.js) debe exponer endpoints REST para que el frontend del administrador pueda consultar las predicciones generadas.
 - **Endpoints:**
 
- #### GET /api/admin/predictions
+ ###### GET /api/admin/predictions
  Devuelve el resumen de predicciones más reciente para todas las zonas.
  
  **Query Parameters:**
@@ -394,7 +430,7 @@ Las predicciones se visualizarán en el Dashboard de Administración mediante gr
  }
  ```
 
- #### GET /api/admin/predictions/:zoneId
+ ###### GET /api/admin/predictions/:zoneId
  Devuelve las predicciones detalladas para una zona específica, incluyendo datos históricos para superponer.
  
  **Response (200):**
@@ -434,7 +470,7 @@ Las predicciones se visualizarán en el Dashboard de Administración mediante gr
  }
  ```
 
- #### GET /api/admin/predictions/heatmap
+ ###### GET /api/admin/predictions/heatmap
  Devuelve los datos necesarios para renderizar el mapa de calor predictivo.
  
  **Response (200):**
@@ -474,9 +510,14 @@ Las predicciones se visualizarán en el Dashboard de Administración mediante gr
 - **Implementación en el backend Node.js:** Los endpoints simplemente leen los archivos JSON desde S3 (generados por el job batch de Python) y los devuelven al frontend. No ejecutan ningún modelo en tiempo real.
 - **Criterio de Aceptación:** Los endpoints devuelven datos válidos que el frontend puede consumir directamente para renderizar gráficas y mapas de calor; si no hay predicciones disponibles, devuelven un error 404 con mensaje amigable.
 
-### 2.4 Visualización en el Dashboard de Administración
+##### 2.4 Visualización en el Dashboard de Administración
 
-#### RF-PRED-009: Gráfica de Predicción vs Realidad (Series de Tiempo)
+###### Scenario: Validación funcional de RF-PRED-008
+- **WHEN** un usuario o servicio invoca la capacidad RF-PRED-008
+- **THEN** Los endpoints devuelven datos válidos que el frontend puede consumir directamente para renderizar gráficas y mapas de calor; si no hay predicciones disponibles, devuelven un error 404 con mensaje amigable.
+
+##### Requirement: RF-PRED-009 - Gráfica de Predicción vs Realidad (Series de Tiempo)
+
 - **Descripción:** El Dashboard de Administración debe incluir una nueva sección/pestaña de "Predicciones" con una gráfica interactiva de series de tiempo que superpone los datos reales observados con las predicciones del modelo.
 - **Componentes de la gráfica:**
  1. **Eje X:** Tiempo (días).
@@ -495,7 +536,12 @@ Las predicciones se visualizarán en el Dashboard de Administración mediante gr
 - **Librería de gráficas:** Recharts (ya utilizado en el frontend existente).
 - **Criterio de Aceptación:** La gráfica se renderiza correctamente con datos reales y predicciones; el intervalo de confianza se visualiza como banda sombreada; la interactividad funciona sin lag.
 
-#### RF-PRED-010: Gráfica de Componentes de Estacionalidad
+###### Scenario: Validación funcional de RF-PRED-009
+- **WHEN** un usuario o servicio invoca la capacidad RF-PRED-009
+- **THEN** La gráfica se renderiza correctamente con datos reales y predicciones; el intervalo de confianza se visualiza como banda sombreada; la interactividad funciona sin lag.
+
+##### Requirement: RF-PRED-010 - Gráfica de Componentes de Estacionalidad
+
 - **Descripción:** Mostrar las componentes estacionales descompuestas del modelo Prophet, permitiendo entender qué patrones temporales son los más influyentes.
 - **Subgráficas:**
  1. **Tendencia (Trend):** Gráfica lineal mostrando la dirección general a largo plazo (¿los incidentes van en aumento o en disminución?).
@@ -504,7 +550,12 @@ Las predicciones se visualizarán en el Dashboard de Administración mediante gr
  4. **Estacionalidad Anual (si aplica):** Gráfica mostrando variaciones mensuales (ej: época de lluvias = más reportes de infraestructura).
 - **Criterio de Aceptación:** Las 3-4 subgráficas se muestran en un layout de grid 2x2; cada componente es interpretable y coincide con la intuición del dominio.
 
-#### RF-PRED-011: Mapa de Calor Predictivo (Heatmap)
+###### Scenario: Validación funcional de RF-PRED-010
+- **WHEN** un usuario o servicio invoca la capacidad RF-PRED-010
+- **THEN** Las 3-4 subgráficas se muestran en un layout de grid 2x2; cada componente es interpretable y coincide con la intuición del dominio.
+
+##### Requirement: RF-PRED-011 - Mapa de Calor Predictivo (Heatmap)
+
 - **Descripción:** El mapa principal del Dashboard de Administración debe poder alternar entre la vista de "Incidentes actuales" (marcadores) y la vista de "Predicción de hotspots" (mapa de calor).
 - **Especificaciones del mapa de calor:**
  1. Renderizado con MapLibre GL JS usando la capa `heatmap` nativa.
@@ -526,7 +577,12 @@ Las predicciones se visualizarán en el Dashboard de Administración mediante gr
    - Slider temporal: "Predicción para hoy", "mañana", "próximos 7 días", etc.
 - **Criterio de Aceptación:** El mapa de calor se renderiza correctamente sobre el mapa existente; los colores reflejan la intensidad de riesgo predicho; los popups muestran información relevante al clic.
 
-#### RF-PRED-012: Panel de Métricas y Comparación de Modelos
+###### Scenario: Validación funcional de RF-PRED-011
+- **WHEN** un usuario o servicio invoca la capacidad RF-PRED-011
+- **THEN** El mapa de calor se renderiza correctamente sobre el mapa existente; los colores reflejan la intensidad de riesgo predicho; los popups muestran información relevante al clic.
+
+##### Requirement: RF-PRED-012 - Panel de Métricas y Comparación de Modelos
+
 - **Descripción:** Sección del dashboard que muestra las métricas de evaluación de los modelos y permite al administrador entender el nivel de confianza de las predicciones.
 - **Contenido:**
  1. **Tarjetas de resumen (KPIs):**
@@ -562,32 +618,43 @@ Las predicciones se visualizarán en el Dashboard de Administración mediante gr
 
 ---
 
-## 3. Requisitos No Funcionales
+###### Scenario: Validación funcional de RF-PRED-012
+- **WHEN** un usuario o servicio invoca la capacidad RF-PRED-012
+- **THEN** Las métricas se presentan de forma clara tanto para técnicos (tabla con MAE/RMSE/R²) como para no-técnicos (explicación en lenguaje natural); la tabla se actualiza automáticamente cuando hay nuevas predicciones.
 
-### 3.1 Rendimiento
+##### Requirement: PRED-RNF - Requisitos No Funcionales
+
+
+##### Requirement: PRED-RNF - Requisitos No Funcionales
+
+####### 3.1 Rendimiento
 - **RNF-PRED-001:** El job batch de entrenamiento debe completarse en menos de 15 minutos (límite de Lambda) para el conjunto completo de zonas (hasta 10 zonas).
 - **RNF-PRED-002:** Los endpoints de consulta de predicciones deben responder en menos de 2 segundos (lectura de S3 + transformación mínima).
 - **RNF-PRED-003:** Las gráficas de series de tiempo deben renderizarse en el frontend en menos de 1 segundo con hasta 365 puntos de datos.
 - **RNF-PRED-004:** El mapa de calor debe renderizarse en menos de 2 segundos con hasta 100 puntos de intensidad.
 
-### 3.2 Escalabilidad
+####### 3.2 Escalabilidad
 - **RNF-PRED-005:** La arquitectura debe soportar la adición de nuevas zonas geográficas sin cambios en el código; solo agregar configuración.
 - **RNF-PRED-006:** Si en el futuro el volumen de datos crece significativamente, debe ser posible migrar el pipeline a AWS Step Functions + Batch sin reescribir la lógica de los modelos.
 
-### 3.3 Mantenibilidad
+####### 3.3 Mantenibilidad
 - **RNF-PRED-007:** El código de Python debe incluir docstrings completos, type hints, y estar formateado con `black` y validado con `flake8`.
 - **RNF-PRED-008:** Los hiperparámetros de los modelos deben estar externalizados en un archivo de configuración YAML o JSON, no hardcodeados.
 - **RNF-PRED-009:** El pipeline debe generar logs estructurados (JSON) que se almacenen en CloudWatch para debugging y auditoría.
 
-### 3.4 Confiabilidad
+####### 3.4 Confiabilidad
 - **RNF-PRED-010:** Si el job de entrenamiento falla, las predicciones anteriores deben seguir siendo consultables (no se sobreescriben hasta que las nuevas estén listas — patrón blue/green).
 - **RNF-PRED-011:** Se debe enviar una alerta por SNS si el job falla o si las métricas del modelo se degradan significativamente (MAE > 2x del promedio histórico).
 
 ---
 
-## 4. Modelos de Datos Nuevos
+###### Scenario: Verificación de atributos de calidad
+- **WHEN** el módulo opera en condiciones normales y de alta concurrencia
+- **THEN** se satisfacen los umbrales de latencia, disponibilidad, seguridad y UX definidos
 
-### 4.1 Estructura de Resultados en S3
+##### Requirement: PRED-Modelos-de-Datos-Nue - Modelos de Datos Nuevos
+
+######### 4.1 Estructura de Resultados en S3
 
 ```
 s3://halo-predictions/
@@ -613,7 +680,7 @@ s3://halo-predictions/
     └── training_log.json     # Log del entrenamiento
 ```
 
-### 4.2 zones.json (Configuración de Zonas)
+######### 4.2 zones.json (Configuración de Zonas)
 ```json
 {
  "zones": [
@@ -649,7 +716,11 @@ s3://halo-predictions/
 
 ---
 
-## 5. Diagrama de Arquitectura del Pipeline
+###### Scenario: Conformidad estructural
+- **WHEN** el sistema gestiona las entidades y estructuras de Modelos de Datos Nuevos
+- **THEN** se garantiza la persistencia, integridad y tipos de datos requeridos
+
+##### Requirement: PRED-DIAG - Diagrama de Arquitectura del Pipeline
 
 ```
           ┌──────────────────┐
@@ -695,4 +766,10 @@ s3://halo-predictions/
           └───────────────────────────┘
 ```
 
+###### Scenario: Conformidad arquitectónica
+- **WHEN** se ejecutan los flujos descritos en el diagrama
+- **THEN** la interacción entre los componentes sigue la secuencia especificada
 
+#### Scenario: Validación de requerimiento
+- **WHEN** se evalúa la sección ADDED Requirements
+- **THEN** el sistema cumple con las directrices establecidas
