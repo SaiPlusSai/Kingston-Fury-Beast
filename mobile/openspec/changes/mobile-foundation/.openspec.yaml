@@ -1,0 +1,7 @@
+schema: spec-driven
+x-name: mobile-foundation
+goal: >
+  Establecer la infraestructura base, el andamiaje nativo con Expo Bare Workflow,
+  la configuración de TypeScript, ESLint, Prettier y la verificación de arranque con Metro Bundler
+  para la aplicación móvil ciudadana HALO en mobile/, correspondiente al Sprint 1.
+created: 2026-10-26
