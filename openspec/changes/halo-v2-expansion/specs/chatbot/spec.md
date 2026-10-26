@@ -443,6 +443,19 @@ wss://{api-id}.execute-api.{region}.amazonaws.com/{stage}?token={jwt_token}
 
 ---
 
+## 5.4 Modulo Cognitivo RAG (Retrieval-Augmented Generation con FAISS)
+
+### RF-CHAT-RAG-001: Recuperacion Aumentada para Asistencia Ciudadana
+- **Descripcion:** Cuando el usuario formula preguntas ciudadanas complejas o normativas en lenguaje natural que no coinciden con un FAQ estatico exacto, el sistema redirige la consulta al motor RAG local.
+- **Flujo:**
+  1. El texto se vectoriza mediante un modelo de embeddings ligero (sentence-transformers/all-MiniLM-L6-v2).
+  2. Se realiza una busqueda por similitud de coseno en un indice vectorial FAISS conteniendo la base de conocimiento de auxilio y seguridad ciudadana de La Paz.
+  3. Se recuperan los k=3 chunks de mayor relevancia contextual con score >= 0.5.
+  4. Se sintetiza la respuesta estructurada y se entrega con atribucion de fuentes normativas.
+- **Criterio de Aceptacion:** Consultas semanticas complejas devuelven respuestas contextualmente precisas con latencia < 1.5s.
+
+---
+
 ## 6. Diagrama de Secuencia
 
 ```

@@ -7,6 +7,7 @@ const locationRoutes = require('./location.routes');
 const adminRoutes = require('./admin.routes');
 const supportRoutes = require('./support.routes');
 const healthRoutes = require('./health.routes');
+const predictionRoutes = require('./prediction.routes');
 
 const router = express.Router();
 
@@ -18,5 +19,6 @@ router.use('/notifications', notificationRoutes);
 router.use('/location', locationRoutes);
 router.use('/admin', adminRoutes);
 router.use('/support', supportRoutes);
+router.use('/predictions', predictionRoutes);
 
 module.exports = router;

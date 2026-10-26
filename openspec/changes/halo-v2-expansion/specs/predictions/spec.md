@@ -549,6 +549,19 @@ Las predicciones se visualizarán en el Dashboard de Administración mediante gr
 
 ---
 
+## 2.5 Comparacion de Modelos y MLOps (CRISP-ML(Q))
+
+### RF-PRED-ARIMA-001: Modelo Comparativo ARIMA / SARIMA
+- **Descripcion:** Implementar el modelo ARIMA(1,1,1) como benchmark estadistico clasico contra Prophet.
+- **Entrada:** Serie temporal diaria indexada por macrodistrito (minimo 14 observaciones).
+- **Salida:** Pronostico a 30 dias con intervalos de confianza del 95% y exportacion de graficos en PNG.
+
+### RF-PRED-MLOPS-001: Evaluador de Metricas y Tracking MLflow
+- **Descripcion:** Evaluar en conjunto de test (holdout) los modelos Baselines (Naive, MA7, Estacional), ARIMA y Prophet bajo MAE, RMSE, MAPE y R2.
+- **Registro MLOps:** Registrar hiperparametros, metricas y artefactos en MLflow y exportar reporte formal JSON.
+
+---
+
 ## 3. Requisitos No Funcionales
 
 ### 3.1 Rendimiento
