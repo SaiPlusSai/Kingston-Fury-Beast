@@ -1,0 +1,7 @@
+schema: spec-driven
+x-name: mobile-reports-media
+goal: >
+  Implementar el flujo integral de creación de reportes ciudadanos (CreateReportScreen) con selector visual
+  de categorías, pin de ubicación arrastrable, captura multimedia vía cámara y galería (expo-image-picker),
+  carga directa de evidencia a Amazon S3 mediante pre-signed URLs y persistencia en el backend.
+created: 2026-10-26
