@@ -98,6 +98,15 @@ async function initLocalStack() {
     }
   }
 
+  // Auto-seed FAQs in LocalStack if table exists
+  try {
+    const { seedFaqs } = require('./seed-faqs');
+    console.log(`\n--- Precarga Automatica de FAQs en LocalStack ---`);
+    await seedFaqs();
+  } catch (err) {
+    console.warn(`[WARN] No se pudo ejecutar seedFaqs automaticamente:`, err.message);
+  }
+
   console.log(`\n[OK] Inicializacion completada exitosamente.`);
 }
 

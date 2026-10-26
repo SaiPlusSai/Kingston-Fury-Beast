@@ -16,7 +16,8 @@
     "localstack:up": "docker compose -f ../docker-compose.localstack.yml up -d",
     "localstack:down": "docker compose -f ../docker-compose.localstack.yml down",
     "localstack:init": "node scripts/init-localstack.js",
-    "test:websocket": "node src/websocket/intentDetector.test.js && node src/websocket/stateMachine.test.js && node src/websocket/connection.test.js && node src/websocket/heartbeat.test.js"
+    "test:websocket": "node src/websocket/intentDetector.test.js && node src/websocket/stateMachine.test.js && node src/websocket/connection.test.js && node src/websocket/heartbeat.test.js",
+    "seed:faqs": "node scripts/seed-faqs.js"
   },
   "keywords": [
     "urbanshield",
