@@ -70,3 +70,10 @@ check_sprints.py
 inspect_cf.py
 summarize_clickup.py
 generate_pdf.py
+
+# 7. Graphify - Archivos temporales y caches locales
+graphify-out/cache/
+graphify-out/202*/
+graphify-out/.graphify_*
+graphify-out/cost.json
+graphify-out/manifest.json
