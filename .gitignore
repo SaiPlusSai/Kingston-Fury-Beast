@@ -3,6 +3,7 @@
 # 1. Documentos y binarios académicos (no versionables)
 ec01.pdf
 *.pdf
+presentaciones_pdf
 
 # 2. Python (Prediction Service & IA)
 __pycache__/

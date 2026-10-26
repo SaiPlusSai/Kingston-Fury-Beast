@@ -1,0 +1,78 @@
+{
+  "timestamp": "2026-10-25T23:44:14.224374",
+  "test_size": 7,
+  "zones": {
+    "Centro": {
+      "zone_id": "Centro",
+      "test_period": {
+        "start": "2026-01-24",
+        "end": "2026-01-30"
+      },
+      "models": {
+        "Baseline_Naive": {
+          "MAE": 2.8571,
+          "RMSE": 3.6645,
+          "MAPE": 23.04,
+          "R2": -1.5504
+        },
+        "Baseline_MA7": {
+          "MAE": 2.0204,
+          "RMSE": 2.4032,
+          "MAPE": 17.74,
+          "R2": -0.0969
+        },
+        "Baseline_Seasonal": {
+          "MAE": 2.7024,
+          "RMSE": 3.1536,
+          "MAPE": 25.13,
+          "R2": -0.8889
+        },
+        "ARIMA": {
+          "MAE": 1.6354,
+          "RMSE": 1.9995,
+          "MAPE": 15.25,
+          "R2": 0.2407
+        },
+        "Prophet": {
+          "MAE": 2.216,
+          "RMSE": 2.4913,
+          "MAPE": 21.36,
+          "R2": 0.68
+        }
+      },
+      "best_model": "ARIMA"
+    }
+  },
+  "global_averages": {
+    "Baseline_Naive": {
+      "MAE": 2.8571,
+      "RMSE": 3.6645,
+      "MAPE": 23.04,
+      "R2": -1.5504
+    },
+    "Prophet": {
+      "MAE": 2.216,
+      "RMSE": 2.4913,
+      "MAPE": 21.36,
+      "R2": 0.68
+    },
+    "ARIMA": {
+      "MAE": 1.6354,
+      "RMSE": 1.9995,
+      "MAPE": 15.25,
+      "R2": 0.2407
+    },
+    "Baseline_Seasonal": {
+      "MAE": 2.7024,
+      "RMSE": 3.1536,
+      "MAPE": 25.13,
+      "R2": -0.8889
+    },
+    "Baseline_MA7": {
+      "MAE": 2.0204,
+      "RMSE": 2.4032,
+      "MAPE": 17.74,
+      "R2": -0.0969
+    }
+  }
+}
