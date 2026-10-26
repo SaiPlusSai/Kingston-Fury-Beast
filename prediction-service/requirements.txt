@@ -3,7 +3,7 @@
 # Python 3.11+
 
 # Series de Tiempo — Modelos principales
-# prophet==1.1.5         # Comentado temporalmente por límite de rutas largas en Windows
+prophet>=1.1.5
 # pmdarima          # Comentado temporalmente por incompatibilidad de build en Python 3.13==2.0.4          # auto_arima para ARIMA baseline
 
 # Manipulación de datos
@@ -23,3 +23,7 @@ python-dotenv==1.0.1
 # Modelos de Series de Tiempo (Sprint 0 — Baselines)
 statsmodels>=0.15.0       # ARIMA, SARIMA, test ADF — puro Python, sin compilacion C++
 scipy>=1.8                # Dependencia de statsmodels
+
+# AWS SDK y Testing
+boto3>=1.34.0
+pytest>=8.0.0
