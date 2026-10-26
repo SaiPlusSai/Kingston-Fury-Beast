@@ -1,0 +1,32 @@
+{
+  "name": "halo-mobile",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "start": "expo start",
+    "android": "expo run:android",
+    "ios": "expo run:ios",
+    "web": "expo start --web",
+    "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
+    "lint:fix": "eslint . --ext .js,.jsx,.ts,.tsx --fix",
+    "format": "prettier --write \"**/*.{js,jsx,ts,tsx,json,md}\"",
+    "type-check": "tsc --noEmit",
+    "prebuild": "expo prebuild"
+  },
+  "dependencies": {
+    "expo": "~51.0.38",
+    "expo-status-bar": "~1.12.1",
+    "react": "18.2.0",
+    "react-native": "0.74.5"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.24.0",
+    "@types/react": "~18.2.79",
+    "es-abstract": "^1.24.2",
+    "eslint": "^8.57.1",
+    "eslint-config-expo": "~7.1.2",
+    "prettier": "^3.5.3",
+    "typescript": "~5.3.3"
+  },
+  "private": true
+}

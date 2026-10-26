@@ -85,6 +85,7 @@ Custom skills are located in `.agents/skills/`. The agent activates them based o
 | **`localstack-aws-runner`** | `.agents/skills/localstack-aws-runner/` | When operating or testing with local AWS cloud emulation. |
 | **`ml-prediction-evaluator`** | `.agents/skills/ml-prediction-evaluator/` | When executing Python synthetic data generation, EDA, or baseline evaluations. |
 | **`security-by-design-audit`** | `.agents/skills/security-by-design-audit/` | To audit routes, IAM policies, and code for secrets and security gaps. |
+| **`mobile-expo-bare-suite`** | `.agents/skills/mobile-expo-bare-suite/` | When developing, scaffolding or validating the React Native Expo app in `mobile/`. |
 
 ---
 
@@ -112,9 +113,22 @@ npm run dev               # Dev server on port 5173
 python prediction-service/scripts/generate_synthetic_data.py   # Generates raw & daily synthetic incident datasets
 ```
 
-### OpenSpec Validation
+### Mobile Application (React Native / Expo)
 ```powershell
-openspec validate --all   # Ensures all OpenSpec proposals, specs, and tasks are syntactically valid
+cd mobile
+npx tsc --noEmit          # TypeScript strict compilation check
+npm run lint              # ESLint check across mobile/
+npx expo export --platform android  # Validates Metro bundle resolution
+cd ..
+```
+
+### OpenSpec Validation (Dual Roots)
+```powershell
+# Root OpenSpec (Backend, Frontend, Prediction)
+openspec validate --all
+
+# Mobile OpenSpec (Mobile Subproject)
+cd mobile; openspec validate --all; cd ..
 ```
 
 ---
