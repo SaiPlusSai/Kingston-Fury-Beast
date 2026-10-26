@@ -3,6 +3,7 @@
 # 1. Documentos y binarios académicos (no versionables)
 ec01.pdf
 *.pdf
+presentaciones_pdf
 
 # 2. Python (Prediction Service & IA)
 __pycache__/
@@ -47,6 +48,7 @@ yarn-error.log*
 .pnpm-debug.log*
 
 # 5. Sistema Operativo y Editores
+.localstack/
 .DS_Store
 .DS_Store?
 ._*
