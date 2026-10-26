@@ -1,0 +1,7 @@
+schema: spec-driven
+x-name: mobile-offline-push-profile
+goal: >
+  Implementar el sistema de notificaciones push nativas (expo-notifications), el modo offline resiliente
+  con detección de red (NetInfo) y almacenamiento local cifrado de borradores, y la pantalla de perfil ciudadano
+  (ProfileScreen) con configuración y cierre de sesión seguro.
+created: 2026-10-26

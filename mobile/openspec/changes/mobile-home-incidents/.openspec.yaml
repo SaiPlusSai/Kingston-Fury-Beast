@@ -1,0 +1,7 @@
+schema: spec-driven
+x-name: mobile-home-incidents
+goal: >
+  Implementar la pantalla principal (HomeScreen/Dashboard) con mapa interactivo centrado en la ubicación
+  del ciudadano mediante expo-location y react-native-maps, marcadores coloreados por categoría,
+  tarjetas scrolleables de resumen y lista de incidentes cercanos.
+created: 2026-10-26

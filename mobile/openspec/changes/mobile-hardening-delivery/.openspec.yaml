@@ -1,0 +1,7 @@
+schema: spec-driven
+x-name: mobile-hardening-delivery
+goal: >
+  Ejecutar el proceso integral de aseguramiento de calidad, accesibilidad WCAG AA, hardening de seguridad
+  (cero PII, certificate pinning, SecureStore audit), suite de pruebas automatizadas E2E/Jest (>80% cobertura)
+  y generación del build de producción para Android (APK) vía EAS Build.
+created: 2026-10-26
