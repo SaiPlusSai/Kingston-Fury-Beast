@@ -6,6 +6,9 @@ const tableNames = {
   notifications: env.dynamodb.notificationsTable,
   activityLogs: env.dynamodb.activityLogsTable,
   supportMessages: env.dynamodb.supportMessagesTable,
+  websocketConnections: env.dynamodb.websocketConnectionsTable,
+  chatSessions: env.dynamodb.chatSessionsTable,
+  chatFaqs: env.dynamodb.chatFaqsTable,
 };
 
 const tableSchemas = {
@@ -123,6 +126,51 @@ const tableSchemas = {
           { AttributeName: 'userId', KeyType: 'HASH' },
           { AttributeName: 'createdAt', KeyType: 'RANGE' },
         ],
+        Projection: { ProjectionType: 'ALL' },
+      },
+    ],
+  },
+  websocketConnections: {
+    TableName: tableNames.websocketConnections,
+    KeySchema: [{ AttributeName: 'connectionId', KeyType: 'HASH' }],
+    AttributeDefinitions: [
+      { AttributeName: 'connectionId', AttributeType: 'S' },
+      { AttributeName: 'userId', AttributeType: 'S' },
+    ],
+    GlobalSecondaryIndexes: [
+      {
+        IndexName: 'GSI_UserId',
+        KeySchema: [{ AttributeName: 'userId', KeyType: 'HASH' }],
+        Projection: { ProjectionType: 'ALL' },
+      },
+    ],
+  },
+  chatSessions: {
+    TableName: tableNames.chatSessions,
+    KeySchema: [{ AttributeName: 'sessionId', KeyType: 'HASH' }],
+    AttributeDefinitions: [
+      { AttributeName: 'sessionId', AttributeType: 'S' },
+      { AttributeName: 'userId', AttributeType: 'S' },
+    ],
+    GlobalSecondaryIndexes: [
+      {
+        IndexName: 'GSI_UserId',
+        KeySchema: [{ AttributeName: 'userId', KeyType: 'HASH' }],
+        Projection: { ProjectionType: 'ALL' },
+      },
+    ],
+  },
+  chatFaqs: {
+    TableName: tableNames.chatFaqs,
+    KeySchema: [{ AttributeName: 'faqId', KeyType: 'HASH' }],
+    AttributeDefinitions: [
+      { AttributeName: 'faqId', AttributeType: 'S' },
+      { AttributeName: 'category', AttributeType: 'S' },
+    ],
+    GlobalSecondaryIndexes: [
+      {
+        IndexName: 'GSI_Category',
+        KeySchema: [{ AttributeName: 'category', KeyType: 'HASH' }],
         Projection: { ProjectionType: 'ALL' },
       },
     ],
