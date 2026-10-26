@@ -1,0 +1,7 @@
+schema: spec-driven
+x-name: mobile-auth-navigation
+goal: >
+  Implementar la arquitectura de navegación completa (AuthStack y MainTabs con RootNavigator)
+  y el ciclo de autenticación ciudadana (Splash, Login, Registro, Verificación de Correo,
+  almacenamiento seguro de tokens JWT en SecureStore y renovación automática vía Axios).
+created: 2026-10-26

@@ -1,0 +1,7 @@
+schema: spec-driven
+x-name: mobile-chatbot-websocket
+goal: >
+  Implementar la interfaz de Chatbot Ciudadano interactivo en tiempo real (ChatScreen) conectada
+  al canal WebSocket de AWS API Gateway mediante autenticación JWT, gestión de reconexión automática
+  y componentes de conversación adaptados al teclado móvil.
+created: 2026-10-26

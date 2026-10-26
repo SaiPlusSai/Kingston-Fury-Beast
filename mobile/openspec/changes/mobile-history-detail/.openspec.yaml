@@ -1,0 +1,7 @@
+schema: spec-driven
+x-name: mobile-history-detail
+goal: >
+  Implementar la gestión y consulta del historial de reportes ciudadanos (MyReportsScreen) con filtros dinámicos,
+  paginación infinita y pull-to-refresh, así como la vista detallada de incidentes (ReportDetailScreen) con
+  mapa de ubicación, visor multimedia con zoom, timeline cronológico de actividad y acciones de interacción.
+created: 2026-10-26
