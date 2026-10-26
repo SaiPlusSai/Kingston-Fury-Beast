@@ -4,10 +4,22 @@ const { env } = require('../../config/env');
 const { spawnSync } = require('child_process');
 const path = require('path');
 
+const fs = require('fs');
+
 /**
  * Fallback static FAQs in case table is empty during cold start
  */
-const DEFAULT_FAQS = [
+let DEFAULT_FAQS = [];
+const SEED_FILE = path.resolve(__dirname, '../../../data/faqs_seed.json');
+if (fs.existsSync(SEED_FILE)) {
+  try {
+    DEFAULT_FAQS = JSON.parse(fs.readFileSync(SEED_FILE, 'utf-8'));
+  } catch (e) {
+    DEFAULT_FAQS = [];
+  }
+}
+if (!DEFAULT_FAQS || DEFAULT_FAQS.length === 0) {
+  DEFAULT_FAQS = [
   {
     faqId: 'emergency-numbers',
     keywords: ['numero', 'telefono', 'contacto', 'emergencia', 'policia', 'bomberos', 'ambulancia'],
@@ -27,6 +39,7 @@ const DEFAULT_FAQS = [
     answer: '🔒 Sí. Todos tus datos personales están protegidos y sólo el equipo de operaciones asignado tiene acceso a la información técnica del incidente.',
   },
 ];
+}
 
 /**
  * Query Python RAG service using FAISS vector search
