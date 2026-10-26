@@ -3,18 +3,37 @@ const {
   GetCommand,
   PutCommand,
   DeleteCommand,
-  UpdateCommand,
 } = require('@aws-sdk/lib-dynamodb');
 const { getDynamoDbDocClient } = require('../aws/clients');
 const { env } = require('../config/env');
 const { AppError } = require('../utils/apiResponse');
+const fs = require('fs');
+const path = require('path');
+
+const SEED_FILE = path.resolve(__dirname, '../../data/faqs_seed.json');
 
 /**
- * Service to manage FAQs in DynamoDB (ChatFaqsTable)
+ * Service to manage FAQs in DynamoDB (ChatFaqsTable) with resilient offline fallback
  */
 class FaqService {
   constructor() {
     this.tableName = env.dynamodb.chatFaqsTable;
+    this.inMemoryFaqs = null;
+    this._loadInitialSeed();
+  }
+
+  _loadInitialSeed() {
+    if (!this.inMemoryFaqs) {
+      if (fs.existsSync(SEED_FILE)) {
+        try {
+          this.inMemoryFaqs = JSON.parse(fs.readFileSync(SEED_FILE, 'utf-8'));
+        } catch (e) {
+          this.inMemoryFaqs = [];
+        }
+      } else {
+        this.inMemoryFaqs = [];
+      }
+    }
   }
 
   get docClient() {
@@ -25,44 +44,55 @@ class FaqService {
    * List FAQs with optional category and search filters
    */
   async getFaqs({ category, search, isActive, limit = 100 } = {}) {
-    const params = {
-      TableName: this.tableName,
-      Limit: limit,
-    };
+    let items = [];
 
-    const filterExpressions = [];
-    const expressionAttributeValues = {};
-    const expressionAttributeNames = {};
+    try {
+      const params = {
+        TableName: this.tableName,
+        Limit: limit,
+      };
 
-    if (category) {
-      filterExpressions.push('#cat = :category');
-      expressionAttributeNames['#cat'] = 'category';
-      expressionAttributeValues[':category'] = category.toLowerCase();
-    }
+      const filterExpressions = [];
+      const expressionAttributeValues = {};
+      const expressionAttributeNames = {};
 
-    if (isActive !== undefined) {
-      filterExpressions.push('#act = :isActive');
-      expressionAttributeNames['#act'] = 'isActive';
-      expressionAttributeValues[':isActive'] = isActive === true || isActive === 'true';
-    }
-
-    if (filterExpressions.length > 0) {
-      params.FilterExpression = filterExpressions.join(' AND ');
-      params.ExpressionAttributeNames = expressionAttributeNames;
-      params.ExpressionAttributeValues = expressionAttributeValues;
-    }
-
-    const result = await this.docClient.send(new ScanCommand(params));
-    let items = result.Items || [];
-
-    // Fallback: If table is empty, load seed data in-memory
-    if (items.length === 0) {
-      try {
-        const seed = require('../../data/faqs_seed.json');
-        items = seed;
-      } catch (err) {
-        items = [];
+      if (category) {
+        filterExpressions.push('#cat = :category');
+        expressionAttributeNames['#cat'] = 'category';
+        expressionAttributeValues[':category'] = category.toLowerCase();
       }
+
+      if (isActive !== undefined) {
+        filterExpressions.push('#act = :isActive');
+        expressionAttributeNames['#act'] = 'isActive';
+        expressionAttributeValues[':isActive'] = isActive === true || isActive === 'true';
+      }
+
+      if (filterExpressions.length > 0) {
+        params.FilterExpression = filterExpressions.join(' AND ');
+        params.ExpressionAttributeNames = expressionAttributeNames;
+        params.ExpressionAttributeValues = expressionAttributeValues;
+      }
+
+      const result = await this.docClient.send(new ScanCommand(params));
+      items = result.Items || [];
+    } catch (err) {
+      // Offline fallback
+      this._loadInitialSeed();
+      items = [...this.inMemoryFaqs];
+
+      if (category) {
+        items = items.filter((f) => f.category && f.category.toLowerCase() === category.toLowerCase());
+      }
+      if (isActive !== undefined) {
+        const boolActive = isActive === true || isActive === 'true';
+        items = items.filter((f) => f.isActive === boolActive);
+      }
+    }
+
+    if (items.length === 0) {
+      this._loadInitialSeed();
+      items = [...this.inMemoryFaqs];
     }
 
     if (search) {
@@ -84,25 +114,24 @@ class FaqService {
   async getFaqById(faqId) {
     if (!faqId) throw new AppError('faqId is required', 400);
 
-    const result = await this.docClient.send(
-      new GetCommand({
-        TableName: this.tableName,
-        Key: { faqId },
-      })
-    );
-
-    if (result.Item) return result.Item;
-
-    // Check seed fallback
     try {
-      const seed = require('../../data/faqs_seed.json');
-      const found = seed.find((f) => f.faqId === faqId);
-      if (found) return found;
+      const result = await this.docClient.send(
+        new GetCommand({
+          TableName: this.tableName,
+          Key: { faqId },
+        })
+      );
+      if (result.Item) return result.Item;
     } catch (err) {
-      // ignore
+      // Offline fallback
+      this._loadInitialSeed();
+      const found = this.inMemoryFaqs.find((f) => f.faqId === faqId);
+      if (found) return found;
     }
 
-    return null;
+    this._loadInitialSeed();
+    const found = this.inMemoryFaqs.find((f) => f.faqId === faqId);
+    return found || null;
   }
 
   /**
@@ -138,12 +167,23 @@ class FaqService {
       updatedAt: now,
     };
 
-    await this.docClient.send(
-      new PutCommand({
-        TableName: this.tableName,
-        Item: item,
-      })
-    );
+    try {
+      await this.docClient.send(
+        new PutCommand({
+          TableName: this.tableName,
+          Item: item,
+        })
+      );
+    } catch (err) {
+      // Offline fallback: store in memory
+      this._loadInitialSeed();
+      this.inMemoryFaqs.push(item);
+    }
+
+    this._loadInitialSeed();
+    if (!this.inMemoryFaqs.some((f) => f.faqId === item.faqId)) {
+      this.inMemoryFaqs.push(item);
+    }
 
     return item;
   }
@@ -174,12 +214,22 @@ class FaqService {
             .filter(Boolean);
     }
 
-    await this.docClient.send(
-      new PutCommand({
-        TableName: this.tableName,
-        Item: updated,
-      })
-    );
+    try {
+      await this.docClient.send(
+        new PutCommand({
+          TableName: this.tableName,
+          Item: updated,
+        })
+      );
+    } catch (err) {
+      // Offline update
+    }
+
+    this._loadInitialSeed();
+    const idx = this.inMemoryFaqs.findIndex((f) => f.faqId === faqId);
+    if (idx !== -1) {
+      this.inMemoryFaqs[idx] = updated;
+    }
 
     return updated;
   }
@@ -193,12 +243,19 @@ class FaqService {
       throw new AppError(`FAQ with id "${faqId}" not found`, 404);
     }
 
-    await this.docClient.send(
-      new DeleteCommand({
-        TableName: this.tableName,
-        Key: { faqId },
-      })
-    );
+    try {
+      await this.docClient.send(
+        new DeleteCommand({
+          TableName: this.tableName,
+          Key: { faqId },
+        })
+      );
+    } catch (err) {
+      // Offline delete
+    }
+
+    this._loadInitialSeed();
+    this.inMemoryFaqs = this.inMemoryFaqs.filter((f) => f.faqId !== faqId);
 
     return { faqId, deleted: true };
   }

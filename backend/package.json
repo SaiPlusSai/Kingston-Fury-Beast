@@ -18,7 +18,8 @@
     "localstack:init": "node scripts/init-localstack.js",
     "test:websocket": "node src/websocket/intentDetector.test.js && node src/websocket/stateMachine.test.js && node src/websocket/connection.test.js && node src/websocket/heartbeat.test.js",
     "seed:faqs": "node scripts/seed-faqs.js",
-    "test:faqs": "node src/websocket/faqsSeed.test.js"
+    "test:faqs": "node src/websocket/faqsSeed.test.js",
+    "test:api:faqs": "node src/tests/faqAdmin.api.test.js"
   },
   "keywords": [
     "urbanshield",
