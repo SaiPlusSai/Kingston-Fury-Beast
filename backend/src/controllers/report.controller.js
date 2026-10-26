@@ -1,6 +1,7 @@
 const reportService = require('../services/report.service');
 const { sendSuccess } = require('../utils/apiResponse');
 const asyncHandler = require('../utils/asyncHandler');
+const { notifyUserReportStatus } = require('../services/pushNotification.service');
 
 const createReport = asyncHandler(async (req, res) => {
   const report = await reportService.createReport(req.user.userId, req.body);
@@ -29,11 +30,22 @@ const updateStatus = asyncHandler(async (req, res) => {
     req.user,
     req.body.notes,
   );
+  // BUILD-06: Emit proactive WebSocket notification to report author
+  if (report && report.userId) {
+    notifyUserReportStatus(report.userId, report).catch(err =>
+      console.warn('Background push notification error:', err.message)
+    );
+  }
   sendSuccess(res, { message: 'Report status updated', data: report });
 });
 
 const resolveReport = asyncHandler(async (req, res) => {
   const report = await reportService.resolveReport(req.params.id, req.user);
+  if (report && report.userId) {
+    notifyUserReportStatus(report.userId, report).catch(err =>
+      console.warn('Background push notification error:', err.message)
+    );
+  }
   sendSuccess(res, { message: 'Report resolved', data: report });
 });
 
@@ -58,8 +70,8 @@ const getNearby = asyncHandler(async (req, res) => {
 });
 
 const getAnalytics = asyncHandler(async (req, res) => {
-  const analytics = await reportService.getAnalytics();
-  sendSuccess(res, { message: 'Report analytics retrieved', data: analytics });
+  const result = await reportService.getAnalytics(req.query, req.user);
+  sendSuccess(res, { message: 'Analytics retrieved', data: result });
 });
 
 module.exports = {
