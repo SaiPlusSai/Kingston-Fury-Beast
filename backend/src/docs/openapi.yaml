@@ -52,3 +52,153 @@ paths:
       summary: Admin dashboard analytics
       security:
         - bearerAuth: []
+
+  /admin/faqs:
+    get:
+      tags: [Admin FAQs]
+      summary: List all FAQs with optional filters
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: category
+          schema:
+            type: string
+          description: Filter by category (e.g. emergencias, general, servicios)
+        - in: query
+          name: search
+          schema:
+            type: string
+          description: Search keywords in question or answer
+        - in: query
+          name: isActive
+          schema:
+            type: boolean
+          description: Filter by active status
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            default: 50
+          description: Maximum number of FAQs to return
+      responses:
+        '200':
+          description: FAQs retrieved successfully
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (Admin role required)
+
+    post:
+      tags: [Admin FAQs]
+      summary: Create a new official FAQ
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [question, answer, category]
+              properties:
+                question:
+                  type: string
+                  example: "¿Cómo reportar una fuga de agua en mi calle?"
+                answer:
+                  type: string
+                  example: "Puede reportarlo desde la sección Reportar seleccionando Servicios Básicos o llamando al 102."
+                category:
+                  type: string
+                  example: "servicios"
+                keywords:
+                  type: array
+                  items:
+                    type: string
+                  example: ["fuga", "agua", "tubería"]
+                isActive:
+                  type: boolean
+                  default: true
+      responses:
+        '201':
+          description: FAQ created successfully
+        '400':
+          description: Validation error
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (Admin role required)
+
+  /admin/faqs/{id}:
+    get:
+      tags: [Admin FAQs]
+      summary: Get FAQ by ID
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          description: FAQ ID
+      responses:
+        '200':
+          description: FAQ retrieved successfully
+        '404':
+          description: FAQ not found
+
+    put:
+      tags: [Admin FAQs]
+      summary: Update an existing FAQ
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          description: FAQ ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                question:
+                  type: string
+                answer:
+                  type: string
+                category:
+                  type: string
+                keywords:
+                  type: array
+                  items:
+                    type: string
+                isActive:
+                  type: boolean
+      responses:
+        '200':
+          description: FAQ updated successfully
+        '404':
+          description: FAQ not found
+
+    delete:
+      tags: [Admin FAQs]
+      summary: Delete a FAQ by ID
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          description: FAQ ID
+      responses:
+        '200':
+          description: FAQ deleted successfully
+        '404':
+          description: FAQ not found

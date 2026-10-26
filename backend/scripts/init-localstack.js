@@ -98,6 +98,23 @@ async function initLocalStack() {
     }
   }
 
+  // Auto-seed FAQs and Users in LocalStack
+  try {
+    const { seedFaqs } = require('./seed-faqs');
+    console.log(`\n--- Precarga Automatica de FAQs en LocalStack ---`);
+    await seedFaqs();
+  } catch (err) {
+    console.warn(`[WARN] No se pudo ejecutar seedFaqs automaticamente:`, err.message);
+  }
+
+  try {
+    const { seedUsers } = require('./seed-users');
+    console.log(`\n--- Precarga Automatica de Usuarios Demo en LocalStack ---`);
+    await seedUsers();
+  } catch (err) {
+    console.warn(`[WARN] No se pudo ejecutar seedUsers automaticamente:`, err.message);
+  }
+
   console.log(`\n[OK] Inicializacion completada exitosamente.`);
 }
 
