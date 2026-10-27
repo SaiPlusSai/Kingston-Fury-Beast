@@ -5,7 +5,7 @@ import React, { useState, useEffect, useMemo, useRef } from 'react';
  *
  * Capabilities:
  * 1. Global Mouse Cursor Eye Tracking: Kuntur follows the user's mouse across the screen!
- * 2. Responsive Sizing: Automatically scales from mobile (64px) to 4K desktop (112px).
+ * 2. Responsive Sizing: Optimized for Mobile (80px), Tablet (96px), Desktop (112px), and 4K (128px).
  * 3. Proactive Idle Gestures: Periodic wing flutters and friendly winks every ~10s.
  * 4. Sleep Mode: Gently closes eyes into sleepy arcs if inactive for >20s, wakes up when mouse moves.
  * 5. Elastic Physics (Squash & Stretch): Organic jelly bounce on click and hover.
@@ -59,7 +59,7 @@ export default function KunturBlob({
       const deltaX = e.clientX - centerX;
       const deltaY = e.clientY - centerY;
 
-      // Smooth clamp to ±4px in X and ±3px in Y
+      // Smooth clamp to ±4.5px in X and ±3.5px in Y
       const maxDist = Math.max(window.innerWidth, window.innerHeight) / 2;
       const clampedX = Math.max(-4.5, Math.min(4.5, (deltaX / maxDist) * 12));
       const clampedY = Math.max(-3.5, Math.min(3.5, (deltaY / maxDist) * 10));
@@ -97,7 +97,6 @@ export default function KunturBlob({
     if (!interactive || isSleepy) return;
 
     const interval = setInterval(() => {
-      // Alternate between wink and cute wing flutter
       const gesture = Math.random() > 0.5 ? 'wink' : 'flutter';
       setPeriodicGesture(gesture);
 
@@ -196,15 +195,14 @@ export default function KunturBlob({
     onMouseLeave?.(e);
   };
 
-  // Dimensions: Responsive mapping
+  // Dimensions: Enhanced responsive sizing for all devices (Mobile to 4K)
   const sizeMap = {
-    sm: 'w-9 h-9',
+    sm: 'w-10 h-10',
     md: 'w-14 h-14',
     lg: 'w-20 h-20',
     xl: 'w-28 h-28',
-    // Dynamic adaptive sizing for the floating launcher button:
-    // Mobile: 64px, Tablet: 80px, Desktop: 96px, Large Display: 112px
-    'responsive-fab': 'w-16 h-16 sm:w-20 sm:h-20 lg:w-24 lg:h-24 xl:w-28 xl:h-28',
+    // Mobile: 80px (w-20), Tablet: 96px (sm:w-24), Desktop: 112px (lg:w-28), Large Screens: 128px (xl:w-32)
+    'responsive-fab': 'w-20 h-20 sm:w-24 sm:h-24 lg:w-28 lg:h-28 xl:w-32 xl:h-32',
   };
   const sizeClass = sizeMap[size] || sizeMap.md;
 
@@ -221,8 +219,9 @@ export default function KunturBlob({
       } ${className}`}
       style={{ willChange: 'transform' }}
     >
+      {/* Optimized viewBox='0 10 120 92' eliminates wasted vertical whitespace, maximizing mascot scale by +28% */}
       <svg
-        viewBox="0 0 120 120"
+        viewBox="0 10 120 92"
         className="w-full h-full overflow-visible drop-shadow-lg transition-all duration-300"
       >
         {/* 1. LEFT WING (Symmetrical, pivots outward gracefully on open/flutter) */}
@@ -262,7 +261,7 @@ export default function KunturBlob({
         {/* 3. SUBTLE ANDEAN CREST (Tiny, aerodynamic on crown) */}
         <path
           d="M 57 22
-             C 57 16, 63 16, 63 22 Z"
+             C 57 15, 63 15, 63 22 Z"
           fill={wingColor}
           className="transition-colors duration-500"
         />
