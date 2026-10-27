@@ -14,6 +14,7 @@ const helpHandler = require('./handlers/helpHandler');
 const faqHandler = require('./handlers/faqHandler');
 const statusHandler = require('./handlers/statusHandler');
 const createHandler = require('./handlers/createHandler');
+const { generateGeminiReply } = require('../services/gemini.service');
 
 /**
  * Sends a message back to the connected WebSocket client
@@ -112,30 +113,35 @@ exports.handler = async (event) => {
     // 3. Classify message intent with intentDetector
     const { intent } = detectIntent(userMessage);
 
-    switch (intent) {
-      case 'greeting':
-        responsePayload = await greetingHandler({ userId, message: userMessage });
-        break;
-      case 'help':
-        responsePayload = await helpHandler({ userId, message: userMessage });
-        break;
-      case 'status':
-        responsePayload = await statusHandler({ userId, message: userMessage });
-        break;
-      case 'create':
-        responsePayload = await createHandler({ userId, message: userMessage });
-        break;
-      case 'faq':
+    if (intent === 'greeting') {
+      responsePayload = await greetingHandler({ userId, message: userMessage });
+    } else if (intent === 'create') {
+      responsePayload = await createHandler({ userId, message: userMessage });
+    } else if (intent === 'status') {
+      responsePayload = await statusHandler({ userId, message: userMessage });
+    } else if (intent === 'help') {
+      responsePayload = await helpHandler({ userId, message: userMessage });
+    } else {
+      // Intent is 'faq' or 'unknown': Try Gemini Generative AI first
+      const geminiReply = await generateGeminiReply(userMessage);
+      if (geminiReply) {
+        responsePayload = {
+          type: 'message',
+          intent: intent === 'faq' ? 'faq' : 'conversational_ai',
+          engine: 'GEMINI_FLASH_LLM',
+          text: geminiReply,
+          suggestedActions: ['Reportar incidente', 'Números de emergencia', 'Ayuda'],
+        };
+      } else if (intent === 'faq') {
         responsePayload = await faqHandler({ userId, message: userMessage });
-        break;
-      default:
+      } else {
         responsePayload = {
           type: 'message',
           intent: 'unknown',
           text: `🤔 No logré entender del todo tu mensaje. Puedes escribir:\n- *"reportar"* para iniciar un reporte\n- *"ayuda"* para ver opciones\n- *"estado"* para consultar un reporte previo.`,
           suggestedActions: ['Reportar incidente', 'Ayuda', 'Preguntas frecuentes'],
         };
-        break;
+      }
     }
   }
 

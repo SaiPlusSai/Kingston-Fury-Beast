@@ -73,6 +73,10 @@ const env = {
     user: process.env.EMAIL_USER || 'gestiontallerdegradoucb@gmail.com',
     pass: process.env.EMAIL_PASS || 'prhb cfzz ejst dzvr',
   },
+  gemini: {
+    apiKey: process.env.GEMINI_API_KEY || '',
+    model: process.env.GEMINI_MODEL || 'gemini-1.5-flash',
+  },
 };
 
 function validateEnv() {
