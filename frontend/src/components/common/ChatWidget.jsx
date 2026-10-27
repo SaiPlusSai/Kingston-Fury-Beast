@@ -29,7 +29,10 @@ export default function ChatWidget() {
   const [fsmState, setFsmState] = useState('GREETING');
   const [isProcessing, setIsProcessing] = useState(false);
   const [isInputFocused, setIsInputFocused] = useState(false);
-  const [showFabTooltip, setShowFabTooltip] = useState(false);
+  
+  // Proactive speech bubble state
+  const [showSpeechBubble, setShowSpeechBubble] = useState(false);
+  const [speechBubbleText, setSpeechBubbleText] = useState('👋 ¡Hola! Soy Kuntur. Haz clic en mí si necesitas reportar un incidente.');
 
   const wsUrl = import.meta.env.VITE_WS_URL || 'ws://localhost:3001';
   const token = localStorage.getItem('token') || 'demo-citizen-token';
@@ -40,6 +43,17 @@ export default function ChatWidget() {
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
+
+  // Proactive greeting bubble after 3.5s
+  useEffect(() => {
+    if (isOpen) return;
+
+    const timer = setTimeout(() => {
+      setShowSpeechBubble(true);
+    }, 3500);
+
+    return () => clearTimeout(timer);
+  }, [isOpen]);
 
   // Sync incoming WebSocket messages
   useEffect(() => {
@@ -77,10 +91,11 @@ export default function ChatWidget() {
     scrollToBottom();
   }, [chatHistory, isProcessing]);
 
-  // Click handler on Kuntur: Spreads wings gracefully before opening chat
+  // Handle open chat with graceful wing-spread
   const handleOpenChat = () => {
+    setShowSpeechBubble(false);
     setIsOpeningTransition(true);
-    // Subtle wing opening animation delay (250ms)
+    // Subtle wing unfolding delay
     setTimeout(() => {
       setIsOpen(true);
       setIsOpeningTransition(false);
@@ -151,45 +166,70 @@ export default function ChatWidget() {
   const lookDirection = isInputFocused || inputText.length > 0 ? 'down' : 'center';
 
   return (
-    <div className="fixed bottom-6 right-6 z-50 font-sans">
-      {/* 1. STANDALONE FLOATING KUNTUR (NO CAPSULE, NO HEAVY BARS) */}
+    <div className="fixed bottom-5 right-5 sm:bottom-7 sm:right-7 z-50 font-sans">
+      {/* 1. STANDALONE RESPONSIVE KUNTUR LAUNCHER (ADAPTIVE SIZE) */}
       {!isOpen && (
-        <div className="relative group">
-          {/* Gentle Speech Bubble on Hover */}
-          {showFabTooltip && (
-            <div className="absolute bottom-full right-2 mb-3 px-3 py-1.5 rounded-2xl bg-slate-900/90 text-white text-xs font-medium shadow-xl whitespace-nowrap animate-in fade-in slide-in-from-bottom-2 duration-200 pointer-events-none">
-              <span>👋 ¿En qué te puedo ayudar hoy?</span>
-              <div className="absolute top-full right-6 -mt-1 border-4 border-transparent border-t-slate-900/90" />
+        <div className="relative flex flex-col items-end group">
+          {/* Proactive Speech Bubble with Tail */}
+          {showSpeechBubble && (
+            <div className="mb-2 sm:mb-3 max-w-[240px] sm:max-w-[280px] p-2.5 px-3.5 rounded-2xl bg-white/95 dark:bg-slate-900/95 text-slate-800 dark:text-slate-100 text-xs font-medium shadow-xl border border-slate-200/80 dark:border-slate-800 animate-in fade-in slide-in-from-bottom-2 duration-300 relative group/bubble">
+              <div className="flex items-start justify-between gap-1.5">
+                <p
+                  onClick={handleOpenChat}
+                  className="cursor-pointer hover:text-teal-600 dark:hover:text-teal-400 transition-colors leading-relaxed"
+                >
+                  {speechBubbleText}
+                </p>
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setShowSpeechBubble(false);
+                  }}
+                  className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-0.5 rounded-md"
+                  title="Cerrar mensaje"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              </div>
+              {/* Bubble Triangle Tail pointing to Kuntur */}
+              <div className="absolute top-full right-8 -mt-1 border-6 border-transparent border-t-white dark:border-t-slate-900 drop-shadow-2xs" />
             </div>
           )}
 
-          {/* Standalone Kuntur Mascot Button */}
+          {/* Standalone Kuntur Mascot with Responsive Size */}
           <button
             type="button"
             onClick={handleOpenChat}
-            onMouseEnter={() => setShowFabTooltip(true)}
-            onMouseLeave={() => setShowFabTooltip(false)}
+            onMouseEnter={() => {
+              setSpeechBubbleText('✨ ¡Haz clic aquí para desplegar mis alas y chatear!');
+              setShowSpeechBubble(true);
+            }}
+            onMouseLeave={() => {
+              setSpeechBubbleText('👋 ¡Hola! Soy Kuntur. Haz clic en mí si necesitas reportar un incidente.');
+            }}
             className="relative flex items-center justify-center p-1 rounded-full focus:outline-none transition-transform duration-300 hover:scale-110 active:scale-95"
             style={{
               animation: 'kunturFloat 3.8s ease-in-out infinite',
             }}
             aria-label="Hablar con Kuntur"
           >
-            {/* Ambient Soft Glow Halo */}
-            <div className="absolute inset-0 rounded-full bg-teal-500/20 blur-md group-hover:bg-teal-400/35 transition-all duration-300 animate-pulse" />
+            {/* Ambient Reactive Glow Halo */}
+            <div className="absolute inset-0 rounded-full bg-teal-500/25 blur-lg group-hover:bg-teal-400/40 transition-all duration-300 animate-pulse" />
 
-            {/* Kuntur Mascot with Wing-spread gesture */}
+            {/* Kuntur Mascot with Global Mouse Cursor Eye Tracking & Responsive Sizing */}
             <KunturBlob
               state="idle"
+              trackCursor={!isOpen}
               wingsOpen={isOpeningTransition}
-              size="fab"
+              size="responsive-fab"
               interactive={true}
             />
 
-            {/* Discrete Online Indicator Dot */}
+            {/* Status Live Indicator Badge */}
             <span
-              title={isConnected ? 'Kuntur conectado' : 'Conectando con Kuntur...'}
-              className={`absolute bottom-1 right-1 w-3.5 h-3.5 rounded-full border-2 border-white dark:border-slate-900 shadow-xs transition-colors duration-300 ${
+              title={isConnected ? 'Kuntur en línea' : 'Conectando con Kuntur...'}
+              className={`absolute bottom-1 right-1 w-4 h-4 rounded-full border-2 border-white dark:border-slate-900 shadow-sm transition-colors duration-300 ${
                 isConnected ? 'bg-emerald-500 animate-pulse' : 'bg-amber-400'
               }`}
             />
@@ -199,12 +239,12 @@ export default function ChatWidget() {
 
       {/* 2. CHATBOT WINDOW (Clean, Minimalist Grok/ChatGPT Layout) */}
       {isOpen && (
-        <div className="w-[94vw] sm:w-[420px] h-[580px] max-h-[85vh] bg-white dark:bg-slate-900 rounded-3xl shadow-2xl flex flex-col border border-slate-200/90 dark:border-slate-800 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+        <div className="w-[94vw] sm:w-[420px] h-[580px] max-h-[85vh] bg-white dark:bg-slate-900 rounded-3xl shadow-2xl flex flex-col border border-slate-200/90 dark:border-slate-800 overflow-hidden animate-in fade-in zoom-in-95 duration-200 origin-bottom-right">
           
           {/* HEADER */}
           <div className="p-3 px-4 bg-slate-50/90 dark:bg-slate-900/90 border-b border-slate-200/70 dark:border-slate-800 flex justify-between items-center">
             <div className="flex items-center gap-3">
-              {/* Mascot in Header with Wings & State */}
+              {/* Mascot in Header with Wings & Real-time State */}
               <div className="relative">
                 <KunturBlob
                   state={isProcessing ? 'PROCESSING' : fsmState}
