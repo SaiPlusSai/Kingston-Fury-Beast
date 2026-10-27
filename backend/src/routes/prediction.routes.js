@@ -9,8 +9,17 @@ const fs = require('fs');
 const path = require('path');
 const router = express.Router();
 
-const PREDICTION_OUTPUT_DIR = path.resolve(__dirname, '../../../prediction-service/output');
-const ZONES_CONFIG_PATH = path.resolve(__dirname, '../../../prediction-service/config/zones.json');
+const PREDICTION_OUTPUT_DIR = (() => {
+  const packaged = path.resolve(__dirname, '../../data/predictions');
+  if (fs.existsSync(packaged)) return packaged;
+  return path.resolve(__dirname, '../../../prediction-service/output');
+})();
+
+const ZONES_CONFIG_PATH = (() => {
+  const packaged = path.resolve(__dirname, '../../data/predictions/zones.json');
+  if (fs.existsSync(packaged)) return packaged;
+  return path.resolve(__dirname, '../../../prediction-service/config/zones.json');
+})();
 
 /**
  * GET /api/predictions/summary
