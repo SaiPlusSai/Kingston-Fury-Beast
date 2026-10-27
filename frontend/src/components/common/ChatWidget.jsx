@@ -33,6 +33,7 @@ export default function ChatWidget() {
   // Proactive speech bubble state
   const [showSpeechBubble, setShowSpeechBubble] = useState(false);
   const [speechBubbleText, setSpeechBubbleText] = useState('👋 ¡Hola! Soy Kuntur. Haz clic en mí si necesitas reportar un incidente.');
+  const [showEmergencyMenu, setShowEmergencyMenu] = useState(false);
 
   const wsUrl = import.meta.env.VITE_WS_URL || 'ws://localhost:3001';
   const token = localStorage.getItem('token') || 'demo-citizen-token';
@@ -285,13 +286,51 @@ export default function ChatWidget() {
               >
                 <RotateCcw className="w-4 h-4" />
               </button>
-              <a
-                href="tel:110"
-                title="Llamar a Radio Patrulla 110"
-                className="text-rose-500 hover:text-rose-600 p-1.5 rounded-lg hover:bg-rose-50 dark:hover:bg-rose-950/40 transition"
-              >
-                <PhoneCall className="w-4 h-4" />
-              </a>
+              
+              {/* Emergency Direct-Dial Popover */}
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => setShowEmergencyMenu(!showEmergencyMenu)}
+                  title="Líneas telefónicas de emergencia en La Paz"
+                  className="text-rose-500 hover:text-rose-600 p-1.5 rounded-lg hover:bg-rose-50 dark:hover:bg-rose-950/40 transition flex items-center justify-center"
+                >
+                  <PhoneCall className="w-4 h-4" />
+                </button>
+
+                {showEmergencyMenu && (
+                  <div className="absolute right-0 top-full mt-2 w-52 p-2 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xl z-50 animate-in fade-in zoom-in-95 duration-150">
+                    <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider px-2 py-1 mb-1">
+                      Llamar a Emergencias:
+                    </p>
+                    <a
+                      href="tel:110"
+                      onClick={() => setShowEmergencyMenu(false)}
+                      className="flex items-center justify-between p-1.5 px-2 rounded-xl hover:bg-rose-50 dark:hover:bg-rose-950/40 text-rose-600 dark:text-rose-400 transition text-xs font-medium"
+                    >
+                      <span>110 - Radio Patrulla</span>
+                      <PhoneCall className="w-3.5 h-3.5" />
+                    </a>
+                    <a
+                      href="tel:119"
+                      onClick={() => setShowEmergencyMenu(false)}
+                      className="flex items-center justify-between p-1.5 px-2 rounded-xl hover:bg-amber-50 dark:hover:bg-amber-950/40 text-amber-600 dark:text-amber-400 transition text-xs font-medium"
+                    >
+                      <span>119 - Bomberos LPZ</span>
+                      <PhoneCall className="w-3.5 h-3.5" />
+                    </a>
+                    <a
+                      href="tel:114"
+                      onClick={() => setShowEmergencyMenu(false)}
+                      className="flex items-center justify-between p-1.5 px-2 rounded-xl hover:bg-teal-50 dark:hover:bg-teal-950/40 text-teal-600 dark:text-teal-400 transition text-xs font-medium"
+                    >
+                      <span>114 - Red GAMLP</span>
+                      <PhoneCall className="w-3.5 h-3.5" />
+                    </a>
+                  </div>
+                )}
+              </div>
+
               <button
                 type="button"
                 onClick={handleCloseChat}
