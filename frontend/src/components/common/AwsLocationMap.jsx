@@ -1,33 +1,58 @@
-import React, { useEffect, useMemo, useRef } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 
-const getLocationConfig = () => {
+const LA_PAZ_DEFAULT_CENTER = [-68.135, -16.498]; // Plaza Murillo / Centro, La Paz
+
+const OSM_RASTER_STYLE = {
+  version: 8,
+  sources: {
+    'osm-tiles': {
+      type: 'raster',
+      tiles: [
+        'https://a.tile.openstreetmap.org/{z}/{x}/{y}.png',
+        'https://b.tile.openstreetmap.org/{z}/{x}/{y}.png',
+        'https://c.tile.openstreetmap.org/{z}/{x}/{y}.png',
+      ],
+      tileSize: 256,
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+    },
+  },
+  layers: [
+    {
+      id: 'osm-tiles-layer',
+      type: 'raster',
+      source: 'osm-tiles',
+      minzoom: 0,
+      maxzoom: 19,
+    },
+  ],
+};
+
+const getInitialStyle = () => {
   const region = import.meta.env.VITE_AWS_LOCATION_REGION || 'us-east-1';
   const mapName = import.meta.env.VITE_AWS_LOCATION_MAP_NAME;
   const apiKey = import.meta.env.VITE_AWS_LOCATION_API_KEY;
 
-  if (!mapName || !apiKey) return null;
+  if (mapName && apiKey && apiKey !== 'YOUR_AWS_LOCATION_API_KEY' && apiKey.trim() !== '') {
+    return `https://maps.geo.${region}.amazonaws.com/maps/v0/maps/${mapName}/style-descriptor?key=${apiKey}`;
+  }
 
-  return {
-    region,
-    mapName,
-    apiKey,
-    styleUrl: `https://maps.geo.${region}.amazonaws.com/maps/v0/maps/${mapName}/style-descriptor?key=${apiKey}`,
-  };
+  // CARTO Positron: Fast, clean, vector style with clear streets and labels
+  return 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json';
 };
 
 const AwsLocationMap = ({
   className = '',
-  center = [-63.18, -17.78],
-  zoom = 12,
+  center = LA_PAZ_DEFAULT_CENTER,
+  zoom = 13,
   markers = [],
   onMapReady,
   showNavigation = true,
   showAttribution = true,
   preserveDrawingBuffer = false,
   centerOnUserLocation = true,
-  userLocationZoom = 14,
+  userLocationZoom = 15,
   showUserLocationMarker = true,
   onMapClick,
   onMarkerClick,
@@ -36,91 +61,118 @@ const AwsLocationMap = ({
   const mapRef = useRef(null);
   const markerRefs = useRef([]);
   const userLocationMarkerRef = useRef(null);
-  const [resolvedCenter, setResolvedCenter] = React.useState(null);
-  const config = useMemo(() => getLocationConfig(), []);
 
+  const validCenter = useMemo(() => {
+    return Array.isArray(center) && center.length === 2 && !isNaN(center[0]) && !isNaN(center[1])
+      ? center
+      : LA_PAZ_DEFAULT_CENTER;
+  }, [center]);
+
+  const [resolvedCenter, setResolvedCenter] = useState(validCenter);
+
+  // Intentar geolocalización en segundo plano sin bloquear el renderizado
   useEffect(() => {
-    if (typeof window === 'undefined' || !config || resolvedCenter) return undefined;
+    if (typeof window === 'undefined' || !centerOnUserLocation || !navigator.geolocation) return;
 
     let cancelled = false;
-    const fallback = Array.isArray(center) && center.length === 2 ? center : [-63.18, -17.78];
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        if (cancelled) return;
+        const userCoords = [position.coords.longitude, position.coords.latitude];
+        setResolvedCenter(userCoords);
+        if (mapRef.current) {
+          mapRef.current.flyTo({ center: userCoords, zoom: userLocationZoom, duration: 1200 });
 
-    if (centerOnUserLocation && navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          if (cancelled) return;
-          setResolvedCenter([position.coords.longitude, position.coords.latitude]);
-        },
-        () => {
-          if (!cancelled) setResolvedCenter(fallback);
-        },
-        { enableHighAccuracy: true, timeout: 8000, maximumAge: 60000 },
-      );
-    } else {
-      setResolvedCenter(fallback);
-    }
+          if (showUserLocationMarker) {
+            if (userLocationMarkerRef.current) {
+              userLocationMarkerRef.current.remove();
+            }
+            const markerElement = document.createElement('div');
+            markerElement.style.width = '18px';
+            markerElement.style.height = '18px';
+            markerElement.style.borderRadius = '999px';
+            markerElement.style.border = '3px solid white';
+            markerElement.style.boxShadow = '0 0 0 8px rgba(76, 159, 112, 0.25)';
+            markerElement.style.background = '#4c9f70';
+
+            userLocationMarkerRef.current = new maplibregl.Marker({ element: markerElement, anchor: 'center' })
+              .setLngLat(userCoords)
+              .addTo(mapRef.current);
+          }
+        }
+      },
+      () => {
+        // En caso de denegación o timeout, se mantiene el centro por defecto
+      },
+      { enableHighAccuracy: false, timeout: 5000, maximumAge: 60000 }
+    );
 
     return () => {
       cancelled = true;
     };
-  }, [config, center, centerOnUserLocation, resolvedCenter]);
+  }, [centerOnUserLocation, userLocationZoom, showUserLocationMarker]);
 
+  // Inicialización del mapa MapLibre
   useEffect(() => {
-    if (typeof window === 'undefined') return undefined;
-    if (!mapContainerRef.current || mapRef.current || !config || !resolvedCenter) return undefined;
+    if (typeof window === 'undefined' || !mapContainerRef.current || mapRef.current) return undefined;
 
-    const map = new maplibregl.Map({
-      container: mapContainerRef.current,
-      style: config.styleUrl,
-      center: resolvedCenter,
-      zoom: zoom,
-      preserveDrawingBuffer,
-      attributionControl: showAttribution,
-    });
+    const style = getInitialStyle();
+    let mapInstance;
 
-    if (showNavigation) {
-      map.addControl(new maplibregl.NavigationControl(), 'top-right');
+    try {
+      mapInstance = new maplibregl.Map({
+        container: mapContainerRef.current,
+        style,
+        center: resolvedCenter,
+        zoom: zoom,
+        preserveDrawingBuffer,
+        attributionControl: showAttribution,
+      });
+    } catch {
+      // Fallback inmediato a raster OSM si falla la inicialización de estilo
+      mapInstance = new maplibregl.Map({
+        container: mapContainerRef.current,
+        style: OSM_RASTER_STYLE,
+        center: resolvedCenter,
+        zoom: zoom,
+        preserveDrawingBuffer,
+        attributionControl: showAttribution,
+      });
     }
 
-    map.on('load', () => {
-      map.resize();
-      if (typeof onMapReady === 'function') onMapReady(map);
-
-      if (centerOnUserLocation && showUserLocationMarker) {
-        if (userLocationMarkerRef.current) {
-          userLocationMarkerRef.current.remove();
-        }
-
-        const markerElement = document.createElement('div');
-        markerElement.style.width = '18px';
-        markerElement.style.height = '18px';
-        markerElement.style.borderRadius = '999px';
-        markerElement.style.border = '3px solid white';
-        markerElement.style.boxShadow = '0 0 0 8px rgba(76, 159, 112, 0.18)';
-        markerElement.style.background = '#4c9f70';
-
-        userLocationMarkerRef.current = new maplibregl.Marker({ element: markerElement, anchor: 'center' })
-          .setLngLat(resolvedCenter)
-          .addTo(map);
+    // Fallback reactivo si el estilo remoto da error (403/404/CORS)
+    mapInstance.on('error', (e) => {
+      const isStyleError = e?.error?.status === 403 || e?.error?.status === 404 || e?.sourceId === 'carto';
+      if (isStyleError) {
+        try {
+          mapInstance.setStyle(OSM_RASTER_STYLE);
+        } catch (_) {}
       }
     });
 
+    if (showNavigation) {
+      mapInstance.addControl(new maplibregl.NavigationControl(), 'top-right');
+    }
+
+    mapInstance.on('load', () => {
+      mapInstance.resize();
+      if (typeof onMapReady === 'function') onMapReady(mapInstance);
+    });
+
     if (onMapClick) {
-      map.on('click', (e) => {
+      mapInstance.on('click', (e) => {
         onMapClick({ latitude: e.lngLat.lat, longitude: e.lngLat.lng });
       });
     }
 
     const resize = () => {
       try {
-        map.resize();
-      } catch (error) {
-        // ignore
-      }
+        mapInstance.resize();
+      } catch (_) {}
     };
 
     window.addEventListener('resize', resize);
-    mapRef.current = map;
+    mapRef.current = mapInstance;
 
     return () => {
       window.removeEventListener('resize', resize);
@@ -130,22 +182,22 @@ const AwsLocationMap = ({
         userLocationMarkerRef.current.remove();
         userLocationMarkerRef.current = null;
       }
-      map.remove();
+      mapInstance.remove();
       mapRef.current = null;
     };
-  }, [config, onMapReady, preserveDrawingBuffer, resolvedCenter, showAttribution, showNavigation, showUserLocationMarker]);
+  }, []);
 
-  // Efecto para actualizar el centro sin recrear el mapa
+  // Efecto para actualizar el centro y zoom sin recrear el mapa
   useEffect(() => {
-    if (mapRef.current && center && center.length === 2) {
-      mapRef.current.flyTo({ center, zoom, duration: 800 });
+    if (mapRef.current && validCenter) {
+      mapRef.current.flyTo({ center: validCenter, zoom, duration: 600 });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [center?.[0], center?.[1], zoom]);
+  }, [validCenter, zoom]);
 
+  // Renderizado dinámico de marcadores de incidentes
   useEffect(() => {
     const map = mapRef.current;
-    if (!map || !config) return undefined;
+    if (!map) return undefined;
 
     markerRefs.current.forEach((marker) => marker.remove());
     markerRefs.current = [];
@@ -157,14 +209,14 @@ const AwsLocationMap = ({
       if (point.html) {
         markerElement.innerHTML = point.html;
       } else {
-        markerElement.style.width = '16px';
-        markerElement.style.height = '16px';
+        markerElement.style.width = '18px';
+        markerElement.style.height = '18px';
         markerElement.style.borderRadius = '999px';
         markerElement.style.border = '2px solid white';
-        markerElement.style.boxShadow = '0 4px 14px rgba(0, 0, 0, 0.22)';
+        markerElement.style.boxShadow = '0 4px 14px rgba(0, 0, 0, 0.25)';
         markerElement.style.background = point.color || '#dc2626';
       }
-      
+
       if (onMarkerClick) {
         markerElement.style.cursor = 'pointer';
         markerElement.addEventListener('click', (e) => {
@@ -179,7 +231,7 @@ const AwsLocationMap = ({
 
       if (point.popupHtml && !onMarkerClick) {
         marker.setPopup(
-          new maplibregl.Popup({ offset: 18, closeButton: true, closeOnClick: true }).setHTML(point.popupHtml),
+          new maplibregl.Popup({ offset: 18, closeButton: true, closeOnClick: true }).setHTML(point.popupHtml)
         );
       }
 
@@ -187,35 +239,9 @@ const AwsLocationMap = ({
     });
 
     return undefined;
-  }, [config, markers]);
+  }, [markers, onMarkerClick]);
 
-  if (!config) {
-    return (
-      <div className={`flex h-full w-full items-center justify-center rounded-2xl border border-dashed border-border bg-[var(--color-card-bg)] ${className}`.trim()}>
-        <div className="max-w-md text-center p-6">
-          <p className="text-sm font-semibold text-text-primary">Falta configurar Amazon Location</p>
-          <p className="mt-2 text-xs text-text-muted">
-            Define VITE_AWS_LOCATION_REGION, VITE_AWS_LOCATION_MAP_NAME y VITE_AWS_LOCATION_API_KEY para mostrar el mapa.
-          </p>
-        </div>
-      </div>
-    );
-  }
-
-  if (!resolvedCenter) {
-    return (
-      <div className={`flex h-full w-full items-center justify-center rounded-2xl border border-dashed border-border bg-[var(--color-card-bg)] ${className}`.trim()}>
-        <div className="max-w-md text-center p-6">
-          <p className="text-sm font-semibold text-text-primary">Obteniendo ubicación...</p>
-          <p className="mt-2 text-xs text-text-muted">
-            Estamos centrando el mapa en tu posición antes de mostrarlo.
-          </p>
-        </div>
-      </div>
-    );
-  }
-
-  return <div ref={mapContainerRef} className={`h-full w-full ${className}`.trim()} />;
+  return <div ref={mapContainerRef} className={`h-full w-full min-h-[300px] ${className}`.trim()} />;
 };
 
 export default AwsLocationMap;

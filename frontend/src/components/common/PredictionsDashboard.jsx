@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Sparkles, BarChart3, CheckCircle2, Award } from 'lucide-react';
+import api from '../../services/api';
 
 export default function PredictionsDashboard() {
   const [summaryData, setSummaryData] = useState(null);
@@ -7,19 +8,15 @@ export default function PredictionsDashboard() {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    fetch('/api/predictions/summary')
+    api.get('/predictions/summary')
       .then((res) => {
-        if (!res.ok) throw new Error('No se pudo cargar el reporte de predicción');
-        return res.json();
-      })
-      .then((data) => {
-        if (data.success) {
-          setSummaryData(data.data);
+        if (res.data?.success) {
+          setSummaryData(res.data.data);
         }
         setLoading(false);
       })
       .catch((err) => {
-        setError(err.message);
+        setError(err.message || 'No se pudo cargar el reporte de predicción');
         setLoading(false);
       });
   }, []);
@@ -188,3 +185,4 @@ export default function PredictionsDashboard() {
     </div>
   );
 }
+
