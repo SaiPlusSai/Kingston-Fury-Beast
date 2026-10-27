@@ -12,7 +12,7 @@ export default function ChatWidget() {
   ]);
 
   const wsUrl = import.meta.env.VITE_WS_URL || 'ws://localhost:3001';
-  const token = localStorage.getItem('token') || 'demo-citizen-token';
+  const token = localStorage.getItem('accessToken') || localStorage.getItem('token') || 'demo-citizen-token';
 
   const { isConnected, sendMessage, lastMessage } = useWebSocket(isOpen ? wsUrl : null, token);
   const messagesEndRef = useRef(null);
