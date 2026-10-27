@@ -2,9 +2,6 @@ const serverless = require('serverless-http');
 const app = require('./app');
 
 /**
- * Handler para AWS Lambda + API Gateway.
- * Desplegar con serverless framework o SAM.
+ * Handler para AWS Lambda + API Gateway HTTP API.
  */
-module.exports.handler = serverless(app, {
-  basePath: process.env.API_PREFIX || '/api',
-});
+module.exports.handler = serverless(app);
