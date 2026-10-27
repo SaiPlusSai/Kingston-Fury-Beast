@@ -1,16 +1,15 @@
 import React, { useState, useEffect, useMemo } from 'react';
 
 /**
- * KunturBlob - Authentic Andean Condor in 3/4 Perspective (Minimalist Vector Style).
+ * KunturBlob - Symmetrical, Minimalist Geometric Mascot (Grok / OpenAI Style).
  *
- * Key Condor Anatomy:
- * 1. Prominent hooked raptor beak in 3/4 profile with arched ridge and hooked claw tip.
- * 2. Warm amber/honey horn coloring (#F59E0B) with dark cere (#334155) - NO MORE WHITE TOOTH!
- * 3. Condor crest (carúncula) smoothly curving across the crown.
- * 4. Fluffy Andean white feather ruff (gorguera) around the neck.
- * 5. Animated wings in perspective that spread open when clicked/opening chat.
- * 6. Expressive pill eyes with natural blinking, gaze tracking, winking, and smiling.
- * 7. Dynamic single-color body morphing (Teal, Blue, Red, Green, Slate).
+ * Designed with perfect mathematical proportions:
+ * 1. Clean, organic symmetrical silhouette (no disjointed Picasso distortions).
+ * 2. Expressive white pill capsule eyes (parpadeo orgánico, seguimiento y sonrisas ^ ^).
+ * 3. Proportional, clean amber condor beak (#F59E0B) centered under the eyes.
+ * 4. Elegant white Andean feather ruff collar at the base.
+ * 5. Symmetrical condor wings that fold neatly against the body and spread smoothly when opening chat.
+ * 6. Dynamic single-color morphing (Teal, Blue, Red, Green, Slate).
  */
 export default function KunturBlob({
   state = 'idle',
@@ -31,7 +30,7 @@ export default function KunturBlob({
   const [isJiggling, setIsJiggling] = useState(false);
   const [blinkTick, setBlinkTick] = useState(0);
 
-  // Natural random blinking
+  // Natural random blinking cycle (every 3-6s)
   useEffect(() => {
     const nextBlink = 3000 + Math.random() * 3200;
     const timer = setTimeout(() => {
@@ -66,7 +65,7 @@ export default function KunturBlob({
     return '#0F766E'; // Signature HALO Forest Teal
   }, [state, colorOverride]);
 
-  // Darker tone for far wing, shadow, and crest
+  // Darker shade for wings and crest
   const wingColor = useMemo(() => {
     switch (bodyColor) {
       case '#DC2626':
@@ -82,7 +81,7 @@ export default function KunturBlob({
     }
   }, [bodyColor]);
 
-  // Eye movement coordinates
+  // Eye movement offsets
   const eyeOffset = useMemo(() => {
     switch (lookAt) {
       case 'left':
@@ -153,90 +152,79 @@ export default function KunturBlob({
         viewBox="0 0 120 120"
         className="w-full h-full overflow-visible drop-shadow-md transition-all duration-300"
       >
-        <defs>
-          <filter id="kunturShadow3D" x="-10%" y="-10%" width="130%" height="130%">
-            <feDropShadow dx="0" dy="2" stdDeviation="2.5" floodOpacity="0.22" />
-          </filter>
-        </defs>
-
-        {/* 1. FAR LEFT WING (Behind body in 3/4 view) */}
+        {/* 1. LEFT WING (Symmetrical, pivots outward gracefully) */}
         <g
           className="transition-transform duration-500 ease-out origin-[32px_54px]"
           style={{
-            transform: effectiveWingsOpen ? 'rotate(-42deg) translate(-4px, -6px) scale(0.95)' : 'rotate(0deg)',
+            transform: effectiveWingsOpen ? 'rotate(-32deg) translate(-2px, -3px)' : 'rotate(0deg)',
           }}
         >
           <path
             d="M 32 50
-               C 20 54, 12 68, 16 80
-               C 18 81, 21 77, 23 79
-               C 25 76, 28 74, 30 78
-               C 33 71, 34 62, 32 50 Z"
-            fill={wingColor}
-            className="transition-colors duration-500 opacity-90"
-          />
-        </g>
-
-        {/* 2. CONDOR CREST (Carúncula andina en la corona hacia la nuca) */}
-        <path
-          d="M 36 21
-             C 34 11, 48 9, 54 14
-             C 58 18, 56 23, 50 24 Z"
-          fill={wingColor}
-          className="transition-colors duration-500"
-        />
-
-        {/* 3. MAIN BODY IN 3/4 PERSPECTIVE */}
-        <path
-          d="M 46 20
-             C 66 20, 82 32, 82 58
-             C 82 80, 68 96, 48 96
-             C 28 96, 18 80, 18 58
-             C 18 32, 28 20, 46 20 Z"
-          fill={bodyColor}
-          className="transition-colors duration-500"
-        />
-
-        {/* 4. ANDEAN WHITE RUFF / GORGUERA (Collar blanco esponjoso envolvente) */}
-        <path
-          d="M 24 78
-             Q 34 88 44 82
-             Q 54 90 64 82
-             Q 74 88 82 78
-             Q 64 98 24 78 Z"
-          fill="#FFFFFF"
-          className="drop-shadow-xs"
-        />
-
-        {/* 5. NEAR RIGHT WING (Folds along the flank in 3/4, flaps wide on open) */}
-        <g
-          className="transition-transform duration-500 ease-out origin-[64px_62px]"
-          style={{
-            transform: effectiveWingsOpen ? 'rotate(45deg) translate(6px, -4px)' : 'rotate(0deg)',
-          }}
-        >
-          <path
-            d="M 64 60
-               C 76 64, 86 76, 82 90
-               C 80 91, 77 86, 75 89
-               C 73 85, 70 83, 68 87
-               C 65 80, 63 71, 64 60 Z"
+               C 22 55, 16 68, 20 80
+               C 24 81, 28 75, 32 78
+               C 34 68, 34 58, 32 50 Z"
             fill={wingColor}
             className="transition-colors duration-500"
           />
         </g>
 
-        {/* 6. EXPRESSIVE PILL EYES IN 3/4 PERSPECTIVE */}
+        {/* 2. RIGHT WING (Symmetrical, pivots outward gracefully) */}
+        <g
+          className="transition-transform duration-500 ease-out origin-[88px_54px]"
+          style={{
+            transform: effectiveWingsOpen ? 'rotate(32deg) translate(2px, -3px)' : 'rotate(0deg)',
+          }}
+        >
+          <path
+            d="M 88 50
+               C 98 55, 104 68, 100 80
+               C 96 81, 92 75, 88 78
+               C 86 68, 86 58, 88 50 Z"
+            fill={wingColor}
+            className="transition-colors duration-500"
+          />
+        </g>
+
+        {/* 3. SUBTLE ANDEAN CREST (Tiny, aerodynamic on crown) */}
+        <path
+          d="M 57 22
+             C 57 16, 63 16, 63 22 Z"
+          fill={wingColor}
+          className="transition-colors duration-500"
+        />
+
+        {/* 4. MAIN BODY (Perfect symmetrical organic rounded condor blob) */}
+        <path
+          d="M 60 22
+             C 82 22, 90 36, 90 58
+             C 90 80, 78 92, 60 92
+             C 42 92, 30 80, 30 58
+             C 30 36, 38 22, 60 22 Z"
+          fill={bodyColor}
+          className="transition-colors duration-500"
+        />
+
+        {/* 5. WHITE ANDEAN COLLAR (Gorguera blanca limpia y simétrica en la base) */}
+        <path
+          d="M 45 80
+             C 55 86, 65 86, 75 80
+             C 67 88, 53 88, 45 80 Z"
+          fill="#FFFFFF"
+          className="drop-shadow-2xs"
+        />
+
+        {/* 6. EXPRESSIVE CAPSULE EYES (Grok / OpenAI style) */}
         <g
           className="transition-transform duration-200"
           style={{
             transform: `translate(${eyeOffset.x}px, ${eyeOffset.y}px)`,
           }}
         >
-          {/* FAR LEFT EYE (Smaller, in perspective) */}
+          {/* LEFT EYE */}
           {activeExpression === 'happy' ? (
             <path
-              d="M 33 42 Q 38 35 43 42"
+              d="M 46 48 Q 50.5 40 55 48"
               fill="none"
               stroke="#FFFFFF"
               strokeWidth="3.5"
@@ -244,81 +232,62 @@ export default function KunturBlob({
             />
           ) : (
             <rect
-              x="34"
-              y="32"
+              x="47"
+              y="38"
               width="7"
-              height={isBlinking ? '1.5' : activeExpression === 'alert' ? '17' : '13'}
+              height={isBlinking ? '1.5' : activeExpression === 'alert' ? '18' : '15'}
               rx="3.5"
               fill="#FFFFFF"
-              className="transition-all duration-150 origin-[37.5px_38px]"
+              className="transition-all duration-150 origin-[50.5px_45.5px]"
             />
           )}
 
-          {/* NEAR RIGHT EYE (Prominent in 3/4) */}
+          {/* RIGHT EYE */}
           {activeExpression === 'happy' || activeExpression === 'wink' ? (
             <path
-              d="M 54 42 Q 60 34 66 42"
+              d="M 65 48 Q 69.5 40 74 48"
               fill="none"
               stroke="#FFFFFF"
-              strokeWidth="4"
+              strokeWidth="3.5"
               strokeLinecap="round"
             />
           ) : (
             <rect
-              x="54"
-              y="30"
-              width="8.5"
-              height={isBlinking ? '2' : activeExpression === 'alert' ? '20' : '15'}
-              rx="4.25"
+              x="66"
+              y="38"
+              width="7"
+              height={isBlinking ? '1.5' : activeExpression === 'alert' ? '18' : '15'}
+              rx="3.5"
               fill="#FFFFFF"
-              className="transition-all duration-150 origin-[58.25px_38px]"
+              className="transition-all duration-150 origin-[69.5px_45.5px]"
             />
           )}
         </g>
 
-        {/* 7. AUTHENTIC 3/4 HOOKED CONDOR BEAK (NO TOOTH, REAL RAPTOR HOOK) */}
+        {/* 7. PROPORTIONAL, CUTE CONDOR BEAK (Centered, warm amber #F59E0B) */}
         <g
-          className="transition-transform duration-150 origin-[60px_52px]"
+          className="transition-transform duration-150 origin-[60px_56px]"
           style={{
-            transform: isSpeaking ? 'translateY(2.5px) rotate(3deg)' : 'translateY(0)',
+            transform: isSpeaking ? 'translateY(2.5px) scaleY(1.15)' : 'translateY(0)',
           }}
         >
-          {/* Lower Mandible (Articulates down when speaking) */}
+          {/* Main beak body */}
           <path
-            d="M 60 56
-               C 66 56, 75 58, 77 64
-               C 72 65, 62 62, 58 59 Z"
-            fill="#B45309"
-          />
-
-          {/* Dark Cere Base (Cera nasal del cóndor) */}
-          <path
-            d="M 50 48
-               C 56 46, 68 47, 72 52
-               C 68 56, 56 55, 48 51 Z"
-            fill="#334155"
-          />
-
-          {/* Main Arched Raptor Hook (Curving boldly forward and down!) */}
-          <path
-            d="M 52 49
-               C 62 47, 82 49, 87 58
-               C 89 62, 87 72, 80 75
-               C 76 77, 74 72, 76 67
-               C 78 62, 74 56, 56 56 Z"
+            d="M 55 56
+               C 55 54.5, 65 54.5, 65 56
+               C 65 60.5, 62.5 67, 60 69
+               C 57.5 67, 55 60.5, 55 56 Z"
             fill="#F59E0B"
-            className="filter drop-shadow-xs"
+            className="filter drop-shadow-2xs"
           />
 
-          {/* Sharp Beak Tip Highlight (Ivory / Golden sheen) */}
+          {/* Subtle upper ridge shadow */}
           <path
-            d="M 72 54
-               C 78 52, 84 54, 86 59
-               C 88 64, 85 71, 80 74
-               C 77 75, 76 72, 77 68
-               C 79 63, 76 58, 72 54 Z"
-            fill="#FDE047"
-            opacity="0.95"
+            d="M 57 56
+               C 57 55, 63 55, 63 56
+               C 63 58, 61.5 60, 60 61
+               C 58.5 60, 57 58, 57 56 Z"
+            fill="#D97706"
           />
         </g>
       </svg>
