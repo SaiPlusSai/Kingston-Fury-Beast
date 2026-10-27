@@ -1,20 +1,21 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 
 /**
- * KunturBlob - Symmetrical, Minimalist Geometric Mascot (Grok / OpenAI Style).
+ * KunturBlob - Highly Interactive Andean Condor Mascot (Grok / OpenAI Style).
  *
- * Designed with perfect mathematical proportions:
- * 1. Clean, organic symmetrical silhouette (no disjointed Picasso distortions).
- * 2. Expressive white pill capsule eyes (parpadeo orgánico, seguimiento y sonrisas ^ ^).
- * 3. Proportional, clean amber condor beak (#F59E0B) centered under the eyes.
- * 4. Elegant white Andean feather ruff collar at the base.
- * 5. Symmetrical condor wings that fold neatly against the body and spread smoothly when opening chat.
- * 6. Dynamic single-color morphing (Teal, Blue, Red, Green, Slate).
+ * Capabilities:
+ * 1. Global Mouse Cursor Eye Tracking: Kuntur follows the user's mouse across the screen!
+ * 2. Responsive Sizing: Automatically scales from mobile (64px) to 4K desktop (112px).
+ * 3. Proactive Idle Gestures: Periodic wing flutters and friendly winks every ~10s.
+ * 4. Sleep Mode: Gently closes eyes into sleepy arcs if inactive for >20s, wakes up when mouse moves.
+ * 5. Elastic Physics (Squash & Stretch): Organic jelly bounce on click and hover.
+ * 6. Authentic Minimalist Condor Anatomy: Symmetrical organic body, amber hooked beak (#F59E0B), white collar ruff, and responsive wings.
  */
 export default function KunturBlob({
   state = 'idle',
   expression = 'normal',
   lookAt = 'center',
+  trackCursor = false,
   isSpeaking = false,
   wingsOpen = false,
   size = 'md',
@@ -25,25 +26,88 @@ export default function KunturBlob({
   onMouseEnter,
   onMouseLeave,
 }) {
+  const containerRef = useRef(null);
   const [isBlinking, setIsBlinking] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const [isJiggling, setIsJiggling] = useState(false);
+  const [isSleepy, setIsSleepy] = useState(false);
+  const [periodicGesture, setPeriodicGesture] = useState(null); // 'wink' | 'flutter' | null
   const [blinkTick, setBlinkTick] = useState(0);
 
-  // Natural random blinking cycle (every 3-6s)
+  // Mouse tracking vector for eyes
+  const [cursorOffset, setCursorOffset] = useState({ x: 0, y: 0 });
+
+  // 1. GLOBAL CURSOR TRACKING
   useEffect(() => {
-    const nextBlink = 3000 + Math.random() * 3200;
+    if (!trackCursor) return;
+
+    let idleTimer = null;
+
+    const handleMouseMove = (e) => {
+      // Wake up if asleep
+      setIsSleepy(false);
+      clearTimeout(idleTimer);
+      idleTimer = setTimeout(() => {
+        setIsSleepy(true);
+      }, 22000);
+
+      if (!containerRef.current) return;
+      const rect = containerRef.current.getBoundingClientRect();
+      const centerX = rect.left + rect.width / 2;
+      const centerY = rect.top + rect.height / 2;
+
+      const deltaX = e.clientX - centerX;
+      const deltaY = e.clientY - centerY;
+
+      // Smooth clamp to ±4px in X and ±3px in Y
+      const maxDist = Math.max(window.innerWidth, window.innerHeight) / 2;
+      const clampedX = Math.max(-4.5, Math.min(4.5, (deltaX / maxDist) * 12));
+      const clampedY = Math.max(-3.5, Math.min(3.5, (deltaY / maxDist) * 10));
+
+      setCursorOffset({ x: clampedX, y: clampedY });
+    };
+
+    window.addEventListener('mousemove', handleMouseMove, { passive: true });
+    idleTimer = setTimeout(() => setIsSleepy(true), 22000);
+
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      clearTimeout(idleTimer);
+    };
+  }, [trackCursor]);
+
+  // 2. NATURAL RANDOM BLINKING
+  useEffect(() => {
+    if (isSleepy) return;
+    const nextBlink = 2800 + Math.random() * 3200;
     const timer = setTimeout(() => {
       setIsBlinking(true);
       const closeTimer = setTimeout(() => {
         setIsBlinking(false);
         setBlinkTick((t) => t + 1);
-      }, 150);
+      }, 140);
       return () => clearTimeout(closeTimer);
     }, nextBlink);
 
     return () => clearTimeout(timer);
-  }, [blinkTick]);
+  }, [blinkTick, isSleepy]);
+
+  // 3. PERIODIC PROACTIVE GESTURES (WINK / FLUTTER EVERY ~12S)
+  useEffect(() => {
+    if (!interactive || isSleepy) return;
+
+    const interval = setInterval(() => {
+      // Alternate between wink and cute wing flutter
+      const gesture = Math.random() > 0.5 ? 'wink' : 'flutter';
+      setPeriodicGesture(gesture);
+
+      setTimeout(() => {
+        setPeriodicGesture(null);
+      }, 1200);
+    }, 11000 + Math.random() * 4000);
+
+    return () => clearInterval(interval);
+  }, [interactive, isSleepy]);
 
   // Color mapping per FSM state
   const bodyColor = useMemo(() => {
@@ -65,7 +129,6 @@ export default function KunturBlob({
     return '#0F766E'; // Signature HALO Forest Teal
   }, [state, colorOverride]);
 
-  // Darker shade for wings and crest
   const wingColor = useMemo(() => {
     switch (bodyColor) {
       case '#DC2626':
@@ -81,13 +144,16 @@ export default function KunturBlob({
     }
   }, [bodyColor]);
 
-  // Eye movement offsets
-  const eyeOffset = useMemo(() => {
+  // Effective eye offset
+  const finalEyeOffset = useMemo(() => {
+    if (trackCursor) {
+      return cursorOffset;
+    }
     switch (lookAt) {
       case 'left':
-        return { x: -3, y: 0 };
+        return { x: -3.5, y: 0 };
       case 'right':
-        return { x: 3, y: 0 };
+        return { x: 3.5, y: 0 };
       case 'down':
       case 'typing':
         return { x: 0, y: 3.5 };
@@ -96,10 +162,12 @@ export default function KunturBlob({
       default:
         return { x: 0, y: 0 };
     }
-  }, [lookAt]);
+  }, [trackCursor, cursorOffset, lookAt]);
 
-  // Effective expression
+  // Effective facial expression
   const activeExpression = useMemo(() => {
+    if (isSleepy) return 'sleepy';
+    if (periodicGesture === 'wink') return 'wink';
     if (expression !== 'normal') return expression;
     const s = String(state).toUpperCase();
     if (s === 'DONE' || s === 'SUCCESS') return 'happy';
@@ -107,17 +175,19 @@ export default function KunturBlob({
     if (s === 'PROCESSING' || s === 'THINKING') return 'thinking';
     if (isHovered) return 'happy';
     return 'normal';
-  }, [state, expression, isHovered]);
+  }, [isSleepy, periodicGesture, expression, state, isHovered]);
 
   const handleClick = (e) => {
     if (!interactive) return;
+    setIsSleepy(false);
     setIsJiggling(true);
-    setTimeout(() => setIsJiggling(false), 450);
+    setTimeout(() => setIsJiggling(false), 500);
     onClick?.(e);
   };
 
   const handleMouseEnter = (e) => {
     setIsHovered(true);
+    setIsSleepy(false);
     onMouseEnter?.(e);
   };
 
@@ -126,37 +196,40 @@ export default function KunturBlob({
     onMouseLeave?.(e);
   };
 
-  // Dimensions
+  // Dimensions: Responsive mapping
   const sizeMap = {
     sm: 'w-9 h-9',
     md: 'w-14 h-14',
     lg: 'w-20 h-20',
     xl: 'w-28 h-28',
-    fab: 'w-16 h-16',
+    // Dynamic adaptive sizing for the floating launcher button:
+    // Mobile: 64px, Tablet: 80px, Desktop: 96px, Large Display: 112px
+    'responsive-fab': 'w-16 h-16 sm:w-20 sm:h-20 lg:w-24 lg:h-24 xl:w-28 xl:h-28',
   };
   const sizeClass = sizeMap[size] || sizeMap.md;
 
-  const effectiveWingsOpen = wingsOpen || (isHovered && interactive);
+  const isWingsFlapping = wingsOpen || (isHovered && interactive) || periodicGesture === 'flutter';
 
   return (
     <div
+      ref={containerRef}
       onClick={handleClick}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       className={`relative inline-flex items-center justify-center select-none cursor-pointer transition-transform duration-300 ${sizeClass} ${
-        isJiggling ? 'scale-110 -rotate-3' : 'hover:scale-105 active:scale-95'
+        isJiggling ? 'scale-115 -rotate-3' : 'hover:scale-108 active:scale-92'
       } ${className}`}
       style={{ willChange: 'transform' }}
     >
       <svg
         viewBox="0 0 120 120"
-        className="w-full h-full overflow-visible drop-shadow-md transition-all duration-300"
+        className="w-full h-full overflow-visible drop-shadow-lg transition-all duration-300"
       >
-        {/* 1. LEFT WING (Symmetrical, pivots outward gracefully) */}
+        {/* 1. LEFT WING (Symmetrical, pivots outward gracefully on open/flutter) */}
         <g
           className="transition-transform duration-500 ease-out origin-[32px_54px]"
           style={{
-            transform: effectiveWingsOpen ? 'rotate(-32deg) translate(-2px, -3px)' : 'rotate(0deg)',
+            transform: isWingsFlapping ? 'rotate(-34deg) translate(-2px, -3px)' : 'rotate(0deg)',
           }}
         >
           <path
@@ -169,11 +242,11 @@ export default function KunturBlob({
           />
         </g>
 
-        {/* 2. RIGHT WING (Symmetrical, pivots outward gracefully) */}
+        {/* 2. RIGHT WING (Symmetrical, pivots outward gracefully on open/flutter) */}
         <g
           className="transition-transform duration-500 ease-out origin-[88px_54px]"
           style={{
-            transform: effectiveWingsOpen ? 'rotate(32deg) translate(2px, -3px)' : 'rotate(0deg)',
+            transform: isWingsFlapping ? 'rotate(34deg) translate(2px, -3px)' : 'rotate(0deg)',
           }}
         >
           <path
@@ -214,17 +287,25 @@ export default function KunturBlob({
           className="drop-shadow-2xs"
         />
 
-        {/* 6. EXPRESSIVE CAPSULE EYES (Grok / OpenAI style) */}
+        {/* 6. EXPRESSIVE CAPSULE EYES (Tracks Mouse Cursor & Emotes) */}
         <g
-          className="transition-transform duration-200"
+          className="transition-transform duration-100 ease-out"
           style={{
-            transform: `translate(${eyeOffset.x}px, ${eyeOffset.y}px)`,
+            transform: `translate(${finalEyeOffset.x}px, ${finalEyeOffset.y}px)`,
           }}
         >
           {/* LEFT EYE */}
           {activeExpression === 'happy' ? (
             <path
               d="M 46 48 Q 50.5 40 55 48"
+              fill="none"
+              stroke="#FFFFFF"
+              strokeWidth="4"
+              strokeLinecap="round"
+            />
+          ) : activeExpression === 'sleepy' ? (
+            <path
+              d="M 46 46 Q 50.5 50 55 46"
               fill="none"
               stroke="#FFFFFF"
               strokeWidth="3.5"
@@ -235,7 +316,7 @@ export default function KunturBlob({
               x="47"
               y="38"
               width="7"
-              height={isBlinking ? '1.5' : activeExpression === 'alert' ? '18' : '15'}
+              height={isBlinking ? '1.5' : activeExpression === 'alert' ? '19' : '15'}
               rx="3.5"
               fill="#FFFFFF"
               className="transition-all duration-150 origin-[50.5px_45.5px]"
@@ -248,6 +329,14 @@ export default function KunturBlob({
               d="M 65 48 Q 69.5 40 74 48"
               fill="none"
               stroke="#FFFFFF"
+              strokeWidth="4"
+              strokeLinecap="round"
+            />
+          ) : activeExpression === 'sleepy' ? (
+            <path
+              d="M 65 46 Q 69.5 50 74 46"
+              fill="none"
+              stroke="#FFFFFF"
               strokeWidth="3.5"
               strokeLinecap="round"
             />
@@ -256,7 +345,7 @@ export default function KunturBlob({
               x="66"
               y="38"
               width="7"
-              height={isBlinking ? '1.5' : activeExpression === 'alert' ? '18' : '15'}
+              height={isBlinking ? '1.5' : activeExpression === 'alert' ? '19' : '15'}
               rx="3.5"
               fill="#FFFFFF"
               className="transition-all duration-150 origin-[69.5px_45.5px]"
