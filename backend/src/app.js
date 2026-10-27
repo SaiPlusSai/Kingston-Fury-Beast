@@ -26,6 +26,7 @@ app.use(
         env.corsOrigins.includes('*') ||
         env.corsOrigins.includes(origin) ||
         origin.endsWith('.amazonaws.com') ||
+        origin.endsWith('.cloudfront.net') ||
         origin.includes('localhost')
       ) {
         return callback(null, true);
