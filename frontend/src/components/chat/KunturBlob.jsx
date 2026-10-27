@@ -1,48 +1,51 @@
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 
 /**
- * KunturBlob - Ultra-minimalist geometric mascot inspired by Grok / OpenAI blob bots.
- * 100% programmatic SVG & CSS. 0 KB images. Infinite scalability.
+ * KunturBlob - Authentic Andean Condor Mascot in Minimalist Vector Style.
  *
- * Capabilities:
- * - Natural random blinking (every 3-6s).
- * - Looking direction (center, left, right, down at input).
- * - Facial expressions (normal, wink, happy, alert, thinking).
- * - Animated beak that opens when speaking / streaming.
- * - Dynamic single-color morphing (teal, cyan, amber/red, emerald, slate).
- * - Jelly squash & stretch bounce on click/hover.
+ * Distinctive Condor Features:
+ * 1. Prominent hooked condor beak with ivory/bone tip and articulated lower jaw.
+ * 2. Condor crest (carúncula) on the crown.
+ * 3. Iconic fluffy white Andean collar (gorguera) at the neck.
+ * 4. Animated condor wings that spread open on click/transition and flutter on hover!
+ * 5. Organic eye blinking, eye tracking, and facial expressions (wink, happy, alert, thinking).
+ * 6. Dynamic single-color body morphing (Teal, Blue, Red, Green, Slate).
  */
 export default function KunturBlob({
   state = 'idle',
   expression = 'normal',
   lookAt = 'center',
   isSpeaking = false,
+  wingsOpen = false,
   size = 'md',
   colorOverride = null,
   interactive = true,
   className = '',
   onClick,
+  onMouseEnter,
+  onMouseLeave,
 }) {
   const [isBlinking, setIsBlinking] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
   const [isJiggling, setIsJiggling] = useState(false);
   const [blinkTick, setBlinkTick] = useState(0);
 
-  // Random natural blink cycle
+  // Natural random blinking cycle
   useEffect(() => {
-    const nextBlinkDelay = 3000 + Math.random() * 3500;
-    const timeout = setTimeout(() => {
+    const nextBlink = 3200 + Math.random() * 3200;
+    const timer = setTimeout(() => {
       setIsBlinking(true);
-      const closeTimeout = setTimeout(() => {
+      const closeTimer = setTimeout(() => {
         setIsBlinking(false);
         setBlinkTick((t) => t + 1);
-      }, 150);
-      return () => clearTimeout(closeTimeout);
-    }, nextBlinkDelay);
+      }, 160);
+      return () => clearTimeout(closeTimer);
+    }, nextBlink);
 
-    return () => clearTimeout(timeout);
+    return () => clearTimeout(timer);
   }, [blinkTick]);
 
-  // Color mapping according to conversation state
+  // Color mapping per state
   const bodyColor = useMemo(() => {
     if (colorOverride) return colorOverride;
     const s = String(state).toUpperCase();
@@ -51,7 +54,7 @@ export default function KunturBlob({
       return '#DC2626'; // Alert Red
     }
     if (s === 'PROCESSING' || s === 'TYPING' || s === 'THINKING' || s === 'SEARCH') {
-      return '#0284C7'; // Electric Sky Blue
+      return '#0284C7'; // Sky Blue
     }
     if (s === 'DONE' || s === 'SUCCESS' || s === 'CONFIRM') {
       return '#16A34A'; // Emerald Green
@@ -59,14 +62,14 @@ export default function KunturBlob({
     if (s === 'ASK_CATEGORY' || s === 'ASK_LOCATION') {
       return '#D97706'; // Focused Amber
     }
-    return '#0F766E'; // Deep Forest Teal (HALO signature)
+    return '#0F766E'; // Signature HALO Forest Teal
   }, [state, colorOverride]);
 
-  // Accent highlights (darker tone of body color for beak)
-  const beakColor = useMemo(() => {
+  // Darker shade for wings and crest
+  const wingColor = useMemo(() => {
     switch (bodyColor) {
       case '#DC2626':
-        return '#991B1B';
+        return '#B91C1C';
       case '#0284C7':
         return '#0369A1';
       case '#16A34A':
@@ -78,13 +81,17 @@ export default function KunturBlob({
     }
   }, [bodyColor]);
 
-  // Calculate eye offsets based on lookAt direction
+  // Beak base color (charcoal/cere) and ivory tip
+  const beakCereColor = '#334155';
+  const beakTipColor = '#F8FAFC';
+
+  // Eye movement coordinates
   const eyeOffset = useMemo(() => {
     switch (lookAt) {
       case 'left':
-        return { x: -3, y: 0 };
+        return { x: -3.5, y: 0 };
       case 'right':
-        return { x: 3, y: 0 };
+        return { x: 3.5, y: 0 };
       case 'down':
       case 'typing':
         return { x: 0, y: 3.5 };
@@ -102,115 +109,129 @@ export default function KunturBlob({
     if (s === 'DONE' || s === 'SUCCESS') return 'happy';
     if (s.includes('EMERGENCY')) return 'alert';
     if (s === 'PROCESSING' || s === 'THINKING') return 'thinking';
+    if (isHovered) return 'happy';
     return 'normal';
-  }, [state, expression]);
+  }, [state, expression, isHovered]);
 
-  const handleBlobClick = (e) => {
+  const handleClick = (e) => {
     if (!interactive) return;
     setIsJiggling(true);
-    setTimeout(() => setIsJiggling(false), 500);
+    setTimeout(() => setIsJiggling(false), 450);
     onClick?.(e);
   };
 
-  // Dimensions by size prop
+  const handleMouseEnter = (e) => {
+    setIsHovered(true);
+    onMouseEnter?.(e);
+  };
+
+  const handleMouseLeave = (e) => {
+    setIsHovered(false);
+    onMouseLeave?.(e);
+  };
+
+  // Dimensions by size
   const sizeMap = {
-    sm: 'w-8 h-8',
-    md: 'w-12 h-12',
+    sm: 'w-9 h-9',
+    md: 'w-14 h-14',
     lg: 'w-20 h-20',
     xl: 'w-28 h-28',
+    fab: 'w-16 h-16', // Ideal for standalone floating launcher
   };
   const sizeClass = sizeMap[size] || sizeMap.md;
 
+  const effectiveWingsOpen = wingsOpen || (isHovered && interactive);
+
   return (
     <div
-      onClick={handleBlobClick}
+      onClick={handleClick}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
       className={`relative inline-flex items-center justify-center select-none cursor-pointer transition-transform duration-300 ${sizeClass} ${
         isJiggling ? 'scale-110 -rotate-3' : 'hover:scale-105 active:scale-95'
       } ${className}`}
-      title="Kuntur - Guardián Digital de HALO"
+      style={{ willChange: 'transform' }}
     >
       <svg
-        viewBox="0 0 100 100"
-        className="w-full h-full overflow-visible drop-shadow-sm transition-all duration-500"
+        viewBox="0 0 120 120"
+        className="w-full h-full overflow-visible drop-shadow-md transition-all duration-300"
       >
         <defs>
-          {/* Subtle ambient lighting on top of head */}
-          <linearGradient id="kunturHighlight" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#ffffff" stopOpacity="0.18" />
-            <stop offset="100%" stopColor="#ffffff" stopOpacity="0" />
-          </linearGradient>
+          <filter id="kunturShadow" x="-10%" y="-10%" width="130%" height="130%">
+            <feDropShadow dx="0" dy="2" stdDeviation="2" floodOpacity="0.18" />
+          </filter>
         </defs>
 
-        {/* 1. MAIN SILHOUETTE: Organic Condor Blob Shape */}
-        {/* Rounded head, slight crest at top, smooth body base */}
-        <path
-          d="M 50 14
-             C 68 14, 82 28, 82 48
-             C 82 68, 72 86, 50 86
-             C 28 86, 18 68, 18 48
-             C 18 28, 32 14, 50 14 Z"
-          fill={bodyColor}
-          className="transition-colors duration-500 ease-out"
-        />
-
-        {/* Top subtle crest curve of the Andean Condor */}
-        <path
-          d="M 44 14
-             C 44 8, 56 8, 56 14
-             Z"
-          fill={bodyColor}
-          className="transition-colors duration-500 ease-out"
-        />
-
-        {/* Subtle highlight sheen */}
-        <path
-          d="M 50 16
-             C 66 16, 78 28, 78 46
-             C 78 52, 70 30, 50 30
-             C 30 30, 22 52, 22 46
-             C 22 28, 34 16, 50 16 Z"
-          fill="url(#kunturHighlight)"
-        />
-
-        {/* 2. ANDEAN WHITE COLLAR (Iconic condor white feather ruff curve) */}
-        <path
-          d="M 30 76
-             C 42 82, 58 82, 70 76
-             C 62 84, 38 84, 30 76 Z"
-          fill="#FFFFFF"
-          fillOpacity="0.95"
-        />
-
-        {/* 3. CONDOR HOOKED BEAK (Key distinguishing feature) */}
+        {/* 1. LEFT WING (Flaps out smoothly when wingsOpen or hovered) */}
         <g
-          className="transition-transform duration-200 origin-[50px_54px]"
+          className="transition-transform duration-500 ease-out origin-[38px_54px]"
           style={{
-            transform: isSpeaking ? 'translateY(2.5px) scaleY(1.15)' : 'translateY(0)',
+            transform: effectiveWingsOpen ? 'rotate(-38deg) translate(-2px, -4px)' : 'rotate(0deg)',
           }}
         >
-          {/* Main downward hooked beak */}
+          {/* Wing silhouette with 3 feather tips */}
           <path
-            d="M 43 53
-               C 43 51, 57 51, 57 53
-               C 57 58, 54 65, 50 67
-               C 46 65, 43 58, 43 53 Z"
-            fill={beakColor}
-            className="transition-colors duration-500 ease-out"
+            d="M 38 52
+               C 26 56, 18 70, 22 84
+               C 24 85, 27 80, 29 83
+               C 31 79, 34 77, 36 81
+               C 39 74, 40 64, 38 52 Z"
+            fill={wingColor}
+            className="transition-colors duration-500"
           />
-
-          {/* Lower jaw/beak line (shows when speaking) */}
-          {isSpeaking && (
-            <path
-              d="M 46 60
-                 C 48 64, 52 64, 54 60
-                 Z"
-              fill="#FFFFFF"
-              opacity="0.9"
-            />
-          )}
         </g>
 
-        {/* 4. EXPRESSIVE PILL EYES (Pure white capsules) */}
+        {/* 2. RIGHT WING (Flaps out smoothly when wingsOpen or hovered) */}
+        <g
+          className="transition-transform duration-500 ease-out origin-[82px_54px]"
+          style={{
+            transform: effectiveWingsOpen ? 'rotate(38deg) translate(2px, -4px)' : 'rotate(0deg)',
+          }}
+        >
+          {/* Wing silhouette with 3 feather tips */}
+          <path
+            d="M 82 52
+               C 94 56, 102 70, 98 84
+               C 96 85, 93 80, 91 83
+               C 89 79, 86 77, 84 81
+               C 81 74, 80 64, 82 52 Z"
+            fill={wingColor}
+            className="transition-colors duration-500"
+          />
+        </g>
+
+        {/* 3. CONDOR CREST (Carúncula en la corona - Rasgo clave del cóndor) */}
+        <path
+          d="M 54 22
+             C 52 11, 63 9, 67 15
+             C 71 20, 68 24, 64 25 Z"
+          fill={wingColor}
+          className="transition-colors duration-500"
+        />
+
+        {/* 4. MAIN BODY SILHOUETTE (Gota orgánica estilizada) */}
+        <path
+          d="M 60 22
+             C 80 22, 92 38, 92 64
+             C 92 84, 78 98, 60 98
+             C 42 98, 28 84, 28 64
+             C 28 38, 40 22, 60 22 Z"
+          fill={bodyColor}
+          className="transition-colors duration-500"
+        />
+
+        {/* 5. ANDEAN WHITE RUFF / GORGUERA (El icónico collar blanco esponjoso) */}
+        <path
+          d="M 36 82
+             Q 44 91 52 85
+             Q 60 93 68 85
+             Q 76 91 84 82
+             Q 60 102 36 82 Z"
+          fill="#FFFFFF"
+          className="drop-shadow-xs"
+        />
+
+        {/* 6. EXPRESSIVE CAPSULE EYES */}
         <g
           className="transition-transform duration-200"
           style={{
@@ -219,49 +240,89 @@ export default function KunturBlob({
         >
           {/* LEFT EYE */}
           {activeExpression === 'happy' ? (
-            // Curved happy eye "^"
             <path
-              d="M 33 44 Q 38 36 43 44"
+              d="M 40 44 Q 45 35 50 44"
               fill="none"
               stroke="#FFFFFF"
-              strokeWidth="3.5"
+              strokeWidth="4"
               strokeLinecap="round"
             />
           ) : (
-            // Pill capsule eye
             <rect
-              x="34"
-              y="33"
-              width="7.5"
-              height={isBlinking ? '1.5' : activeExpression === 'alert' ? '18' : '15'}
-              rx="3.75"
+              x="42"
+              y="32"
+              width="8"
+              height={isBlinking ? '2' : activeExpression === 'alert' ? '19' : '15'}
+              rx="4"
               fill="#FFFFFF"
-              className="transition-all duration-150 origin-[37.75px_40px]"
+              className="transition-all duration-150 origin-[46px_40px]"
             />
           )}
 
           {/* RIGHT EYE */}
           {activeExpression === 'happy' || activeExpression === 'wink' ? (
-            // Curved wink / happy eye "^"
             <path
-              d="M 57 44 Q 62 36 67 44"
+              d="M 70 44 Q 75 35 80 44"
               fill="none"
               stroke="#FFFFFF"
-              strokeWidth="3.5"
+              strokeWidth="4"
               strokeLinecap="round"
             />
           ) : (
-            // Pill capsule eye
             <rect
-              x="58.5"
-              y="33"
-              width="7.5"
-              height={isBlinking ? '1.5' : activeExpression === 'alert' ? '18' : '15'}
-              rx="3.75"
+              x="70"
+              y="32"
+              width="8"
+              height={isBlinking ? '2' : activeExpression === 'alert' ? '19' : '15'}
+              rx="4"
               fill="#FFFFFF"
-              className="transition-all duration-150 origin-[62.25px_40px]"
+              className="transition-all duration-150 origin-[74px_40px]"
             />
           )}
+        </g>
+
+        {/* 7. AUTHENTIC HOOKED CONDOR BEAK (Pico ganchudo de rapaz) */}
+        <g
+          className="transition-transform duration-150 origin-[60px_54px]"
+          style={{
+            transform: isSpeaking ? 'translateY(3px) scaleY(1.15)' : 'translateY(0)',
+          }}
+        >
+          {/* Lower jaw (visible when talking) */}
+          <path
+            d="M 53 62
+               C 56 68, 64 68, 67 62 Z"
+            fill="#64748B"
+          />
+
+          {/* Upper hooked mandible base (cere) */}
+          <path
+            d="M 48 50
+               C 48 48, 72 48, 72 50
+               C 72 59, 68 64, 60 65
+               C 52 64, 48 59, 48 50 Z"
+            fill={beakCereColor}
+          />
+
+          {/* Distinctive curved raptor beak tip (ivory hooked claw) */}
+          <path
+            d="M 50 54
+               C 50 53, 70 53, 70 54
+               C 70 63, 67 74, 60 76
+               C 57 73, 50 63, 50 54 Z"
+            fill={beakTipColor}
+            className="filter drop-shadow-2xs"
+          />
+
+          {/* Hook curve accent line */}
+          <path
+            d="M 59 55 L 59 70 C 59 74, 60 75, 60 75"
+            fill="none"
+            stroke="#CBD5E1"
+            strokeWidth="1.5"
+            strokeLinecap="round"
+            opacity="0.8"
+          />
         </g>
       </svg>
     </div>
