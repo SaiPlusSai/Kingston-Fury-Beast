@@ -1,5 +1,5 @@
 const path = require('path');
-require('dotenv').config({ path: path.resolve(__dirname, '../../.env') });
+if (!process.env.AWS_EXECUTION_ENV && !process.env.LAMBDA_TASK_ROOT) { require('dotenv').config({ path: path.resolve(__dirname, '../../.env') }); }
 
 const requiredInProduction = ['JWT_ACCESS_SECRET', 'JWT_REFRESH_SECRET'];
 
