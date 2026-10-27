@@ -16,18 +16,20 @@ import {
 
 const INITIAL_GREETING = {
   sender: 'bot',
-  text: `👋 ¡Hola! Soy **Kuntur**, tu asistente ciudadano de HALO La Paz.\n\nPuedo ayudarte a reportar emergencias, consultar números de auxilio o hacer seguimiento a tus casos en la ciudad.\n\n¿En qué te puedo colaborar hoy?`,
+  text: `👋 ¡Hola! Soy **Kuntur**, tu guardián ciudadano de HALO La Paz.\n\nPuedo ayudarte a reportar emergencias, consultar teléfonos de auxilio o dar seguimiento a tus casos en la ciudad.\n\n¿En qué te puedo colaborar hoy?`,
   state: 'GREETING',
   suggestedActions: ['Reportar incidente', 'Números de emergencia', 'Estado de mi reporte'],
 };
 
 export default function ChatWidget() {
   const [isOpen, setIsOpen] = useState(false);
+  const [isOpeningTransition, setIsOpeningTransition] = useState(false);
   const [inputText, setInputText] = useState('');
   const [chatHistory, setChatHistory] = useState([INITIAL_GREETING]);
   const [fsmState, setFsmState] = useState('GREETING');
   const [isProcessing, setIsProcessing] = useState(false);
   const [isInputFocused, setIsInputFocused] = useState(false);
+  const [showFabTooltip, setShowFabTooltip] = useState(false);
 
   const wsUrl = import.meta.env.VITE_WS_URL || 'ws://localhost:3001';
   const token = localStorage.getItem('token') || 'demo-citizen-token';
@@ -74,6 +76,20 @@ export default function ChatWidget() {
   useEffect(() => {
     scrollToBottom();
   }, [chatHistory, isProcessing]);
+
+  // Click handler on Kuntur: Spreads wings gracefully before opening chat
+  const handleOpenChat = () => {
+    setIsOpeningTransition(true);
+    // Subtle wing opening animation delay (250ms)
+    setTimeout(() => {
+      setIsOpen(true);
+      setIsOpeningTransition(false);
+    }, 280);
+  };
+
+  const handleCloseChat = () => {
+    setIsOpen(false);
+  };
 
   const handleSend = (textToSend) => {
     const text = (textToSend || inputText || '').trim();
@@ -125,56 +141,70 @@ export default function ChatWidget() {
       case 'ASK_PHOTO':
         return 'Escribe "1" para omitir o sube una foto...';
       case 'CONFIRM':
-        return 'Escribe "sí" para confirmar o "cancelar"...';
+        return 'Escribe "sí" para registrar o "cancelar"...';
       default:
         return 'Escribe tu mensaje a Kuntur...';
     }
   }, [fsmState]);
 
-  // Determine Kuntur's gaze and expressions
+  // Gaze tracking
   const lookDirection = isInputFocused || inputText.length > 0 ? 'down' : 'center';
 
   return (
     <div className="fixed bottom-6 right-6 z-50 font-sans">
-      {/* 1. MINIMALIST FLOATING ACTION BUTTON */}
+      {/* 1. STANDALONE FLOATING KUNTUR (NO CAPSULE, NO HEAVY BARS) */}
       {!isOpen && (
-        <button
-          onClick={() => setIsOpen(true)}
-          className="group flex items-center gap-2.5 p-2 pr-4 rounded-full bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 shadow-xl hover:shadow-2xl transition-all duration-200 hover:scale-105 active:scale-95"
-          aria-label="Abrir asistente Kuntur"
-        >
-          <div className="relative flex items-center justify-center">
-            <KunturBlob state="idle" size="sm" interactive={false} />
+        <div className="relative group">
+          {/* Gentle Speech Bubble on Hover */}
+          {showFabTooltip && (
+            <div className="absolute bottom-full right-2 mb-3 px-3 py-1.5 rounded-2xl bg-slate-900/90 text-white text-xs font-medium shadow-xl whitespace-nowrap animate-in fade-in slide-in-from-bottom-2 duration-200 pointer-events-none">
+              <span>👋 ¿En qué te puedo ayudar hoy?</span>
+              <div className="absolute top-full right-6 -mt-1 border-4 border-transparent border-t-slate-900/90" />
+            </div>
+          )}
+
+          {/* Standalone Kuntur Mascot Button */}
+          <button
+            type="button"
+            onClick={handleOpenChat}
+            onMouseEnter={() => setShowFabTooltip(true)}
+            onMouseLeave={() => setShowFabTooltip(false)}
+            className="relative flex items-center justify-center p-1 rounded-full focus:outline-none transition-transform duration-300 hover:scale-110 active:scale-95"
+            style={{
+              animation: 'kunturFloat 3.8s ease-in-out infinite',
+            }}
+            aria-label="Hablar con Kuntur"
+          >
+            {/* Ambient Soft Glow Halo */}
+            <div className="absolute inset-0 rounded-full bg-teal-500/20 blur-md group-hover:bg-teal-400/35 transition-all duration-300 animate-pulse" />
+
+            {/* Kuntur Mascot with Wing-spread gesture */}
+            <KunturBlob
+              state="idle"
+              wingsOpen={isOpeningTransition}
+              size="fab"
+              interactive={true}
+            />
+
+            {/* Discrete Online Indicator Dot */}
             <span
-              className={`absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-white dark:border-slate-900 ${
-                isConnected ? 'bg-emerald-500' : 'bg-amber-400'
+              title={isConnected ? 'Kuntur conectado' : 'Conectando con Kuntur...'}
+              className={`absolute bottom-1 right-1 w-3.5 h-3.5 rounded-full border-2 border-white dark:border-slate-900 shadow-xs transition-colors duration-300 ${
+                isConnected ? 'bg-emerald-500 animate-pulse' : 'bg-amber-400'
               }`}
             />
-          </div>
-          <div className="text-left">
-            <div className="flex items-center gap-1.5">
-              <span className="text-xs font-bold text-slate-800 dark:text-slate-100 group-hover:text-teal-600 transition-colors">
-                Kuntur
-              </span>
-              <span className="text-[10px] text-teal-700 dark:text-teal-300 font-mono font-medium">
-                LPZ
-              </span>
-            </div>
-            <p className="text-[10px] text-slate-400 dark:text-slate-500 font-medium">
-              Asistente Ciudadano
-            </p>
-          </div>
-        </button>
+          </button>
+        </div>
       )}
 
-      {/* 2. CHATBOT WINDOW (Grok / ChatGPT Minimalist Style) */}
+      {/* 2. CHATBOT WINDOW (Clean, Minimalist Grok/ChatGPT Layout) */}
       {isOpen && (
-        <div className="w-[94vw] sm:w-[420px] h-[580px] max-h-[85vh] bg-white dark:bg-slate-900 rounded-3xl shadow-2xl flex flex-col border border-slate-200/90 dark:border-slate-800 overflow-hidden animate-in fade-in duration-200">
+        <div className="w-[94vw] sm:w-[420px] h-[580px] max-h-[85vh] bg-white dark:bg-slate-900 rounded-3xl shadow-2xl flex flex-col border border-slate-200/90 dark:border-slate-800 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
           
-          {/* MINIMALIST HEADER */}
-          <div className="p-3.5 px-4 bg-slate-50/80 dark:bg-slate-900/80 border-b border-slate-200/70 dark:border-slate-800 flex justify-between items-center">
+          {/* HEADER */}
+          <div className="p-3 px-4 bg-slate-50/90 dark:bg-slate-900/90 border-b border-slate-200/70 dark:border-slate-800 flex justify-between items-center">
             <div className="flex items-center gap-3">
-              {/* Interactive Kuntur Mascot */}
+              {/* Mascot in Header with Wings & State */}
               <div className="relative">
                 <KunturBlob
                   state={isProcessing ? 'PROCESSING' : fsmState}
@@ -199,8 +229,8 @@ export default function ChatWidget() {
                     HALO LPZ
                   </span>
                 </div>
-                <p className="text-[11px] text-slate-500 dark:text-slate-400 flex items-center gap-1">
-                  <span>{isProcessing ? 'Pensando...' : isConnected ? 'En línea en La Paz' : 'Conectando...'}</span>
+                <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                  {isProcessing ? 'Pensando...' : isConnected ? 'En línea en La Paz' : 'Conectando...'}
                 </p>
               </div>
             </div>
@@ -224,7 +254,7 @@ export default function ChatWidget() {
               </a>
               <button
                 type="button"
-                onClick={() => setIsOpen(false)}
+                onClick={handleCloseChat}
                 title="Cerrar chat"
                 className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition ml-0.5"
               >
@@ -234,7 +264,7 @@ export default function ChatWidget() {
           </div>
 
           {/* MESSAGE STREAM */}
-          <div className="flex-1 p-3.5 overflow-y-auto space-y-3.5 bg-slate-50/40 dark:bg-slate-950/40">
+          <div className="flex-1 p-3.5 overflow-y-auto space-y-3 bg-slate-50/40 dark:bg-slate-950/40">
             {chatHistory.map((msg, idx) => {
               const isLastBotMessage = msg.sender === 'bot' && idx === chatHistory.length - 1;
 
@@ -271,7 +301,7 @@ export default function ChatWidget() {
 
                   <div className="flex-1 min-w-0">
                     <div className="rounded-2xl rounded-bl-xs p-3.5 bg-white dark:bg-slate-800/90 border border-slate-200/80 dark:border-slate-700/80 shadow-2xs text-slate-800 dark:text-slate-100">
-                      {/* Rich Formatted Markdown Text (NO ASTERISKS!) */}
+                      {/* Rich Formatted Markdown (NO ASTERISKS!) */}
                       <FormattedMessage text={msg.text} />
 
                       {msg.engine && (
@@ -327,7 +357,7 @@ export default function ChatWidget() {
               );
             })}
 
-            {/* KUNTUR SPEAKING / TYPING INDICATOR */}
+            {/* KUNTUR THINKING INDICATOR */}
             {isProcessing && (
               <div className="flex items-center gap-2 text-xs text-teal-700 dark:text-teal-300 p-2 px-3 rounded-2xl bg-teal-50 dark:bg-slate-800 border border-teal-100 dark:border-teal-900/40 w-fit animate-pulse">
                 <Sparkles className="w-3.5 h-3.5 animate-spin" />
@@ -366,6 +396,14 @@ export default function ChatWidget() {
           </form>
         </div>
       )}
+
+      {/* Floating Sway Keyframes */}
+      <style>{`
+        @keyframes kunturFloat {
+          0%, 100% { transform: translateY(0px); }
+          50% { transform: translateY(-7px); }
+        }
+      `}</style>
     </div>
   );
 }
