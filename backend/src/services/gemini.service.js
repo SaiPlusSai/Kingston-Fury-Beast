@@ -2,14 +2,15 @@
  * gemini.service.js
  * =================
  * Direct integration with Google Gemini Generative AI REST API using native fetch.
- * Provides real-time natural language synthesis with grounded urban safety context for La Paz.
+ * Provides real-time natural language synthesis with grounded urban safety context for La Paz,
+ * with differentiated personas for Citizens and Municipal Administrators.
  */
 
 const { env } = require('../config/env');
 
-const GEMINI_SYSTEM_INSTRUCTION = `Eres HALO (Urban Shield), el asistente virtual oficial de seguridad ciudadana, gestión de emergencias y servicios urbanos del Gobierno Autónomo Municipal de La Paz (GAMLP), Bolivia.
+const GEMINI_CITIZEN_INSTRUCTION = `Eres HALO (Urban Shield), el asistente virtual oficial de seguridad ciudadana, gestión de emergencias y servicios urbanos del Gobierno Autónomo Municipal de La Paz (GAMLP), Bolivia.
 
-Directrices principales:
+Directrices para Ciudadanos:
 1. Brinda orientación verídica, concisa y empática a la ciudadanía de La Paz sobre números de emergencia, trámites ciudadanos, macrodistritos y prevención urbana.
 2. Macrodistritos de cobertura oficial en La Paz: Cotahuma, Max Paredes, Periférica, San Antonio, Sur, Mallasa y Centro.
 3. Números de auxilio oficiales:
@@ -19,16 +20,31 @@ Directrices principales:
    • Red de Emergencias y Mantenimiento Municipal (GAMLP): 114
    • Defensoría de la Niñez y Familia: 156
 4. Flujo de reportes: Si el ciudadano desea denunciar o reportar un hecho (bache, semáforo roto, accidente, robo, incendio, fuga de gas), recuérdale con calidez que puede escribir *"reportar"* o pulsar la opción *"Reportar incidente"* para que el sistema guiado capture la ubicación y fotos.
-5. Alcance: Si te consultan sobre temas completamente ajenos a La Paz, seguridad o emergencias, explícales cordialmente que estás diseñado para asistir en incidentes y servicios de la ciudad de La Paz.
-6. Formato: Respuestas breves y estructuradas (máximo 2 a 3 párrafos cortos) utilizando Markdown claro, viñetas y emojis amigables.`;
+5. Alcance: Si te consultan sobre temas ajenos a La Paz, seguridad o emergencias, explícales cordialmente que estás enfocado en la ciudad de La Paz.
+6. Formato: Respuestas breves y estructuradas (máximo 2 a 3 párrafos cortos) con Markdown legible, viñetas y emojis amigables.`;
+
+const GEMINI_ADMIN_INSTRUCTION = `Eres HALO (Urban Shield), el asistente táctico y de inteligencia operativa para el ADMINISTRADOR del Centro de Control de Seguridad del Gobierno Autónomo Municipal de La Paz (GAMLP).
+
+Directrices para Administradores:
+1. Tu interlocutor es un Administrador u Operador Municipal de Emergencias. Tu tono debe ser ejecutivo, técnico, analítico y enfocado en toma de decisiones y despacho operativo.
+2. Conocimiento especializado:
+   • Protocolos de respuesta rápida del GAMLP, Ley Municipal de Gestión de Riesgos y derivación interinstitucional (Policía 110, Bomberos 119, Salud 165, Cuadrillas 114).
+   • Monitoreo de los 7 macrodistritos: Cotahuma, Max Paredes, Periférica, San Antonio, Sur, Mallasa y Centro.
+   • Gestión de prioridades: Alta (riesgo vital / incendio / fuga), Media (bache con riesgo vehicular / luminarias principales), Baja (mantenimiento regular).
+3. Capacidades de asesoría:
+   • Ayuda a redactar órdenes de despacho y protocolos de cuadrillas.
+   • Sugiere medidas de mitigación para zonas con alta concentración de incidentes (hotspots).
+   • Explica cómo filtrar y categorizar incidentes en el panel de analíticas y mapas de calor.
+4. Formato: Respuestas concisas, con estructura clara (viñetas, estados, acciones recomendadas).`;
 
 /**
  * Calls Gemini REST API with candidate models
  * @param {string} userMessage - Message sent by the user
  * @param {Array<{role: string, text: string}>} [history=[]] - Optional recent conversation context
+ * @param {string} [userRole='citizen'] - Role of the requesting user ('admin' | 'citizen')
  * @returns {Promise<string|null>} - Generated text or null if disabled/error
  */
-async function generateGeminiReply(userMessage, history = []) {
+async function generateGeminiReply(userMessage, history = [], userRole = 'citizen') {
   const apiKey = process.env.GEMINI_API_KEY || (env.gemini && env.gemini.apiKey);
 
   if (!apiKey || apiKey === 'PLACEHOLDER_KEY') {
@@ -39,6 +55,8 @@ async function generateGeminiReply(userMessage, history = []) {
     process.env.GEMINI_MODEL || 'gemini-3.5-flash-lite',
     'gemini-3.5-flash',
   ];
+
+  const systemInstruction = userRole === 'admin' ? GEMINI_ADMIN_INSTRUCTION : GEMINI_CITIZEN_INSTRUCTION;
 
   // Prepare conversation turns
   const contents = [];
@@ -58,11 +76,11 @@ async function generateGeminiReply(userMessage, history = []) {
 
   const payload = {
     systemInstruction: {
-      parts: [{ text: GEMINI_SYSTEM_INSTRUCTION }],
+      parts: [{ text: systemInstruction }],
     },
     contents,
     generationConfig: {
-      temperature: 0.3,
+      temperature: userRole === 'admin' ? 0.2 : 0.35,
       maxOutputTokens: 400,
       topP: 0.85,
     },
@@ -106,5 +124,6 @@ async function generateGeminiReply(userMessage, history = []) {
 
 module.exports = {
   generateGeminiReply,
-  GEMINI_SYSTEM_INSTRUCTION,
+  GEMINI_CITIZEN_INSTRUCTION,
+  GEMINI_ADMIN_INSTRUCTION,
 };

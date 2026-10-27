@@ -2,7 +2,7 @@ const { processReportStep, STATES } = require('./stateMachine');
 
 async function runStateMachineTest() {
   console.log('Testing Chat Report State Machine...');
-  const userId = 'test_user_sim_123';
+  const userId = `test_user_sim_${Date.now()}`;
 
   // Step 1: Start
   let res = await processReportStep(userId, 'Quiero reportar un bache peligroso');
@@ -36,15 +36,15 @@ async function runStateMachineTest() {
   }
 
   console.log('Testing Natural Language Category Classification...');
-  const nlUserId = 'test_user_nl_cat';
-  await processReportStep(nlUserId, 'reportar');
-  const catRes1 = await processReportStep(nlUserId, 'paso un incendio cerca de mi casa');
-  console.log('NL Category (Incendio):', catRes1.text.includes('Incendio / Fuga de gas') ? 'PASS' : 'FAIL');
+  const nlUserId1 = `test_user_nl1_${Date.now()}`;
+  await processReportStep(nlUserId1, 'reportar');
+  const catRes1 = await processReportStep(nlUserId1, 'paso un incendio cerca de mi casa');
+  console.log('NL Category (Incendio):', catRes1.text && catRes1.text.includes('Incendio / Fuga de gas') ? 'PASS' : 'FAIL');
 
-  const catRes2 = await processReportStep('user_nl_infra', 'reportar');
-  const catRes2Step = await processReportStep('user_nl_infra', 'hay un bache tremendo y no hay luz');
-  console.log('NL Category (Infraestructura):', catRes2Step.text.includes('Infraestructura / Bache / Luminaria') ? 'PASS' : 'FAIL');
+  const nlUserId2 = `test_user_nl2_${Date.now()}`;
+  await processReportStep(nlUserId2, 'reportar');
+  const catRes2Step = await processReportStep(nlUserId2, 'hay un bache tremendo y no hay luz');
+  console.log('NL Category (Infraestructura):', catRes2Step.text && catRes2Step.text.includes('Infraestructura / Bache / Luminaria') ? 'PASS' : 'FAIL');
 }
 
 runStateMachineTest();
-

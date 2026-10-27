@@ -85,8 +85,9 @@ exports.handler = async (event) => {
     };
   }
 
-  // 1. Recover userId from DynamoDB WebSocketConnectionsTable
+  // 1. Recover userId and userRole from DynamoDB WebSocketConnectionsTable
   let userId = 'anonymous';
+  let userRole = 'citizen';
   try {
     const docClient = getDynamoDbDocClient();
     const connRecord = await docClient.send(
@@ -95,8 +96,9 @@ exports.handler = async (event) => {
         Key: { connectionId },
       })
     );
-    if (connRecord.Item && connRecord.Item.userId) {
-      userId = connRecord.Item.userId;
+    if (connRecord.Item) {
+      if (connRecord.Item.userId) userId = connRecord.Item.userId;
+      if (connRecord.Item.userRole) userRole = connRecord.Item.userRole;
     }
   } catch (err) {
     console.warn(`Could not resolve userId for connection ${connectionId}:`, err.message);
@@ -114,23 +116,26 @@ exports.handler = async (event) => {
     const { intent } = detectIntent(userMessage);
 
     if (intent === 'greeting') {
-      responsePayload = await greetingHandler({ userId, message: userMessage });
+      responsePayload = await greetingHandler({ userId, userRole, message: userMessage });
     } else if (intent === 'create') {
       responsePayload = await createHandler({ userId, message: userMessage });
     } else if (intent === 'status') {
-      responsePayload = await statusHandler({ userId, message: userMessage });
+      responsePayload = await statusHandler({ userId, userRole, message: userMessage });
     } else if (intent === 'help') {
       responsePayload = await helpHandler({ userId, message: userMessage });
     } else {
-      // Intent is 'faq' or 'unknown': Try Gemini Generative AI first
-      const geminiReply = await generateGeminiReply(userMessage);
+      // Intent is 'faq' or 'unknown': Try Gemini Generative AI first with role persona
+      const geminiReply = await generateGeminiReply(userMessage, [], userRole);
       if (geminiReply) {
         responsePayload = {
           type: 'message',
           intent: intent === 'faq' ? 'faq' : 'conversational_ai',
           engine: 'GEMINI_FLASH_LLM',
+          role: userRole,
           text: geminiReply,
-          suggestedActions: ['Reportar incidente', 'Números de emergencia', 'Ayuda'],
+          suggestedActions: userRole === 'admin'
+            ? ['Resumen operativo', 'Reportes críticos', 'Macrodistritos']
+            : ['Reportar incidente', 'Números de emergencia', 'Ayuda'],
         };
       } else if (intent === 'faq') {
         responsePayload = await faqHandler({ userId, message: userMessage });
@@ -138,8 +143,13 @@ exports.handler = async (event) => {
         responsePayload = {
           type: 'message',
           intent: 'unknown',
-          text: `🤔 No logré entender del todo tu mensaje. Puedes escribir:\n- *"reportar"* para iniciar un reporte\n- *"ayuda"* para ver opciones\n- *"estado"* para consultar un reporte previo.`,
-          suggestedActions: ['Reportar incidente', 'Ayuda', 'Preguntas frecuentes'],
+          role: userRole,
+          text: userRole === 'admin'
+            ? `🛡️ Comando no reconocido. Como Administrador puedes escribir:\n- *"resumen"* para el estado de la ciudad\n- *"críticos"* para incidentes de alta prioridad\n- *"estado de reporte [id]"* para inspeccionar cualquier caso.`
+            : `🤔 No logré entender del todo tu mensaje. Puedes escribir:\n- *"reportar"* para iniciar un reporte\n- *"ayuda"* para ver opciones\n- *"estado"* para consultar un reporte previo.`,
+          suggestedActions: userRole === 'admin'
+            ? ['Resumen operativo', 'Reportes críticos', 'Macrodistritos']
+            : ['Reportar incidente', 'Ayuda', 'Preguntas frecuentes'],
         };
       }
     }

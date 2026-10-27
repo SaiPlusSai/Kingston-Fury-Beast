@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useWebSocket } from '../../hooks/useWebSocket';
+import { useAuth } from '../../context/AuthContext';
 import MascotAvatar from '../chat/MascotAvatar';
 import FormattedMessage from '../chat/FormattedMessage';
 import QuickCategoryChips from '../chat/components/QuickCategoryChips';
@@ -14,24 +15,49 @@ import {
   Sparkles,
 } from 'lucide-react';
 
-const getInitialGreeting = (mascot = 'kuntur') => ({
-  sender: 'bot',
-  text:
-    mascot === 'zeo'
-      ? `👋 ¡Hola! Soy **Zeo**, tu cebra educadora y embajador ciudadano de HALO La Paz.\n\nPuedo ayudarte a reportar incidentes viales, emergencias y baches, consultar teléfonos de auxilio o dar seguimiento a tus reportes en la ciudad con educación ciudadana.\n\n¿En qué te puedo colaborar hoy?`
-      : `👋 ¡Hola! Soy **Kuntur**, tu guardián ciudadano de HALO La Paz.\n\nPuedo ayudarte a reportar emergencias, consultar teléfonos de auxilio o dar seguimiento a tus casos en la ciudad.\n\n¿En qué te puedo colaborar hoy?`,
-  state: 'GREETING',
-  suggestedActions: ['Reportar incidente', 'Números de emergencia', 'Estado de mi reporte'],
-});
+const getInitialGreeting = (mascot = 'kuntur', role = 'citizen', userName = '') => {
+  const isCebra = mascot === 'zeo';
+  const nameGreeting = userName ? `, ${userName}` : '';
+
+  if (role === 'admin') {
+    return {
+      sender: 'bot',
+      text: isCebra
+        ? `🛡️ ¡Bienvenido al Centro de Control${nameGreeting}! Soy **Zeo**, tu asistente operativo de HALO La Paz.\n\nEstoy aquí para apoyarte en la supervisión urbana, gestión de alertas críticas y monitoreo de macrodistritos.\n\n¿Qué deseas consultar hoy?`
+        : `🛡️ ¡Panel de Comando Activo${nameGreeting}! Soy **Kuntur**, tu asistente táctico de operaciones HALO.\n\nEstoy conectado al sistema municipal para ayudarte a priorizar incidentes, coordinar cuadrillas y supervisar macrodistritos.\n\n¿En qué te colaboro, Operador?`,
+      state: 'GREETING',
+      suggestedActions: ['Resumen operativo', 'Reportes críticos', 'Macrodistritos', 'Ayuda'],
+    };
+  }
+
+  return {
+    sender: 'bot',
+    text: isCebra
+      ? `👋 ¡Hola${nameGreeting}! Soy **Zeo**, tu cebra educadora de HALO La Paz.\n\nPuedo ayudarte a reportar incidentes viales, emergencias y baches, o consultar el estado de tus trámites en la ciudad.\n\n¿En qué te puedo colaborar hoy?`
+      : `👋 ¡Hola${nameGreeting}! Soy **Kuntur**, tu guardián ciudadano de HALO La Paz.\n\nEstoy conectado en tiempo real para ayudarte a reportar emergencias, consultar teléfonos de auxilio o dar seguimiento a tus casos.\n\n¿En qué te puedo colaborar hoy?`,
+    state: 'GREETING',
+    suggestedActions: ['Reportar incidente', 'Mis reportes', 'Números de emergencia', 'Ayuda'],
+  };
+};
 
 export default function ChatWidget() {
+  const { user } = useAuth();
+
+  // El chatbot y la mascota NO aparecen si el usuario no ha iniciado sesión (ej: landing page)
+  if (!user) {
+    return null;
+  }
+
+  const userRole = user?.role || 'citizen';
+  const userName = user?.name || '';
+
   const [selectedMascot, setSelectedMascot] = useState(() => {
     return localStorage.getItem('halo_mascot') || 'kuntur';
   });
   const [isOpen, setIsOpen] = useState(false);
   const [isOpeningTransition, setIsOpeningTransition] = useState(false);
   const [inputText, setInputText] = useState('');
-  const [chatHistory, setChatHistory] = useState(() => [getInitialGreeting(selectedMascot)]);
+  const [chatHistory, setChatHistory] = useState(() => [getInitialGreeting(selectedMascot, userRole, userName)]);
   const [fsmState, setFsmState] = useState('GREETING');
   const [isProcessing, setIsProcessing] = useState(false);
   const [isInputFocused, setIsInputFocused] = useState(false);
@@ -39,14 +65,16 @@ export default function ChatWidget() {
   // Proactive speech bubble state
   const [showSpeechBubble, setShowSpeechBubble] = useState(false);
   const [speechBubbleText, setSpeechBubbleText] = useState(() =>
-    selectedMascot === 'zeo'
-      ? '👋 ¡Hola! Soy Zeo, tu cebra de La Paz. Haz clic en mí si necesitas reportar un incidente.'
-      : '👋 ¡Hola! Soy Kuntur. Haz clic en mí si necesitas reportar un incidente.'
+    userRole === 'admin'
+      ? `🛡️ ¡Hola ${userName || 'Operador'}! Consulta alertas operativas y estado de macrodistritos.`
+      : selectedMascot === 'zeo'
+        ? `👋 ¡Hola ${userName}! Soy Zeo, tu cebra de La Paz. Haz clic en mí si necesitas reportar un incidente.`
+        : `👋 ¡Hola ${userName}! Soy Kuntur. Haz clic en mí si necesitas reportar un incidente.`
   );
   const [showEmergencyMenu, setShowEmergencyMenu] = useState(false);
 
   const wsUrl = import.meta.env.VITE_WS_URL || 'ws://localhost:3001';
-  const token = localStorage.getItem('accessToken') || localStorage.getItem('token') || 'demo-citizen-token';
+  const token = localStorage.getItem('accessToken') || localStorage.getItem('token');
 
   const { isConnected, sendMessage, lastMessage } = useWebSocket(isOpen ? wsUrl : null, token);
   const messagesEndRef = useRef(null);
@@ -69,7 +97,7 @@ export default function ChatWidget() {
 
     // If chat only has initial greeting, replace it with the new mascot greeting
     if (chatHistory.length <= 1 && chatHistory[0]?.sender === 'bot') {
-      setChatHistory([getInitialGreeting(mascotKey)]);
+      setChatHistory([getInitialGreeting(mascotKey, userRole, userName)]);
     } else {
       setChatHistory((prev) => [
         ...prev,
