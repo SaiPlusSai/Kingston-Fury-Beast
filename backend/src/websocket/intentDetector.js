@@ -4,8 +4,8 @@
 
 const INTENT_PATTERNS = {
   greeting: [
-    /^(hola|buenos?\s+d[ií]as?|buenas?\s+(tardes?|noches?)|hey|saludos|que\s+tal|buenas)(\s+|$)/i,
-    /\b(hola|buen\s+dia|buenas\s+tardes|buenas\s+noches)\b/i,
+    /^(hola+|holi|holis|buenos?\s+d[ií]as?|buenas?\s+(tardes?|noches?)|hey|saludos|que\s+tal|buenas)(\s+|$)/i,
+    /\b(hola+|holi|holis|buen\s+dia|buenas\s+tardes|buenas\s+noches)\b/i,
   ],
   help: [
     /^(ayuda|help|opciones|men[uú]|qu[eé]?\s+puedes?|comandos|gu[ií]a)(\s+|$)/i,

@@ -6,7 +6,7 @@ const {
 const { getDynamoDbDocClient } = require('../aws/clients');
 const { env } = require('../config/env');
 const { detectIntent } = require('./intentDetector');
-const { getSession } = require('./stateMachine');
+const { getSession, deleteSession } = require('./stateMachine');
 
 // Handlers
 const greetingHandler = require('./handlers/greetingHandler');
@@ -104,17 +104,37 @@ exports.handler = async (event) => {
     console.warn(`Could not resolve userId for connection ${connectionId}:`, err.message);
   }
 
-  // 2. Check if user is currently inside an active multi-step session (stateMachine)
+  // 2. Classify message intent with intentDetector
+  const { intent } = detectIntent(userMessage);
+
+  // 3. Check if user is currently inside an active multi-step session (stateMachine)
   const activeSession = await getSession(userId);
   let responsePayload = null;
 
-  if (activeSession && activeSession.state && activeSession.state !== 'IDLE') {
-    // User is in the middle of creating a report
-    responsePayload = await createHandler({ userId, message: userMessage });
-  } else {
-    // 3. Classify message intent with intentDetector
-    const { intent } = detectIntent(userMessage);
+  const isGreeting = intent === 'greeting' || /^(hola+|holi|holis|hey|saludos|buenas?)/i.test((userMessage || '').trim());
+  const isCancel = /^(cancelar|salir|abortar|stop|reinicio|reiniciar)/i.test((userMessage || '').trim());
 
+  if (activeSession && activeSession.state && activeSession.state !== 'IDLE') {
+    if (isCancel) {
+      await deleteSession(userId);
+      responsePayload = {
+        type: 'message',
+        intent: 'cancel',
+        role: userRole,
+        text: '❌ El proceso de reporte ha sido cancelado. ¿En qué más te puedo colaborar?',
+        suggestedActions: userRole === 'admin'
+          ? ['Resumen operativo', 'Reportes críticos', 'Macrodistritos']
+          : ['Reportar incidente', 'Mis reportes', 'Números de emergencia'],
+      };
+    } else if (isGreeting && (activeSession.state === 'ASK_CATEGORY' || !activeSession.draft?.category)) {
+      // User sent a greeting instead of choosing a category: cancel stale draft and answer greeting
+      await deleteSession(userId);
+      responsePayload = await greetingHandler({ userId, userRole, message: userMessage });
+    } else {
+      // User is continuing active report
+      responsePayload = await createHandler({ userId, message: userMessage });
+    }
+  } else {
     if (intent === 'greeting') {
       responsePayload = await greetingHandler({ userId, userRole, message: userMessage });
     } else if (intent === 'create') {

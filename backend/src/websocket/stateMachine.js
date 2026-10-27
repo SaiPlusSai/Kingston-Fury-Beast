@@ -38,6 +38,13 @@ async function resolveCategory(rawText) {
   const text = (rawText || '').trim();
   if (!text) return null;
 
+  const lower = text.toLowerCase();
+
+  // Exclude greetings and pleasantries from being categorized as incidents
+  if (/^(hola+|holi|holis|buenos?\s+d[ií]as?|buenas?|buen\s*d[ií]a|hey|saludos|que\s+tal|c[oó]mo\s+est[aá]s)/i.test(lower)) {
+    return null;
+  }
+
   // 1. Exact numeric option
   const catKey = text.replace(/[^0-9]/g, '');
   if (catKey && CATEGORIES[catKey]) {
@@ -45,7 +52,6 @@ async function resolveCategory(rawText) {
   }
 
   // 2. Direct exact or prefix matches
-  const lower = text.toLowerCase();
   if (/^(seguridad|robo|asalto)/i.test(lower)) return 'Seguridad / Robo';
   if (/^(accidente|tr[aá]nsito|choque)/i.test(lower)) return 'Accidente de Tránsito';
   if (/^(infraestructura|bache|luminaria|foco)/i.test(lower)) return 'Infraestructura / Bache / Luminaria';
@@ -113,7 +119,15 @@ async function getSession(userId) {
         Key: { sessionId: `session_${userId}` },
       })
     );
-    return res.Item || localMemorySessions.get(`session_${userId}`) || null;
+    const session = res.Item || localMemorySessions.get(`session_${userId}`) || null;
+    if (session && session.updatedAt) {
+      const ageMs = Date.now() - new Date(session.updatedAt).getTime();
+      if (ageMs > 15 * 60 * 1000) {
+        await deleteSession(userId);
+        return null;
+      }
+    }
+    return session;
   } catch (err) {
     return localMemorySessions.get(`session_${userId}`) || null;
   }
