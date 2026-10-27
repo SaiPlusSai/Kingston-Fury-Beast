@@ -16,7 +16,11 @@
     "localstack:up": "docker compose -f ../docker-compose.localstack.yml up -d",
     "localstack:down": "docker compose -f ../docker-compose.localstack.yml down",
     "localstack:init": "node scripts/init-localstack.js",
-    "test:websocket": "node src/websocket/intentDetector.test.js && node src/websocket/stateMachine.test.js && node src/websocket/connection.test.js && node src/websocket/heartbeat.test.js"
+    "test:websocket": "node src/websocket/intentDetector.test.js && node src/websocket/stateMachine.test.js && node src/websocket/connection.test.js && node src/websocket/heartbeat.test.js",
+    "seed:faqs": "node scripts/seed-faqs.js",
+    "test:faqs": "node src/websocket/faqsSeed.test.js",
+    "test:api:faqs": "node src/tests/faqAdmin.api.test.js",
+    "seed:users": "node scripts/seed-users.js"
   },
   "keywords": [
     "urbanshield",
@@ -28,8 +32,11 @@
   "license": "ISC",
   "dependencies": {
     "@aws-sdk/client-apigatewaymanagementapi": "^3.1156.0",
+    "@aws-sdk/client-cloudfront": "^3.1157.0",
+    "@aws-sdk/client-cloudwatch-logs": "^3.1157.0",
     "@aws-sdk/client-cognito-identity-provider": "^3.758.0",
     "@aws-sdk/client-dynamodb": "^3.758.0",
+    "@aws-sdk/client-lambda": "^3.1157.0",
     "@aws-sdk/client-location": "^3.758.0",
     "@aws-sdk/client-s3": "^3.758.0",
     "@aws-sdk/client-sns": "^3.758.0",

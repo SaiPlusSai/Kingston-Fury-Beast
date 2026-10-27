@@ -5,6 +5,7 @@ import { AuthProvider } from './context/AuthContext';
 import { NotificationProvider } from './context/NotificationContext';
 import NotificationToast from './components/ui/NotificationToast';
 import AppRoutes from './routes/AppRoutes';
+import ChatWidget from './components/common/ChatWidget';
 
 function App() {
   React.useEffect(() => {
@@ -30,6 +31,7 @@ function App() {
         <NotificationProvider>
           <AppRoutes />
           <NotificationToast />
+          <ChatWidget />
           <Toaster position="top-right" toastOptions={{ className: 'glass-premium rounded-xl text-sm font-semibold' }} />
         </NotificationProvider>
       </AuthProvider>
@@ -38,4 +40,3 @@ function App() {
 }
 
 export default App;
-

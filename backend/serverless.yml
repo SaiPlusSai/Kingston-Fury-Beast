@@ -25,13 +25,15 @@ provider:
     JWT_REFRESH_SECRET: ${env:JWT_REFRESH_SECRET}
     JWT_ACCESS_EXPIRES_IN: ${env:JWT_ACCESS_EXPIRES_IN, '15m'}
     JWT_REFRESH_EXPIRES_IN: ${env:JWT_REFRESH_EXPIRES_IN, '7d'}
-    CORS_ORIGIN: ${env:CORS_ORIGIN, 'http://localhost:5173'}
+    CORS_ORIGIN: '*'
     FRONTEND_URL: ${env:FRONTEND_URL, 'http://localhost:5173'}
     COGNITO_USER_POOL_ID: ${env:COGNITO_USER_POOL_ID, ''}
     COGNITO_CLIENT_ID: ${env:COGNITO_CLIENT_ID, ''}
     SNS_TOPIC_EMERGENCY_ALERTS: !Ref EmergencyAlertsTopic
     LOCATION_MAP_NAME: ${env:LOCATION_MAP_NAME, 'UrbanShieldMap'}
-    LOCATION_PLACE_INDEX: ${env:LOCATION_PLACE_INDEX, 'UrbanShieldPlaceIndex'}
+    LOCATION_PLACE_INDEX: 
+    GEMINI_API_KEY: 
+    GEMINI_MODEL: ${env:LOCATION_PLACE_INDEX, 'UrbanShieldPlaceIndex'}
 
   iam:
     role:

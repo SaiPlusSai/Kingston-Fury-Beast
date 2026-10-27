@@ -120,6 +120,15 @@ Todas las tareas están ordenadas por dependencias (lo que desbloquea primero va
 
 ---
 
+
+### 2.3 Comparacion de Modelos y MLOps
+- [x] T-2.6: Entrenar modelo ARIMA/SARIMA comparativo con intervalos de confianza (BUILD-08)
+- [x] T-2.7: Implementar evaluador formal multizona (MAE, RMSE, MAPE, R2) y tracking MLflow (BUILD-09)
+- [ ] T-2.8: Implementar modulo RAG con FAISS y embeddings locales para asistencia ciudadana (BUILD-RAG)
+
+### 2.4 Endpoints de Integracion
+- [ ] T-2.9: Implementar endpoint REST GET /api/predictions para servir pronosticos al frontend (BUILD-11)
+
 ## Fase 3: Chatbot — Frontend Web
 
 - [ ] **T-3.1:** Implementar el custom hook `useWebSocket.js` en el frontend React que gestione la conexión WebSocket (connect, disconnect, reconnect con backoff exponencial, enviar mensajes, recibir mensajes). Debe manejar el estado de conexión (connecting, connected, disconnected, error).

@@ -48,6 +48,7 @@ yarn-error.log*
 .pnpm-debug.log*
 
 # 5. Sistema Operativo y Editores
+.localstack/
 .DS_Store
 .DS_Store?
 ._*

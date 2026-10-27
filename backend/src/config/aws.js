@@ -247,11 +247,18 @@ const getAwsClientConfig = () => {
     region: awsInfrastructure.region,
   };
 
+  if (process.env.AWS_EXECUTION_ENV || process.env.LAMBDA_TASK_ROOT) {
+    return config;
+  }
+
   if (env.aws.accessKeyId && env.aws.secretAccessKey) {
     config.credentials = {
       accessKeyId: env.aws.accessKeyId,
       secretAccessKey: env.aws.secretAccessKey,
     };
+    if (process.env.AWS_SESSION_TOKEN) {
+      config.credentials.sessionToken = process.env.AWS_SESSION_TOKEN;
+    }
   }
 
   return config;
@@ -277,3 +284,5 @@ module.exports = {
   getDynamoDbClientConfig,
   hasAwsCredentials,
 };
+
+

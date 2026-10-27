@@ -3,9 +3,9 @@ const { getDynamoDbDocClient } = require('../../aws/clients');
 const { env } = require('../../config/env');
 
 /**
- * Status intent handler: looks up report by ID, verifies ownership, and returns status + latest activities.
+ * Status intent handler: looks up report by ID, verifies ownership (or admin), and returns status + details.
  */
-async function statusHandler({ userId, message }) {
+async function statusHandler({ userId, userRole = 'citizen', message }) {
   // Extract potential report ID from message (e.g. "reporte 123", "reporte #abc-456", "rep_123")
   const idMatch = message.match(/(?:reporte|caso|denuncia)?\s*#?\s*([a-zA-Z0-9_-]{3,})/i);
   const reportId = idMatch ? idMatch[1] : null;
@@ -14,7 +14,7 @@ async function statusHandler({ userId, message }) {
     return {
       type: 'message',
       intent: 'status',
-      text: `🔍 Por favor indícame el ID o código de tu reporte. Por ejemplo:\n*"estado del reporte rep-1234"*`,
+      text: `🔍 Por favor indícame el ID o código de tu reporte. Por ejemplo:\n*"estado del reporte REP-MVQ1G2VC-780"*`,
     };
   }
 
@@ -39,28 +39,29 @@ async function statusHandler({ userId, message }) {
     }
 
     // Security check: verify user owns the report (or user is admin)
-    if (report.userId && report.userId !== userId) {
+    if (report.userId && report.userId !== userId && userRole !== 'admin') {
       return {
         type: 'message',
         intent: 'status',
-        text: `🔒 Por motivos de seguridad y privacidad, solo el creador del reporte puede consultar su estado detallado.`,
+        text: `🔒 Por motivos de seguridad y privacidad, solo el creador del reporte o un administrador puede consultar su estado detallado.`,
       };
     }
 
     const statusEmojis = {
-      pending: '🟡 Pendiente de revisión',
-      in_progress: '🔵 En atención / En curso',
+      pending: '🟡 Pendiente de evaluación',
+      in_progress: '🔵 En atención / Cuadrilla asignada',
       resolved: '🟢 Resuelto',
-      rejected: '🔴 Rechazado',
+      rejected: '🔴 Desestimado',
     };
 
     const statusText = statusEmojis[report.status] || `⚪ ${report.status || 'En evaluación'}`;
+    const priorityText = report.priority === 'high' ? '🚨 Alta' : report.priority === 'low' ? '🟢 Baja' : '🟡 Media';
 
     return {
       type: 'message',
       intent: 'status',
-      text: `📋 **Estado del Reporte #${reportId}**\n\n📌 **Categoría:** ${report.category || 'General'}\n📝 **Descripción:** ${report.description || 'Sin descripción'}\n📍 **Zona/Ubicación:** ${report.zone || report.address || 'Registrada'}\n📊 **Estado:** ${statusText}\n📅 **Fecha de Creación:** ${report.createdAt ? new Date(report.createdAt).toLocaleString('es-BO') : 'Reciente'}\n\nTe notificaremos automáticamente cuando ocurra una nueva actualización en tu caso.`,
-      suggestedActions: ['Reportar otro caso', 'Menú principal'],
+      text: `📋 **Ficha del Reporte #${reportId}**\n\n📌 **Categoría:** ${report.category || 'General'}\n📝 **Descripción:** ${report.description || 'Sin descripción'}\n📍 **Ubicación:** ${report.location || report.exactZone || report.zone || 'La Paz'}\n⚡ **Prioridad:** ${priorityText}\n📊 **Estado:** ${statusText}\n👤 **Reportado por:** ${report.reporterName || report.userId || 'Ciudadano'}\n📅 **Fecha:** ${report.createdAt ? new Date(report.createdAt).toLocaleString('es-BO') : 'Reciente'}\n\n${userRole === 'admin' ? '⚙️ *Acción administrativa: Puedes actualizar este estado desde el panel web de reportes.*' : 'Te notificaremos automáticamente cuando ocurra una nueva actualización en tu caso.'}`,
+      suggestedActions: userRole === 'admin' ? ['Panel de reportes', 'Menú principal'] : ['Reportar otro caso', 'Menú principal'],
     };
   } catch (error) {
     console.error(`Error querying report ${reportId}:`, error.message);
@@ -73,4 +74,3 @@ async function statusHandler({ userId, message }) {
 }
 
 module.exports = statusHandler;
-

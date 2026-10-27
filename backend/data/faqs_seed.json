@@ -1,0 +1,98 @@
+[
+  {
+    "faqId": "faq-emergencia-policia",
+    "category": "emergencia",
+    "question": "¿Cuál es el número de la Policía Nacional y cuándo debo llamarlo?",
+    "answer": "El número de la Policía Nacional es el 110. Debes comunicarte de inmediato ante situaciones de robo, violencia, disturbios, agresiones o delitos flagrantes en la vía pública.",
+    "keywords": ["policia", "110", "seguridad", "denuncia", "patrulla", "delito", "asalto", "robo", "violencia"],
+    "isActive": true
+  },
+  {
+    "faqId": "faq-emergencia-bomberos",
+    "category": "emergencia",
+    "question": "¿Cómo contacto a la Unidad de Bomberos en La Paz?",
+    "answer": "La Unidad de Bomberos Antofagasta responde en la línea directa 119. Atienden incendios estructurales, forestales, fugas de gas, rescates vehiculares y emergencias con materiales peligrosos.",
+    "keywords": ["bomberos", "119", "incendio", "fuego", "gas", "rescate", "auxilio", "fuga de gas"],
+    "isActive": true
+  },
+  {
+    "faqId": "faq-emergencia-ambulancias",
+    "category": "emergencia",
+    "question": "¿Cuál es la línea de ambulancias y atención médica urgente?",
+    "answer": "El Sistema Municipal de Atención Médica de Emergencia (Red 165) atiende las 24 horas del día para el despacho de ambulancias en casos de accidentes graves o crisis de salud.",
+    "keywords": ["ambulancia", "165", "medico", "paramedico", "salud", "accidente", "herido", "hospital"],
+    "isActive": true
+  },
+  {
+    "faqId": "faq-emergencia-municipal",
+    "category": "emergencia",
+    "question": "¿Cuál es el teléfono de la Red de Emergencias del Gobierno Municipal (GAMLP)?",
+    "answer": "La Red de Emergencias y Auxilio de la Alcaldía de La Paz atiende en la línea gratuita 114 para reportar mazamorras, deslizamientos, caída de árboles, sifonamientos y desbordes de ríos.",
+    "keywords": ["alcaldia", "114", "gamlp", "emergencia municipal", "mazamorra", "deslizamiento", "rio", "arbol"],
+    "isActive": true
+  },
+  {
+    "faqId": "faq-reportes-creacion",
+    "category": "reportes",
+    "question": "¿Cómo puedo registrar un nuevo reporte o incidente urbano?",
+    "answer": "Puedes registrar un reporte escribiendo 'Quiero reportar un incidente' en este chat o seleccionando el botón '+' en el panel principal. Te guiaremos paso a paso para indicar la categoría, descripción, ubicación GPS y fotografía.",
+    "keywords": ["crear reporte", "nuevo reporte", "denunciar", "registrar incidente", "reportar", "bache", "luminaria"],
+    "isActive": true
+  },
+  {
+    "faqId": "faq-reportes-seguimiento",
+    "category": "reportes",
+    "question": "¿Cómo consulto el estado y avance de mi reporte?",
+    "answer": "Escribe 'Consultar estado' en el chat seguido de tu código de reporte (ejemplo: #REP-1234), o ingresa a la pestaña 'Mis Reportes' en el menú superior para ver la línea de tiempo de atención.",
+    "keywords": ["estado", "seguimiento", "consultar", "mi caso", "progreso", "codigo", "timeline"],
+    "isActive": true
+  },
+  {
+    "faqId": "faq-seguridad-anonimato",
+    "category": "seguridad",
+    "question": "¿Mis reportes son confidenciales y protegen mi identidad?",
+    "answer": "Sí. HALO protege tus datos mediante cifrado AES-256 en reposo y tránsito. Al enviar una denuncia ciudadana, puedes optar por ocultar tu identidad al público general.",
+    "keywords": ["anonimo", "confidencial", "privacidad", "datos personales", "identidad", "seguro"],
+    "isActive": true
+  },
+  {
+    "faqId": "faq-tiempos-respuesta",
+    "category": "tramites",
+    "question": "¿Cuáles son los tiempos estimados de atención de un incidente?",
+    "answer": "Incidentes críticos (riesgo de vida o estructural) se derivan en menos de 15 minutos. El mantenimiento urbano general (luminarias, baches) tiene un plazo de evaluación de 24 a 48 horas hábiles.",
+    "keywords": ["tiempo", "plazo", "demora", "cuanto tarda", "evaluacion", "horario de atencion"],
+    "isActive": true
+  },
+  {
+    "faqId": "faq-zonas-macrodistritos",
+    "category": "zonas",
+    "question": "¿Qué macrodistritos de La Paz cubre la plataforma?",
+    "answer": "HALO brinda cobertura integral a los 7 macrodistritos urbanos de La Paz: Cotahuma, Max Paredes, Periférica, San Antonio, Sur, Mallasa y Centro.",
+    "keywords": ["macrodistrito", "zonas", "cotahuma", "centro", "sur", "periferica", "san antonio", "max paredes", "mallasa"],
+    "isActive": true
+  },
+  {
+    "faqId": "faq-fotos-evidencia",
+    "category": "reportes",
+    "question": "¿Qué tipo de archivos puedo adjuntar como evidencia fotográfica?",
+    "answer": "Puedes adjuntar imágenes en formato JPG, PNG o WEBP con un tamaño máximo de 10 MB. Las imágenes se almacenan de forma segura en Amazon S3 mediante URLs prefirmadas de corta duración.",
+    "keywords": ["foto", "imagen", "adjunto", "subir", "s3", "archivo", "evidencia", "camara"],
+    "isActive": true
+  },
+  {
+    "faqId": "faq-prediccion-hotspots",
+    "category": "ia",
+    "question": "¿Cómo funciona el mapa de riesgo y predicción de incidentes?",
+    "answer": "HALO utiliza modelos estadísticos de Inteligencia Artificial (Prophet y ARIMA) entrenados con series temporales para prever focos de riesgo y optimizar el patrullaje preventivo de las autoridades.",
+    "keywords": ["prediccion", "hotspots", "mapa de calor", "modelo", "inteligencia artificial", "riesgo", "prophet", "arima"],
+    "isActive": true
+  },
+  {
+    "faqId": "faq-chatbot-comandos",
+    "category": "chatbot",
+    "question": "¿Qué comandos rápidos puedo utilizar con el asistente virtual?",
+    "answer": "Puedes escribir: 'ayuda' para ver el menú principal, 'reportar' para iniciar una denuncia asistida, 'estado' para revisar un ticket previo, o consultar directamente tus dudas en lenguaje natural.",
+    "keywords": ["comandos", "menu", "ayuda", "asistente", "opciones", "funciones", "chatbot"],
+    "isActive": true
+  }
+]

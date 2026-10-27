@@ -605,9 +605,25 @@ El sistema SHALL verificar y aplicar las condiciones de ADDED Requirements.
 
 ---
 
+## 2.5 Comparacion de Modelos y MLOps (CRISP-ML(Q))
+
+### RF-PRED-ARIMA-001: Modelo Comparativo ARIMA / SARIMA
+- **Descripcion:** Implementar el modelo ARIMA(1,1,1) como benchmark estadistico clasico contra Prophet.
+- **Entrada:** Serie temporal diaria indexada por macrodistrito (minimo 14 observaciones).
+- **Salida:** Pronostico a 30 dias con intervalos de confianza del 95% y exportacion de graficos en PNG.
+
+### RF-PRED-MLOPS-001: Evaluador de Metricas y Tracking MLflow
+- **Descripcion:** Evaluar en conjunto de test (holdout) los modelos Baselines (Naive, MA7, Estacional), ARIMA y Prophet bajo MAE, RMSE, MAPE y R2.
+- **Registro MLOps:** Registrar hiperparametros, metricas y artefactos en MLflow y exportar reporte formal JSON.
+
+---
+
 ###### Scenario: Validación funcional de RF-PRED-012
 - **WHEN** un usuario o servicio invoca la capacidad RF-PRED-012
 - **THEN** Las métricas se presentan de forma clara tanto para técnicos (tabla con MAE/RMSE/R²) como para no-técnicos (explicación en lenguaje natural); la tabla se actualiza automáticamente cuando hay nuevas predicciones.
+
+##### Requirement: PRED-RNF - Requisitos No Funcionales
+
 
 ##### Requirement: PRED-RNF - Requisitos No Funcionales
 

@@ -91,7 +91,7 @@ const CitizenMap = () => {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [selectedStatus, setSelectedStatus] = useState('all');
   const [showMobileFilters, setShowMobileFilters] = useState(false);
-  const [mapCenter, setMapCenter] = useState([-63.18, -17.78]);
+  const [mapCenter, setMapCenter] = useState([-68.135, -16.498]);
   const [mapZoom, setMapZoom] = useState(13);
   const [centerOnUser, setCenterOnUser] = useState(true);
   const [showLatestPanel, setShowLatestPanel] = useState(true);

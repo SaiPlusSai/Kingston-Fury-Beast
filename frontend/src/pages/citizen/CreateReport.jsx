@@ -68,8 +68,8 @@ const CreateReport = () => {
     description: '',
     priority: '',
     location: '',
-    latitude: -17.7833,
-    longitude: -63.1821,
+    latitude: -16.498,
+    longitude: -68.135,
   });
 
   // Limpieza de URLs de objeto
@@ -561,3 +561,4 @@ const CreateReport = () => {
 };
 
 export default CreateReport;
+

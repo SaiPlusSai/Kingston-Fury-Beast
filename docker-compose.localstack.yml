@@ -1,19 +1,16 @@
-version: '3.8'
-
 services:
   localstack:
     container_name: halo_localstack
-    image: localstack/localstack:latest
+    image: localstack/localstack:3.8.0
     ports:
-      - "4566:4566"            # LocalStack Edge Port
-      - "4510-4559:4510-4559"  # external services port range
+      - "4566:4566"
+      - "4510-4559:4510-4559"
     environment:
-      - SERVICES=dynamodb,s3,sns,apigateway,lambda
+      - SERVICES=dynamodb,s3,sns,apigateway
       - AWS_DEFAULT_REGION=us-east-1
       - DOCKER_HOST=unix:///var/run/docker.sock
-      - DEBUG=1
+      - DEBUG=0
     volumes:
       - "./localstack-init:/etc/localstack/init/ready.d"
       - "${LOCALSTACK_VOLUME_DIR:-./.localstack}:/var/lib/localstack"
       - "/var/run/docker.sock:/var/run/docker.sock"
-

@@ -21,7 +21,14 @@ app.use(helmet());
 app.use(
   cors({
     origin: (origin, callback) => {
-      if (!origin || env.corsOrigins.includes(origin)) {
+      if (
+        !origin ||
+        env.corsOrigins.includes('*') ||
+        env.corsOrigins.includes(origin) ||
+        origin.endsWith('.amazonaws.com') ||
+        origin.endsWith('.cloudfront.net') ||
+        origin.includes('localhost')
+      ) {
         return callback(null, true);
       }
       return callback(new Error(`CORS blocked for origin: ${origin}`));
