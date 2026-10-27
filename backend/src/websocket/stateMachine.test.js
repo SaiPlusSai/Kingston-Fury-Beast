@@ -34,6 +34,16 @@ async function runStateMachineTest() {
     console.error('FAILED: Report creation flow did not complete.');
     process.exit(1);
   }
+
+  console.log('Testing Natural Language Category Classification...');
+  const nlUserId = 'test_user_nl_cat';
+  await processReportStep(nlUserId, 'reportar');
+  const catRes1 = await processReportStep(nlUserId, 'paso un incendio cerca de mi casa');
+  console.log('NL Category (Incendio):', catRes1.text.includes('Incendio / Fuga de gas') ? 'PASS' : 'FAIL');
+
+  const catRes2 = await processReportStep('user_nl_infra', 'reportar');
+  const catRes2Step = await processReportStep('user_nl_infra', 'hay un bache tremendo y no hay luz');
+  console.log('NL Category (Infraestructura):', catRes2Step.text.includes('Infraestructura / Bache / Luminaria') ? 'PASS' : 'FAIL');
 }
 
 runStateMachineTest();

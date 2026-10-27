@@ -2,6 +2,7 @@ const { GetCommand, PutCommand, DeleteCommand } = require('@aws-sdk/lib-dynamodb
 const { getDynamoDbDocClient } = require('../aws/clients');
 const { env } = require('../config/env');
 const { v4: uuidv4 } = require('uuid');
+const { generateGeminiReply } = require('../services/gemini.service');
 
 /**
  * Chat creation state machine states:
@@ -26,6 +27,79 @@ const CATEGORIES = {
   '5': 'Emergencia Médica',
   '6': 'Otro',
 };
+
+const VALID_CATEGORIES = Object.values(CATEGORIES);
+
+/**
+ * Categorizes citizen input into one of the 6 canonical categories
+ * via exact match, regex heuristics, or Gemini Flash LLM.
+ */
+async function resolveCategory(rawText) {
+  const text = (rawText || '').trim();
+  if (!text) return null;
+
+  // 1. Exact numeric option
+  const catKey = text.replace(/[^0-9]/g, '');
+  if (catKey && CATEGORIES[catKey]) {
+    return CATEGORIES[catKey];
+  }
+
+  // 2. Direct exact or prefix matches
+  const lower = text.toLowerCase();
+  if (/^(seguridad|robo|asalto)/i.test(lower)) return 'Seguridad / Robo';
+  if (/^(accidente|tr[aá]nsito|choque)/i.test(lower)) return 'Accidente de Tránsito';
+  if (/^(infraestructura|bache|luminaria|foco)/i.test(lower)) return 'Infraestructura / Bache / Luminaria';
+  if (/^(incendio|fuga|fuego|gas)/i.test(lower)) return 'Incendio / Fuga de gas';
+  if (/^(m[eé]dica|salud|herido|ambulancia)/i.test(lower)) return 'Emergencia Médica';
+  if (/^(otro|ningun)/i.test(lower)) return 'Otro';
+
+  // 3. Fast keyword & heuristic patterns
+  if (/\b(incendio|fuego|quema|fuga.*gas|gas|garrafa|humo|explosi[oó]n)\b/i.test(lower)) {
+    return 'Incendio / Fuga de gas';
+  }
+  if (/\b(accidente|choque|colisi[oó]n|atropell|vuelco|tr[aá]nsito|veh[ií]cul|minib[uú]s|auto|motocicleta|moto)\b/i.test(lower)) {
+    return 'Accidente de Tránsito';
+  }
+  if (/\b(bache|hueco|luminaria|foco|poste|alcantarilla|tuber[ií]a|acera|pavimento|alumbrado|sem[aá]foro|agua|inundaci[oó]n|derrumbe)\b/i.test(lower)) {
+    return 'Infraestructura / Bache / Luminaria';
+  }
+  if (/\b(robo|asalto|ladr[oó]n|ladrones|robando|robaron|atraco|seguridad|delincuen|arma|pandill|hurto|violenc|agres)\b/i.test(lower)) {
+    return 'Seguridad / Robo';
+  }
+  if (/\b(m[eé]dic|salud|herid[oa]|ambulancia|desmay|infarto|enferm[oa]|sangr)\b/i.test(lower)) {
+    return 'Emergencia Médica';
+  }
+
+  // 4. Natural language semantic classification via Gemini LLM
+  if (text.length > 4) {
+    try {
+      const prompt = `Analiza el siguiente texto de un ciudadano que describe un incidente urbano en La Paz: "${text}".
+Clasifícalo en exactamente una de estas categorías oficiales:
+- Seguridad / Robo
+- Accidente de Tránsito
+- Infraestructura / Bache / Luminaria
+- Incendio / Fuga de gas
+- Emergencia Médica
+- Otro
+
+Instrucción estricta: Devuelve ÚNICAMENTE el nombre exacto de la categoría seleccionada, sin texto adicional ni comillas.`;
+
+      const aiReply = await generateGeminiReply(prompt);
+      if (aiReply) {
+        for (const cat of VALID_CATEGORIES) {
+          if (aiReply.toLowerCase().includes(cat.toLowerCase()) || cat.toLowerCase().includes(aiReply.trim().toLowerCase())) {
+            return cat;
+          }
+        }
+      }
+    } catch (e) {
+      // Fallback below
+    }
+    return 'Otro';
+  }
+
+  return null;
+}
 
 // In-memory fallback for local dev/testing without active AWS credentials
 const localMemorySessions = new Map();
@@ -120,13 +194,13 @@ async function processReportStep(userId, message) {
   // Handle current state
   switch (session.state) {
     case STATES.ASK_CATEGORY: {
-      const catKey = text.replace(/[^0-9]/g, '');
-      const selectedCategory = CATEGORIES[catKey] || (text.length > 3 ? text : null);
+      const selectedCategory = await resolveCategory(text);
 
       if (!selectedCategory) {
         return {
           state: STATES.ASK_CATEGORY,
-          text: `⚠️ Por favor ingresa una opción válida (1 al 6) o el nombre de la categoría:\n\n1️⃣ Seguridad\n2️⃣ Accidente\n3️⃣ Infraestructura\n4️⃣ Incendio\n5️⃣ Emergencia Médica\n6️⃣ Otro`,
+          text: `⚠️ Por favor selecciona una opción válida (1 al 6) o descríbela en tus palabras:\n\n1️⃣ Seguridad / Robo\n2️⃣ Accidente de Tránsito\n3️⃣ Infraestructura / Bache / Luminaria\n4️⃣ Incendio / Fuga de gas\n5️⃣ Emergencia Médica\n6️⃣ Otro`,
+          suggestedActions: ['1. Seguridad', '2. Accidente', '3. Infraestructura', '4. Incendio', '5. Médica', '6. Otro'],
         };
       }
 
@@ -136,7 +210,8 @@ async function processReportStep(userId, message) {
 
       return {
         state: STATES.ASK_DESCRIPTION,
-        text: `✅ Categoría: **${selectedCategory}**\n\n📝 (Paso 2 de 5) **Describe brevemente lo que sucedió:**\n*(Ejemplo: Choque entre dos minibuses con derrame de combustible cerca del semáforo)*`,
+        text: `✅ Categoría asignada: **${selectedCategory}**\n\n📝 (Paso 2 de 5) **Describe brevemente lo que sucedió:**\n*(Ejemplo: Choque entre dos minibuses con derrame de combustible cerca del semáforo)*`,
+        suggestedActions: ['Continuar', 'Cancelar'],
       };
     }
 
