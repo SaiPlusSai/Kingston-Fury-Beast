@@ -203,12 +203,19 @@ async function processReportStep(userId, message) {
         const reportItem = {
           reportId,
           userId,
+          title: `${session.draft.category} en ${session.draft.location}`,
           category: session.draft.category,
           description: session.draft.description,
           location: session.draft.location,
-          zone: session.draft.location,
-          photoUrl: session.draft.photoUrl,
+          exactZone: session.draft.location,
+          latitude: -16.498,
+          longitude: -68.135,
+          imageUrl: session.draft.photoUrl || null,
+          imageKeys: [],
           status: 'pending',
+          priority: 'medium',
+          upvotes: [],
+          downvotes: [],
           createdAt: now,
           updatedAt: now,
         };
@@ -221,8 +228,9 @@ async function processReportStep(userId, message) {
               Item: reportItem,
             })
           );
+          console.log(`[DynamoDB] Report created successfully: ${reportId}`);
         } catch (saveErr) {
-          // Continue if in dev
+          console.error(`[DynamoDB ERROR] Failed to save report ${reportId}:`, saveErr.message);
         }
 
         await deleteSession(userId);
