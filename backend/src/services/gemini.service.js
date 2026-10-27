@@ -23,7 +23,7 @@ Directrices principales:
 6. Formato: Respuestas breves y estructuradas (máximo 2 a 3 párrafos cortos) utilizando Markdown claro, viñetas y emojis amigables.`;
 
 /**
- * Calls Gemini REST API
+ * Calls Gemini REST API with candidate models
  * @param {string} userMessage - Message sent by the user
  * @param {Array<{role: string, text: string}>} [history=[]] - Optional recent conversation context
  * @returns {Promise<string|null>} - Generated text or null if disabled/error
@@ -35,8 +35,10 @@ async function generateGeminiReply(userMessage, history = []) {
     return null;
   }
 
-  const model = process.env.GEMINI_MODEL || 'gemini-1.5-flash';
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+  const models = [
+    process.env.GEMINI_MODEL || 'gemini-3.5-flash-lite',
+    'gemini-3.5-flash',
+  ];
 
   // Prepare conversation turns
   const contents = [];
@@ -66,36 +68,40 @@ async function generateGeminiReply(userMessage, history = []) {
     },
   };
 
-  try {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 4500); // 4.5s max to avoid API GW 29s timeout
+  for (const model of models) {
+    try {
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 4500); // 4.5s max
 
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(payload),
-      signal: controller.signal,
-    });
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+        signal: controller.signal,
+      });
 
-    clearTimeout(timeoutId);
+      clearTimeout(timeoutId);
 
-    if (!response.ok) {
-      const errorBody = await response.text();
-      console.warn(`[Gemini API] HTTP ${response.status}: ${errorBody}`);
-      return null;
+      if (response.ok) {
+        const data = await response.json();
+        const candidate = data?.candidates?.[0];
+        const replyText = candidate?.content?.parts?.[0]?.text;
+        if (replyText) {
+          return replyText.trim();
+        }
+      } else {
+        const errorBody = await response.text();
+        console.warn(`[Gemini API] Model ${model} HTTP ${response.status}: ${errorBody}`);
+      }
+    } catch (err) {
+      console.warn(`[Gemini API Warning] Model ${model}: ${err.name === 'AbortError' ? 'Timeout' : err.message}`);
     }
-
-    const data = await response.json();
-    const candidate = data?.candidates?.[0];
-    const replyText = candidate?.content?.parts?.[0]?.text;
-
-    return replyText ? replyText.trim() : null;
-  } catch (err) {
-    console.warn(`[Gemini API Warning] ${err.name === 'AbortError' ? 'Request timed out' : err.message}`);
-    return null;
   }
+
+  return null;
 }
 
 module.exports = {
