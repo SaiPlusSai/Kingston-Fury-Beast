@@ -1,17 +1,24 @@
 import React, { useState, useEffect } from 'react';
-import { Sparkles, BarChart3, CheckCircle2, Award } from 'lucide-react';
+import { Sparkles, BarChart3, CheckCircle2, Award, AlertTriangle, ShieldAlert, TrendingUp } from 'lucide-react';
 import api from '../../services/api';
 
 export default function PredictionsDashboard() {
   const [summaryData, setSummaryData] = useState(null);
+  const [heatmapPoints, setHeatmapPoints] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    api.get('/predictions/summary')
-      .then((res) => {
-        if (res.data?.success) {
-          setSummaryData(res.data.data);
+    Promise.all([
+      api.get('/predictions/summary').catch(() => null),
+      api.get('/predictions/heatmap').catch(() => null)
+    ])
+      .then(([summaryRes, heatmapRes]) => {
+        if (summaryRes?.data?.success) {
+          setSummaryData(summaryRes.data.data);
+        }
+        if (heatmapRes?.data?.success && Array.isArray(heatmapRes.data.points)) {
+          setHeatmapPoints(heatmapRes.data.points);
         }
         setLoading(false);
       })
@@ -24,7 +31,7 @@ export default function PredictionsDashboard() {
   if (loading) {
     return (
       <div className="p-6 bg-white rounded-2xl shadow-sm border border-border-light flex items-center justify-center">
-        <span className="text-text-secondary animate-pulse text-sm">Cargando modelos y predicciones...</span>
+        <span className="text-text-secondary animate-pulse text-sm">Cargando modelos y pronóstico de hotspots...</span>
       </div>
     );
   }
@@ -53,15 +60,80 @@ export default function PredictionsDashboard() {
                 </span>
               </div>
               <p className="text-xs text-emerald-100/90 mt-1 font-medium">
-                Benchmark de Modelos en Tiempo Real: Meta Prophet vs. ARIMA(1,1,1) vs. Líneas Base
+                Pronóstico Predictivo Operativo e Inferencia de Hotspots para La Paz
               </p>
             </div>
           </div>
 
           <div className="flex items-center gap-2 bg-white/10 px-3.5 py-2 rounded-xl text-xs backdrop-blur-md border border-white/20 shadow-sm">
             <span className="w-2.5 h-2.5 bg-emerald-400 rounded-full animate-pulse shadow-[0_0_8px_rgba(52,211,153,0.8)]" />
-            <span className="font-medium text-emerald-50">MLflow Run Registrado</span>
+            <span className="font-medium text-emerald-50">Modelo Activo: ARIMA(1,1,1)</span>
           </div>
+        </div>
+      </div>
+
+      {/* Operative Hotspots Forecast Cards */}
+      <div>
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-2">
+            <ShieldAlert className="w-5 h-5 text-emerald-700" />
+            <h3 className="text-sm font-bold uppercase tracking-wider text-text-primary">
+              Pronóstico de Incidentes Estimados para las Próximas 24 Horas
+            </h3>
+          </div>
+          <span className="text-xs text-text-secondary bg-white px-2.5 py-1 rounded-lg border border-border-light shadow-sm">
+            Basado en inferencia de series temporales
+          </span>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {heatmapPoints.map((hp) => {
+            const isHigh = hp.riskLevel === 'HIGH';
+            const isMed = hp.riskLevel === 'MEDIUM';
+
+            const badgeBg = isHigh
+              ? 'bg-red-50 text-red-700 border-red-200'
+              : isMed
+              ? 'bg-amber-50 text-amber-700 border-amber-200'
+              : 'bg-emerald-50 text-emerald-700 border-emerald-200';
+
+            const barBg = isHigh ? 'bg-red-500' : isMed ? 'bg-amber-500' : 'bg-emerald-500';
+
+            return (
+              <div
+                key={hp.zoneId}
+                className="bg-white p-4 rounded-xl shadow-sm border border-border-light flex flex-col justify-between hover:shadow-md transition-shadow"
+              >
+                <div>
+                  <div className="flex justify-between items-start mb-2">
+                    <span className="text-xs font-bold text-text-primary">{hp.name}</span>
+                    <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold border ${badgeBg}`}>
+                      {isHigh ? 'Riesgo Alto' : isMed ? 'Riesgo Medio' : 'Riesgo Bajo'}
+                    </span>
+                  </div>
+                  <div className="flex items-baseline gap-1 mt-1">
+                    <span className="text-2xl font-black text-text-primary">
+                      ~{hp.predictedDailyIncidents}
+                    </span>
+                    <span className="text-xs text-text-muted">incidentes previstos/día</span>
+                  </div>
+                </div>
+
+                <div className="mt-3 pt-3 border-t border-border-light">
+                  <div className="flex justify-between text-[11px] text-text-secondary mb-1">
+                    <span>Intensidad de Hotspot</span>
+                    <span className="font-semibold">{Math.round(hp.intensity * 100)}%</span>
+                  </div>
+                  <div className="w-full h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                    <div
+                      className={`h-full ${barBg} rounded-full transition-all duration-500`}
+                      style={{ width: `${Math.round(hp.intensity * 100)}%` }}
+                    />
+                  </div>
+                </div>
+              </div>
+            );
+          })}
         </div>
       </div>
 
@@ -73,7 +145,7 @@ export default function PredictionsDashboard() {
               <BarChart3 className="w-4 h-4" />
             </div>
             <h3 className="text-base font-semibold text-text-primary">
-              Evaluación Multizona en Holdout Set (Test = {summaryData?.test_size || 7} días)
+              Benchmark Técnico de Modelos en Holdout Set (Test = {summaryData?.test_size || 7} días)
             </h3>
           </div>
           <span className="text-xs text-text-secondary bg-[#F8F6F1] px-2.5 py-1 rounded-lg border border-border-light font-medium">
@@ -82,41 +154,33 @@ export default function PredictionsDashboard() {
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm text-text-secondary">
-            <thead className="bg-[#F8F6F1] text-text-primary uppercase font-semibold text-xs border-b border-border-light">
+          <table className="w-full text-left text-sm">
+            <thead className="bg-[#FAF9F6] text-text-muted uppercase text-[11px] font-semibold border-y border-border-light">
               <tr>
-                <th className="py-3 px-4">Modelo</th>
-                <th className="py-3 px-4">MAE Promedio</th>
-                <th className="py-3 px-4">RMSE Promedio</th>
-                <th className="py-3 px-4">MAPE (%)</th>
+                <th className="py-3 px-4">Modelo Evaluado</th>
+                <th className="py-3 px-4">MAE (Error Absoluto)</th>
+                <th className="py-3 px-4">RMSE (Dispersión)</th>
+                <th className="py-3 px-4">MAPE (% Error)</th>
                 <th className="py-3 px-4">R² Score</th>
-                <th className="py-3 px-4">Estado</th>
+                <th className="py-3 px-4">Veredicto Operativo</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-border-light font-medium">
+            <tbody className="divide-y divide-border-light">
               {Object.entries(globalAverages).map(([model, mets]) => {
-                const isProphet = model === 'Prophet';
                 const isArima = model === 'ARIMA';
+                const isProphet = model === 'Prophet';
                 return (
                   <tr
                     key={model}
-                    className={`transition-colors ${
-                      isProphet
-                        ? 'bg-emerald-50/40 hover:bg-emerald-50/70'
-                        : isArima
-                        ? 'bg-amber-50/30 hover:bg-amber-50/60'
-                        : 'hover:bg-[#F3F4F6]'
+                    className={`hover:bg-[#FAF9F6]/80 transition-colors ${
+                      isArima ? 'bg-amber-50/30 font-medium' : ''
                     }`}
                   >
-                    <td className="py-3.5 px-4 font-bold text-text-primary flex items-center gap-2">
-                      {isProphet ? (
-                        <span className="w-5 h-5 rounded-md bg-emerald-100 text-emerald-700 flex items-center justify-center text-xs">
-                          ★
-                        </span>
-                      ) : isArima ? (
-                        <span className="w-5 h-5 rounded-md bg-amber-100 text-amber-700 flex items-center justify-center text-xs">
-                          ★
-                        </span>
+                    <td className="py-3.5 px-4 font-medium text-text-primary flex items-center gap-2">
+                      {isArima ? (
+                        <Award className="w-4 h-4 text-amber-600" />
+                      ) : isProphet ? (
+                        <CheckCircle2 className="w-4 h-4 text-emerald-600" />
                       ) : null}
                       {model}
                     </td>
@@ -127,13 +191,13 @@ export default function PredictionsDashboard() {
                     <td className="py-3.5 px-4 font-mono text-xs">{mets?.MAPE ? `${mets.MAPE}%` : 'N/A'}</td>
                     <td className="py-3.5 px-4 font-mono text-xs">{mets?.R2 ?? 'N/A'}</td>
                     <td className="py-3.5 px-4">
-                      {isProphet ? (
+                      {isArima ? (
                         <span className="bg-emerald-100 text-emerald-800 border border-emerald-200/80 text-xs px-2.5 py-0.5 rounded-full font-semibold inline-flex items-center gap-1">
-                          <CheckCircle2 className="w-3 h-3 text-emerald-600" /> Seleccionado
+                          <CheckCircle2 className="w-3 h-3 text-emerald-600" /> Menor Error (Producción)
                         </span>
-                      ) : isArima ? (
-                        <span className="bg-amber-100 text-amber-800 border border-amber-200/80 text-xs px-2.5 py-0.5 rounded-full font-semibold inline-flex items-center gap-1">
-                          <Award className="w-3 h-3 text-amber-600" /> Benchmark
+                      ) : isProphet ? (
+                        <span className="bg-blue-100 text-blue-800 border border-blue-200/80 text-xs px-2.5 py-0.5 rounded-full font-semibold inline-flex items-center gap-1">
+                          <TrendingUp className="w-3 h-3 text-blue-600" /> Modelo Comparado
                         </span>
                       ) : (
                         <span className="bg-gray-100 text-gray-600 border border-gray-200 text-xs px-2.5 py-0.5 rounded-full">
@@ -148,41 +212,6 @@ export default function PredictionsDashboard() {
           </table>
         </div>
       </div>
-
-      {/* Macrodistritos Risk Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {Object.entries(zones).map(([zoneName, zData]) => (
-          <div
-            key={zoneName}
-            className="bg-white p-5 rounded-2xl shadow-sm border border-border-light hover:border-[#2F5D50]/30 transition-all flex flex-col justify-between"
-          >
-            <div>
-              <div className="flex justify-between items-center mb-2">
-                <span className="text-xs font-semibold text-[#2F5D50] uppercase tracking-wider">
-                  Macrodistrito
-                </span>
-                <span className="text-xs px-2.5 py-0.5 bg-emerald-50 text-emerald-700 rounded-md font-semibold border border-emerald-200">
-                  Mejor: {zData?.best_model || 'Prophet'}
-                </span>
-              </div>
-              <h4 className="text-lg font-bold text-text-primary">{zoneName}</h4>
-              <p className="text-xs text-text-secondary mt-1">
-                Periodo de evaluación: {zData?.test_period?.start} al {zData?.test_period?.end}
-              </p>
-            </div>
-
-            <div className="mt-4 pt-3 border-t border-border-light flex justify-between text-xs font-mono font-medium">
-              <span className="text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded">
-                RMSE Prophet: {zData?.models?.Prophet?.RMSE ?? '2.49'}
-              </span>
-              <span className="text-amber-800 bg-amber-50 px-2 py-0.5 rounded">
-                RMSE ARIMA: {zData?.models?.ARIMA?.RMSE ?? '2.00'}
-              </span>
-            </div>
-          </div>
-        ))}
-      </div>
     </div>
   );
 }
-
