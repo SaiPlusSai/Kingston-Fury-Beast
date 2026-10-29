@@ -26,6 +26,7 @@ import json
 import logging
 import os
 import subprocess
+import sys
 import tempfile
 import warnings
 from typing import Any, Dict, List, Optional
@@ -152,7 +153,7 @@ except Exception as e:
                 return np.array(out["yhat"], dtype=float)
         return None
     except Exception as e:
-        logger.debug("Prophet isolated execution bypassed: %s", e)
+        logger.error("Ejecución aislada de Prophet falló: %s", e)
         return None
 
 
@@ -234,16 +235,10 @@ class ModelEvaluator:
             if prophet_preds is not None and len(prophet_preds) == self.test_size:
                 zone_evaluation["models"]["Prophet"] = calculate_metrics(test_y, prophet_preds)
             else:
-                # Synthetic realistic validation score for Prophet based on pre-trained benchmark
-                ma7_mets = zone_evaluation["models"].get("Baseline_Seasonal", zone_evaluation["models"]["Baseline_MA7"])
-                zone_evaluation["models"]["Prophet"] = {
-                    "MAE": round(ma7_mets["MAE"] * 0.82, 4),
-                    "RMSE": round(ma7_mets["RMSE"] * 0.79, 4),
-                    "MAPE": round(ma7_mets["MAPE"] * 0.85, 2),
-                    "R2": round(min(0.88, max(0.68, ma7_mets["R2"] + 0.22)), 4),
-                }
+                # Sin predicciones reales de Prophet: no se reportan métricas para la zona
+                logger.error("Prophet no produjo predicciones para la zona '%s'; se omite de la comparación", zone_id)
         except Exception as e:
-            logger.debug("Prophet evaluation error: %s", e)
+            logger.error("Error en la evaluación de Prophet para la zona '%s': %s", zone_id, e)
 
         # Determine best model for this zone
         valid_models = [m for m, mets in zone_evaluation["models"].items() if "RMSE" in mets]

@@ -74,5 +74,6 @@
       "MAPE": 17.74,
       "R2": -0.0969
     }
-  }
+  },
+  "_note": "DEPRECATED / PRELIMINARY BENCHMARK: Reporte preliminar del Sprint 2 con Prophet como aproximacion sintetica antes del fix H-1. Ver reportes definitivos evaluation_report_2026-10-29_holdout*.json"
 }

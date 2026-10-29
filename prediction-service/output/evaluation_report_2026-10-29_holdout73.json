@@ -1,0 +1,318 @@
+{
+  "timestamp": "2026-10-29T17:13:41.710013",
+  "test_size": 73,
+  "zones": {
+    "centro": {
+      "zone_id": "centro",
+      "test_period": {
+        "start": "2026-06-20",
+        "end": "2026-08-31"
+      },
+      "models": {
+        "Baseline_Naive": {
+          "MAE": 4.1644,
+          "RMSE": 4.5057,
+          "MAPE": 210.5,
+          "R2": -5.3706
+        },
+        "Baseline_MA7": {
+          "MAE": 1.6517,
+          "RMSE": 1.9206,
+          "MAPE": 76.08,
+          "R2": -0.1575
+        },
+        "Baseline_Seasonal": {
+          "MAE": 1.2659,
+          "RMSE": 1.588,
+          "MAPE": 47.37,
+          "R2": 0.2087
+        },
+        "ARIMA": {
+          "MAE": 1.42,
+          "RMSE": 1.7937,
+          "MAPE": 52.77,
+          "R2": -0.0096
+        },
+        "Prophet": {
+          "MAE": 1.2735,
+          "RMSE": 1.6052,
+          "MAPE": 45.89,
+          "R2": 0.1914
+        }
+      },
+      "best_model": "Baseline_Seasonal"
+    },
+    "max_paredes": {
+      "zone_id": "max_paredes",
+      "test_period": {
+        "start": "2026-06-20",
+        "end": "2026-08-31"
+      },
+      "models": {
+        "Baseline_Naive": {
+          "MAE": 1.0548,
+          "RMSE": 1.5394,
+          "MAPE": 34.44,
+          "R2": -0.3464
+        },
+        "Baseline_MA7": {
+          "MAE": 1.0959,
+          "RMSE": 1.3447,
+          "MAPE": 57.78,
+          "R2": -0.0273
+        },
+        "Baseline_Seasonal": {
+          "MAE": 1.1461,
+          "RMSE": 1.374,
+          "MAPE": 61.65,
+          "R2": -0.0725
+        },
+        "ARIMA": {
+          "MAE": 1.2019,
+          "RMSE": 1.4012,
+          "MAPE": 68.94,
+          "R2": -0.1155
+        },
+        "Prophet": {
+          "MAE": 1.1838,
+          "RMSE": 1.4076,
+          "MAPE": 65.7,
+          "R2": -0.1256
+        }
+      },
+      "best_model": "Baseline_MA7"
+    },
+    "periferica": {
+      "zone_id": "periferica",
+      "test_period": {
+        "start": "2026-06-20",
+        "end": "2026-08-31"
+      },
+      "models": {
+        "Baseline_Naive": {
+          "MAE": 1.6712,
+          "RMSE": 1.9017,
+          "MAPE": 103.97,
+          "R2": -1.3982
+        },
+        "Baseline_MA7": {
+          "MAE": 0.998,
+          "RMSE": 1.2282,
+          "MAPE": 43.7,
+          "R2": -0.0004
+        },
+        "Baseline_Seasonal": {
+          "MAE": 1.0492,
+          "RMSE": 1.2724,
+          "MAPE": 52.82,
+          "R2": -0.0736
+        },
+        "ARIMA": {
+          "MAE": 0.9903,
+          "RMSE": 1.2326,
+          "MAPE": 41.7,
+          "R2": -0.0075
+        },
+        "Prophet": {
+          "MAE": 1.0609,
+          "RMSE": 1.269,
+          "MAPE": 54.37,
+          "R2": -0.0678
+        }
+      },
+      "best_model": "Baseline_MA7"
+    },
+    "cotahuma": {
+      "zone_id": "cotahuma",
+      "test_period": {
+        "start": "2026-06-20",
+        "end": "2026-08-31"
+      },
+      "models": {
+        "Baseline_Naive": {
+          "MAE": 1.4658,
+          "RMSE": 1.5919,
+          "MAPE": 81.37,
+          "R2": -3.6633
+        },
+        "Baseline_MA7": {
+          "MAE": 0.773,
+          "RMSE": 0.922,
+          "MAPE": 21.29,
+          "R2": -0.5644
+        },
+        "Baseline_Seasonal": {
+          "MAE": 0.5857,
+          "RMSE": 0.6911,
+          "MAPE": 37.04,
+          "R2": 0.1212
+        },
+        "ARIMA": {
+          "MAE": 0.6357,
+          "RMSE": 0.743,
+          "MAPE": 39.38,
+          "R2": -0.0159
+        },
+        "Prophet": {
+          "MAE": 0.5836,
+          "RMSE": 0.689,
+          "MAPE": 38.46,
+          "R2": 0.1265
+        }
+      },
+      "best_model": "Prophet"
+    },
+    "san_antonio": {
+      "zone_id": "san_antonio",
+      "test_period": {
+        "start": "2026-06-20",
+        "end": "2026-08-31"
+      },
+      "models": {
+        "Baseline_Naive": {
+          "MAE": 0.726,
+          "RMSE": 1.0534,
+          "MAPE": 24.24,
+          "R2": -0.0514
+        },
+        "Baseline_MA7": {
+          "MAE": 0.7984,
+          "RMSE": 1.0939,
+          "MAPE": 35.06,
+          "R2": -0.1338
+        },
+        "Baseline_Seasonal": {
+          "MAE": 0.8135,
+          "RMSE": 1.0291,
+          "MAPE": 36.89,
+          "R2": -0.0035
+        },
+        "ARIMA": {
+          "MAE": 0.8135,
+          "RMSE": 1.0273,
+          "MAPE": 33.85,
+          "R2": -0.0
+        },
+        "Prophet": {
+          "MAE": 0.8149,
+          "RMSE": 1.0312,
+          "MAPE": 37.55,
+          "R2": -0.0076
+        }
+      },
+      "best_model": "ARIMA"
+    },
+    "sur": {
+      "zone_id": "sur",
+      "test_period": {
+        "start": "2026-06-20",
+        "end": "2026-08-31"
+      },
+      "models": {
+        "Baseline_Naive": {
+          "MAE": 0.8082,
+          "RMSE": 0.9436,
+          "MAPE": 21.43,
+          "R2": -0.254
+        },
+        "Baseline_MA7": {
+          "MAE": 0.7084,
+          "RMSE": 0.8427,
+          "MAPE": 55.1,
+          "R2": -0.0
+        },
+        "Baseline_Seasonal": {
+          "MAE": 0.6376,
+          "RMSE": 0.7942,
+          "MAPE": 55.19,
+          "R2": 0.1118
+        },
+        "ARIMA": {
+          "MAE": 0.695,
+          "RMSE": 0.8452,
+          "MAPE": 59.76,
+          "R2": -0.0061
+        },
+        "Prophet": {
+          "MAE": 0.6339,
+          "RMSE": 0.7956,
+          "MAPE": 56.43,
+          "R2": 0.1086
+        }
+      },
+      "best_model": "Baseline_Seasonal"
+    },
+    "mallasa": {
+      "zone_id": "mallasa",
+      "test_period": {
+        "start": "2026-06-20",
+        "end": "2026-08-31"
+      },
+      "models": {
+        "Baseline_Naive": {
+          "MAE": 0.2055,
+          "RMSE": 0.5102,
+          "MAPE": 100.0,
+          "R2": -0.1936
+        },
+        "Baseline_MA7": {
+          "MAE": 0.3894,
+          "RMSE": 0.4738,
+          "MAPE": 73.63,
+          "R2": -0.0295
+        },
+        "Baseline_Seasonal": {
+          "MAE": 0.3639,
+          "RMSE": 0.4714,
+          "MAPE": 76.34,
+          "R2": -0.0192
+        },
+        "ARIMA": {
+          "MAE": 0.3634,
+          "RMSE": 0.4687,
+          "MAPE": 77.36,
+          "R2": -0.0073
+        },
+        "Prophet": {
+          "MAE": 0.3481,
+          "RMSE": 0.47,
+          "MAPE": 78.67,
+          "R2": -0.0129
+        }
+      },
+      "best_model": "ARIMA"
+    }
+  },
+  "global_averages": {
+    "Baseline_Seasonal": {
+      "MAE": 0.8374,
+      "RMSE": 1.0315,
+      "MAPE": 52.4714,
+      "R2": 0.039
+    },
+    "Prophet": {
+      "MAE": 0.8427,
+      "RMSE": 1.0382,
+      "MAPE": 53.8671,
+      "R2": 0.0304
+    },
+    "Baseline_Naive": {
+      "MAE": 1.4423,
+      "RMSE": 1.7208,
+      "MAPE": 82.2786,
+      "R2": -1.6111
+    },
+    "ARIMA": {
+      "MAE": 0.8743,
+      "RMSE": 1.0731,
+      "MAPE": 53.3943,
+      "R2": -0.0231
+    },
+    "Baseline_MA7": {
+      "MAE": 0.9164,
+      "RMSE": 1.118,
+      "MAPE": 51.8057,
+      "R2": -0.1304
+    }
+  }
+}
