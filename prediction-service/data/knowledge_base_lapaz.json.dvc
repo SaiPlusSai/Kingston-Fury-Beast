@@ -1,0 +1,5 @@
+outs:
+- md5: 182b88e5d4d9b2e2d9307d5ba2855be7
+  size: 2812
+  hash: md5
+  path: knowledge_base_lapaz.json

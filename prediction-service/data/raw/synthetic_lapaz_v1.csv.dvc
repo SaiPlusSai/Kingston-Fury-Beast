@@ -1,0 +1,5 @@
+outs:
+- md5: ffed625750ae8b223299ffb50d0ca499
+  size: 1378365
+  hash: md5
+  path: synthetic_lapaz_v1.csv
