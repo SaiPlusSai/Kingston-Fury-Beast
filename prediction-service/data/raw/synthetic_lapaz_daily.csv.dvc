@@ -1,0 +1,5 @@
+outs:
+- md5: 80f51d9f21377d01a838beb4d8103ea5
+  size: 119597
+  hash: md5
+  path: synthetic_lapaz_daily.csv
