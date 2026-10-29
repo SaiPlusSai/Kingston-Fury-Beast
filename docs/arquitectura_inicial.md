@@ -1,4 +1,4 @@
-﻿# Arquitectura Inicial del Proyecto HALO (Urban Shield)
+# Arquitectura Inicial del Proyecto HALO (Urban Shield)
 
 Este documento detalla la estructura base del sistema y los componentes actuales con los que el equipo debe integrarse y trabajar para continuar con la fase de expansión (Chatbot, App Móvil y Predicción de Hotspots).
 

@@ -1,4 +1,4 @@
-﻿# Priorización de Casos de Proyecto - Taller de Sistemas Inteligentes
+# Priorización de Casos de Proyecto - Taller de Sistemas Inteligentes
 
 ## 1. Descripción de los Casos Evaluados
 

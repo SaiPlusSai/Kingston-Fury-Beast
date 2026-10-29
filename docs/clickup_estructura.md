@@ -1,4 +1,4 @@
-﻿# Estructura del Tablero ClickUp
+# Estructura del Tablero ClickUp
 
 Este documento traduce nuestro flujo de trabajo a un tablero operativo en ClickUp, definiendo las listas (columnas), los campos obligatorios y el proceso para que la evidencia quede versionada correctamente, según las reglas del equipo.
 

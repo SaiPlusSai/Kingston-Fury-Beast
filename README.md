@@ -12,6 +12,14 @@
 
 ---
 
+
+### 🌐 Acceso al Sistema Desplegado en Producción (AWS CloudFront)
+- **Frontend Web Oficial (HTTPS):** [https://d1w82jk0jx6e50.cloudfront.net](https://d1w82jk0jx6e50.cloudfront.net)
+- **API REST Backend:** https://1xh998qzp6.execute-api.us-east-1.amazonaws.com/api (Healthcheck: /api/health -> 200 OK)
+- **WebSocket Gateway (Tiempo Real):** wss://xqhdoxr886.execute-api.us-east-1.amazonaws.com/dev
+- **Repositorio de Datos DagsHub:** [https://dagshub.com/christian.coronel/Kingston-Fury-Beast](https://dagshub.com/christian.coronel/Kingston-Fury-Beast)
+
+---
 ## 📌 Descripción del Proyecto
 
 **HALO (Urban Shield)** es una plataforma de gestión de emergencias urbanas que conecta a ciudadanos, agentes de seguridad y administradores para reportar, gestionar y anticipar incidentes urbanos. Este repositorio contiene la documentación, especificaciones, arquitectura formal y gobernanza de la expansión **v2**, que agrega tres nuevas capacidades inteligentes:
@@ -260,6 +268,8 @@ Abre tu navegador e ingresa a:
 El módulo de predicción de hotspots tiene un pipeline de ciencia de datos listo para evaluación.
 
 #### Paso 3.1: Entorno Virtual e Instalación
+> ⚠️ Usa **Python 3.11** (igual que `prediction-service/Dockerfile`). Con Python 3.13 en Windows, `pandas==2.2.2` no tiene wheel y la instalación falla.
+
 Abre una terminal en la carpeta del servicio:
 ```bash
 cd prediction-service
@@ -277,6 +287,15 @@ python scripts/generate_synthetic_data.py
 Hemos preparado dos cuadernos Jupyter interactivos para visualizar los hallazgos:
 1. Abre `notebooks/01_eda.ipynb` (Análisis Exploratorio de Datos) en VS Code y ejecútalo para ver los mapas de calor y distribuciones.
 2. Abre `notebooks/02_baseline.ipynb` (Evaluación de Baselines) en VS Code y ejecútalo para ver cómo se comportan los modelos estacionales básicos frente a la realidad.
+
+#### Paso 3.4: Evaluar Baselines, ARIMA y Prophet
+Desde `prediction-service/`, con el entorno del paso 3.1 activo:
+```bash
+python -m src.models.evaluator
+```
+Genera `output/evaluation_report_YYYY-MM-DD.json` y muestra la tabla comparativa en consola. Los resultados y la comparación contra la línea base están en `docs/baseline.md` y `docs/experiment_log.md`.
+
+> ⚠️ **Antes de confiar en las métricas de Prophet**, `src/models/evaluator.py` debe importar `sys` (hallazgo H-1 en `docs/experiment_log.md`). Sin esa corrección, el evaluador rellena las métricas de Prophet con valores sintéticos.
 
 ---
 
